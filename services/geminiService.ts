@@ -1,5 +1,4 @@
 
-
 import { GoogleGenAI } from "@google/genai";
 
 const TEXT_MODEL = "gemini-3-pro-preview";
@@ -37,6 +36,95 @@ export const generatePostContent = async (
   } catch (error) {
     console.error("Error generating post content:", error);
     return "Error: Could not contact AI service. Please check your API key.";
+  }
+};
+
+export const generateVariations = async (
+  originalContent: string,
+  platform: string
+): Promise<string[]> => {
+  try {
+    const ai = getAiClient();
+    const prompt = `
+      Create 3 distinct variations of the following social media post for ${platform}.
+      
+      Original: "${originalContent}"
+      
+      1. Variation A: Short & Punchy (Hook-driven)
+      2. Variation B: Question-based (Engagement-driven)
+      3. Variation C: Storytelling (Emotion-driven)
+      
+      Return ONLY a JSON array of strings. No markdown formatting.
+      Example: ["Post 1 text", "Post 2 text", "Post 3 text"]
+    `;
+
+    const response = await ai.models.generateContent({
+      model: TEXT_MODEL,
+      contents: prompt,
+      config: { responseMimeType: 'application/json' }
+    });
+
+    const text = response.text || "[]";
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("Error generating variations:", error);
+    return [];
+  }
+};
+
+export const generateAltText = async (imageBase64: string): Promise<string> => {
+  try {
+    const ai = getAiClient();
+    // For image analysis, we use the generateContent method with image parts
+    // Note: We use a text model that supports vision or the specific vision model
+    const response = await ai.models.generateContent({
+      model: TEXT_MODEL, // gemini-3-pro supports vision
+      contents: {
+        parts: [
+          { inlineData: { mimeType: 'image/png', data: imageBase64.split(',')[1] } },
+          { text: "Write a concise, descriptive alt text for this image for accessibility purposes. Max 1 sentence." }
+        ]
+      }
+    });
+
+    return response.text || "Image description unavailable.";
+  } catch (error) {
+    console.error("Error generating alt text:", error);
+    return "Error generating description.";
+  }
+};
+
+export const repurposeContent = async (sourceText: string): Promise<{ twitter: string[]; linkedin: string; instagram: string }> => {
+  try {
+    const ai = getAiClient();
+    const prompt = `
+      Analyze the following source text and repurpose it into three distinct social media formats.
+      
+      Source Text: "${sourceText.substring(0, 2000)}"
+      
+      1. Twitter Thread: A series of 3-5 connected tweets.
+      2. LinkedIn Post: Professional, structured with bullet points.
+      3. Instagram Caption: Engaging, emoji-rich, with hashtags.
+      
+      Return ONLY a valid JSON object with keys: 'twitter' (array of strings), 'linkedin' (string), 'instagram' (string).
+      Do not wrap in markdown code blocks.
+    `;
+
+    const response = await ai.models.generateContent({
+      model: TEXT_MODEL,
+      contents: prompt,
+      config: { responseMimeType: 'application/json' }
+    });
+
+    const text = response.text || "{}";
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("Error repurposing content:", error);
+    return { 
+      twitter: ["Error generating thread."], 
+      linkedin: "Error generating post.", 
+      instagram: "Error generating caption." 
+    };
   }
 };
 
@@ -262,5 +350,41 @@ export const generateVideoCaptions = async (description: string): Promise<string
   } catch (error) {
     console.error("Error generating captions:", error);
     return "00:00 - [Error generating captions]";
+  }
+};
+
+export const analyzeDraft = async (content: string, platform: string): Promise<any> => {
+  try {
+    const ai = getAiClient();
+    const prompt = `
+      Analyze the following social media draft for ${platform} and provide critical feedback.
+      
+      Draft: "${content}"
+      
+      Return ONLY a JSON object with:
+      - score: Number (0-100 based on quality)
+      - sentiment: String (Positive/Neutral/Negative)
+      - engagementPrediction: String (High/Medium/Low)
+      - suggestions: Array of strings (3 specific improvements)
+      
+      Do not wrap in markdown code blocks.
+    `;
+
+    const response = await ai.models.generateContent({
+      model: TEXT_MODEL,
+      contents: prompt,
+      config: { responseMimeType: 'application/json' }
+    });
+
+    const text = response.text || "{}";
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("Error analyzing draft:", error);
+    return {
+      score: 0,
+      sentiment: "Unknown",
+      engagementPrediction: "Unknown",
+      suggestions: ["Could not analyze content."]
+    };
   }
 };

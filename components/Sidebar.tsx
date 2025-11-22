@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { LayoutDashboard, PenSquare, Calendar as CalendarIcon, BarChart3, Settings, Zap, MessageSquare, FolderOpen, Link, Workflow, Sun, Moon, Monitor, Bell, ChevronDown, Plus, Check, HelpCircle, Crown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { LayoutDashboard, PenSquare, Calendar as CalendarIcon, BarChart3, Settings, Zap, MessageSquare, FolderOpen, Link, Workflow, Sun, Moon, Monitor, Bell, ChevronDown, Plus, Check, HelpCircle, Crown, Briefcase } from 'lucide-react';
 import { ViewState, Workspace, BrandingConfig, PlanTier } from '../types';
 
 interface SidebarProps {
@@ -15,16 +15,31 @@ interface SidebarProps {
   onOpenUpgrade?: () => void;
 }
 
-const MOCK_WORKSPACES: Workspace[] = [
+const AGENCY_WORKSPACES: Workspace[] = [
   { id: '1', name: 'SocialFlow Agency', role: 'owner' },
   { id: '2', name: 'Client: TechCorp', role: 'member' },
   { id: '3', name: 'Client: GreenFoods', role: 'owner' },
 ];
 
+const PERSONAL_WORKSPACE: Workspace[] = [
+  { id: '1', name: 'My Workspace', role: 'owner' }
+];
+
 const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, currentTheme, setTheme, branding, userPlan, onOpenNotifications, onOpenHelp, onOpenUpgrade }) => {
-  const [workspaces, setWorkspaces] = useState<Workspace[]>(MOCK_WORKSPACES);
-  const [activeWorkspace, setActiveWorkspace] = useState<Workspace>(MOCK_WORKSPACES[0]);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>(PERSONAL_WORKSPACE);
+  const [activeWorkspace, setActiveWorkspace] = useState<Workspace>(PERSONAL_WORKSPACE[0]);
   const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
+
+  // Update workspaces based on plan
+  useEffect(() => {
+    if (userPlan === 'agency') {
+      setWorkspaces(AGENCY_WORKSPACES);
+      setActiveWorkspace(AGENCY_WORKSPACES[0]);
+    } else {
+      setWorkspaces(PERSONAL_WORKSPACE);
+      setActiveWorkspace(PERSONAL_WORKSPACE[0]);
+    }
+  }, [userPlan]);
 
   const navItems = [
     { id: ViewState.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
@@ -45,13 +60,15 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, currentTheme, s
   const usedCredits = 8; // Mock usage
   const creditsPercent = totalCredits === Infinity ? 100 : (usedCredits / totalCredits) * 100;
 
+  const isSingleUser = userPlan === 'free' || userPlan === 'pro';
+
   return (
     <div className="w-64 h-full bg-slate-900 text-white flex flex-col border-r border-slate-800 shadow-xl">
       {/* Workspace Switcher / Branding Header */}
       <div className="p-4 border-b border-slate-800 relative z-20">
         <button 
-          onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
-          className="w-full flex items-center justify-between hover:bg-slate-800 p-2 rounded-lg transition-colors group"
+          onClick={() => !isSingleUser && setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
+          className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors group ${!isSingleUser ? 'hover:bg-slate-800 cursor-pointer' : 'cursor-default'}`}
         >
           <div className="flex items-center space-x-3 overflow-hidden">
             {hasCustomLogo ? (
@@ -60,7 +77,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, currentTheme, s
                </div>
             ) : (
                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-900/50 group-hover:scale-105 transition-transform shrink-0">
-                 <Zap className="w-5 h-5 text-white fill-current" />
+                 {isSingleUser ? <Zap className="w-5 h-5 text-white fill-current" /> : <Briefcase className="w-5 h-5 text-white" />}
                </div>
             )}
             <div className="text-left min-w-0">
@@ -68,14 +85,16 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, currentTheme, s
                  {hasCustomLogo ? branding.companyName : activeWorkspace.name}
               </span>
               <span className="block text-[10px] text-slate-400 uppercase font-semibold tracking-wider truncate">
-                 {hasCustomLogo ? activeWorkspace.name : activeWorkspace.role}
+                 {hasCustomLogo ? activeWorkspace.name : (isSingleUser ? 'Personal' : activeWorkspace.role)}
               </span>
             </div>
           </div>
-          <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform shrink-0 ${isWorkspaceDropdownOpen ? 'rotate-180' : ''}`} />
+          {!isSingleUser && (
+            <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform shrink-0 ${isWorkspaceDropdownOpen ? 'rotate-180' : ''}`} />
+          )}
         </button>
 
-        {isWorkspaceDropdownOpen && (
+        {isWorkspaceDropdownOpen && !isSingleUser && (
           <div className="absolute top-full left-4 right-4 mt-2 bg-slate-800 rounded-xl border border-slate-700 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 z-50">
             <div className="max-h-60 overflow-y-auto">
               {workspaces.map(ws => (

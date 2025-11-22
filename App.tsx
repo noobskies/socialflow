@@ -15,7 +15,7 @@ import Toast from './components/Toast';
 import Notifications from './components/Notifications';
 import HelpModal from './components/HelpModal';
 import UpgradeModal from './components/UpgradeModal';
-import { ViewState, Draft, ToastType, BrandingConfig, PlanTier } from './types';
+import { ViewState, Draft, ToastType, BrandingConfig, PlanTier, Post } from './types';
 import { Menu, LayoutDashboard, PenSquare, MessageSquare, Calendar as CalendarIcon, MoreHorizontal, Keyboard, X } from 'lucide-react';
 
 // Keyboard Shortcuts Modal Component
@@ -58,6 +58,23 @@ const ShortcutsModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ is
   );
 };
 
+// Initial Mock Data for Posts
+const INITIAL_POSTS: Post[] = [
+  { id: '1', scheduledDate: '2023-10-03', platforms: ['twitter'], content: 'Launching our new feature... 🚀', status: 'published', time: '09:00' },
+  { id: '2', scheduledDate: '2023-10-03', platforms: ['linkedin'], content: 'Company growth update: We reached 10k users!', status: 'published', time: '11:30' },
+  { id: '3', scheduledDate: '2023-10-05', platforms: ['facebook'], content: 'Community spotlight on our super users.', status: 'scheduled', time: '14:00' },
+  { id: '4', scheduledDate: '2023-10-08', platforms: ['twitter'], content: 'Thread: 5 ways AI is changing content creation 🧵', status: 'pending_review', time: '10:00' },
+  { id: '5', scheduledDate: '2023-10-12', platforms: ['linkedin'], content: 'We are hiring engineers! Apply now.', status: 'draft', time: '13:00' },
+  { id: '6', scheduledDate: '2023-10-15', platforms: ['twitter'], content: 'Customer testimonial from @SarahJ.', status: 'scheduled', time: '15:45' },
+  { id: '7', scheduledDate: '2023-10-15', platforms: ['instagram'], content: 'Team lunch photo at the new office! 🍕', status: 'pending_review', time: '16:00', mediaUrl: 'https://picsum.photos/id/1015/400/400', mediaType: 'image' },
+  { id: '8', scheduledDate: '2023-10-20', platforms: ['youtube'], content: 'New Tutorial: Getting Started with SocialFlow', status: 'scheduled', time: '12:00' },
+  { id: '9', scheduledDate: '2023-10-22', platforms: ['pinterest'], content: 'Summer Design Inspiration Board', status: 'published', time: '17:00', mediaUrl: 'https://picsum.photos/id/1016/400/600', mediaType: 'image' },
+  { id: '10', scheduledDate: '2023-10-25', platforms: ['tiktok'], content: 'Day in the life of a Social Manager', status: 'draft', time: '09:00' },
+  { id: '11', scheduledDate: '2023-10-27', platforms: ['instagram'], content: 'Product showcase teaser', status: 'scheduled', time: '11:00', mediaUrl: 'https://picsum.photos/id/1018/400/400', mediaType: 'image' },
+  { id: '12', scheduledDate: '2023-10-29', platforms: ['instagram'], content: 'Monday Motivation 💪', status: 'draft', time: '08:00', mediaUrl: 'https://picsum.photos/id/1019/400/400', mediaType: 'image' },
+  { id: '13', scheduledDate: '2023-11-01', platforms: ['instagram'], content: 'November Goals setting', status: 'scheduled', time: '10:00', mediaUrl: 'https://picsum.photos/id/1020/400/400', mediaType: 'image' },
+];
+
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>(ViewState.DASHBOARD);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -68,14 +85,17 @@ const App: React.FC = () => {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   
-  // User Plan State (Lifted)
+  // Global Post State
+  const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
+
+  // User Plan State
   const [userPlan, setUserPlan] = useState<PlanTier>('free');
 
   // Branding State (Agency)
   const [branding, setBranding] = useState<BrandingConfig>({
     companyName: 'SocialFlow Agency',
     primaryColor: '#4f46e5',
-    logoUrl: '', // Empty by default
+    logoUrl: '',
     removeWatermark: false,
     customDomain: 'social.myagency.com'
   });
@@ -107,10 +127,8 @@ const App: React.FC = () => {
   // Apply Theme Logic
   useEffect(() => {
     const root = window.document.documentElement;
-    
     const applyTheme = () => {
       root.classList.remove('light', 'dark');
-      
       if (theme === 'system') {
         const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         root.classList.add(systemTheme);
@@ -118,21 +136,15 @@ const App: React.FC = () => {
         root.classList.add(theme);
       }
     };
-
     applyTheme();
     localStorage.setItem('theme', theme);
-
-    // Listen for system changes if in system mode
     if (theme === 'system') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handleChange = () => applyTheme();
-      
-      // Modern addEventListener
       if (mediaQuery.addEventListener) {
         mediaQuery.addEventListener('change', handleChange);
         return () => mediaQuery.removeEventListener('change', handleChange);
       } else {
-        // Fallback for older browsers
         mediaQuery.addListener(handleChange);
         return () => mediaQuery.removeListener(handleChange);
       }
@@ -142,31 +154,22 @@ const App: React.FC = () => {
   // Global Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if in input/textarea
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName)) {
         return;
       }
-
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setIsCmdPaletteOpen(true);
       }
-
       if (e.key === '?') {
         e.preventDefault();
         setIsShortcutsOpen(prev => !prev);
       }
-      
-      // Navigation Shortcuts
       if (e.key === 'c') {
         e.preventDefault();
         setCurrentView(ViewState.COMPOSER);
       }
-      
-      // 'g' then key sequence logic could be implemented here with a state machine
-      // simplified for now
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
@@ -175,6 +178,15 @@ const App: React.FC = () => {
     setInitialDraft(draft);
     setCurrentView(ViewState.COMPOSER);
     setMobileMenuOpen(false);
+  };
+
+  const handlePostCreated = (newPost: Post) => {
+    setPosts(prev => [...prev, newPost]);
+    // No toast needed here as Composer handles it
+  };
+
+  const handleUpdatePost = (updatedPost: Post) => {
+    setPosts(prev => prev.map(p => p.id === updatedPost.id ? updatedPost : p));
   };
 
   const handleUpgrade = (plan: PlanTier) => {
@@ -186,13 +198,13 @@ const App: React.FC = () => {
   const renderView = () => {
     switch (currentView) {
       case ViewState.DASHBOARD:
-        return <Dashboard />;
+        return <Dashboard posts={posts} />;
       case ViewState.COMPOSER:
-        return <Composer initialDraft={initialDraft} showToast={showToast} />;
+        return <Composer initialDraft={initialDraft} showToast={showToast} onPostCreated={handlePostCreated} userPlan={userPlan} />;
       case ViewState.INBOX:
         return <Inbox showToast={showToast} />;
       case ViewState.CALENDAR:
-        return <Calendar onCompose={handleCompose} />;
+        return <Calendar onCompose={handleCompose} posts={posts} onUpdatePost={handleUpdatePost} userPlan={userPlan} />;
       case ViewState.LIBRARY:
         return <Library onCompose={handleCompose} userPlan={userPlan} onOpenUpgrade={() => setIsUpgradeModalOpen(true)} />;
       case ViewState.LINKS:
@@ -204,69 +216,24 @@ const App: React.FC = () => {
       case ViewState.SETTINGS:
         return <Settings showToast={showToast} branding={branding} setBranding={setBranding} userPlan={userPlan} onOpenUpgrade={() => setIsUpgradeModalOpen(true)} />;
       default:
-        return <Dashboard />;
+        return <Dashboard posts={posts} />;
     }
   };
 
   return (
     <div className="flex h-screen w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans overflow-hidden transition-colors duration-200">
-      {/* Toast Notification */}
-      <Toast 
-        message={toast.message} 
-        type={toast.type} 
-        isVisible={toast.visible} 
-        onClose={() => setToast(prev => ({ ...prev, visible: false }))} 
-      />
+      <Toast message={toast.message} type={toast.type} isVisible={toast.visible} onClose={() => setToast(prev => ({ ...prev, visible: false }))} />
+      <Notifications isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} />
+      <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+      <ShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
+      <UpgradeModal isOpen={isUpgradeModalOpen} onClose={() => setIsUpgradeModalOpen(false)} currentPlan={userPlan} onUpgrade={handleUpgrade} />
+      <CommandPalette isOpen={isCmdPaletteOpen} onClose={() => setIsCmdPaletteOpen(false)} setView={(view) => { setCurrentView(view); setIsCmdPaletteOpen(false); }} />
 
-      {/* Notifications Panel */}
-      <Notifications 
-        isOpen={isNotificationsOpen} 
-        onClose={() => setIsNotificationsOpen(false)} 
-      />
-
-      {/* Help Modal */}
-      <HelpModal 
-        isOpen={isHelpOpen}
-        onClose={() => setIsHelpOpen(false)}
-      />
-      
-      {/* Shortcuts Modal */}
-      <ShortcutsModal
-        isOpen={isShortcutsOpen}
-        onClose={() => setIsShortcutsOpen(false)}
-      />
-
-      {/* Upgrade Modal */}
-      <UpgradeModal 
-        isOpen={isUpgradeModalOpen}
-        onClose={() => setIsUpgradeModalOpen(false)}
-        currentPlan={userPlan}
-        onUpgrade={handleUpgrade}
-      />
-
-      {/* Command Palette */}
-      <CommandPalette 
-        isOpen={isCmdPaletteOpen} 
-        onClose={() => setIsCmdPaletteOpen(false)} 
-        setView={(view) => {
-          setCurrentView(view);
-          setIsCmdPaletteOpen(false);
-        }} 
-      />
-
-      {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
-          onClick={() => setMobileMenuOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} />
       )}
       
-      {/* Sidebar (Desktop & Mobile Drawer) */}
-      <div className={`
-        fixed md:relative z-50 h-full transition-transform duration-300 ease-in-out
-        ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-      `}>
+      <div className={`fixed md:relative z-50 h-full transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
          <Sidebar 
             currentView={currentView} 
             setView={(view) => { setCurrentView(view); setMobileMenuOpen(false); }} 
@@ -280,9 +247,7 @@ const App: React.FC = () => {
          />
       </div>
 
-      {/* Main Content */}
       <main className="flex-1 flex flex-col h-full relative overflow-hidden">
-        {/* Mobile Header */}
         <div className="md:hidden h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center px-4 justify-between shrink-0 transition-colors duration-200">
            <div className="flex items-center space-x-3">
               <button onClick={() => setMobileMenuOpen(true)} className="p-2 -ml-2 text-slate-600 dark:text-slate-300">
@@ -293,52 +258,31 @@ const App: React.FC = () => {
            <div className="flex items-center gap-3">
              <button onClick={() => setIsNotificationsOpen(true)} className="relative p-1">
                <div className="w-2 h-2 bg-red-500 rounded-full absolute top-0 right-0 border border-white dark:border-slate-900"></div>
-               <img 
-                  src="https://picsum.photos/100/100" 
-                  alt="User" 
-                  className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700"
-                />
+               <img src="https://picsum.photos/100/100" alt="User" className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700" />
              </button>
            </div>
         </div>
 
-        {/* View Container */}
         <div className="flex-1 overflow-y-auto scroll-smooth pb-20 md:pb-0">
            {renderView()}
         </div>
 
-        {/* Mobile Bottom Navigation */}
         <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-6 py-3 flex justify-between items-center z-40 safe-area-pb transition-colors duration-200">
-           <button 
-             onClick={() => setCurrentView(ViewState.DASHBOARD)}
-             className={`flex flex-col items-center gap-1 ${currentView === ViewState.DASHBOARD ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`}
-           >
+           <button onClick={() => setCurrentView(ViewState.DASHBOARD)} className={`flex flex-col items-center gap-1 ${currentView === ViewState.DASHBOARD ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`}>
              <LayoutDashboard className="w-6 h-6" />
            </button>
-           <button 
-             onClick={() => setCurrentView(ViewState.CALENDAR)}
-             className={`flex flex-col items-center gap-1 ${currentView === ViewState.CALENDAR ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`}
-           >
+           <button onClick={() => setCurrentView(ViewState.CALENDAR)} className={`flex flex-col items-center gap-1 ${currentView === ViewState.CALENDAR ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`}>
              <CalendarIcon className="w-6 h-6" />
            </button>
            <div className="relative -top-6">
-             <button 
-               onClick={() => handleCompose()}
-               className="bg-indigo-600 text-white p-4 rounded-full shadow-lg shadow-indigo-500/40 hover:bg-indigo-700 transition-transform active:scale-95 dark:shadow-indigo-900/40"
-             >
+             <button onClick={() => handleCompose()} className="bg-indigo-600 text-white p-4 rounded-full shadow-lg shadow-indigo-500/40 hover:bg-indigo-700 transition-transform active:scale-95 dark:shadow-indigo-900/40">
                <PenSquare className="w-6 h-6" />
              </button>
            </div>
-           <button 
-             onClick={() => setCurrentView(ViewState.INBOX)}
-             className={`flex flex-col items-center gap-1 ${currentView === ViewState.INBOX ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`}
-           >
+           <button onClick={() => setCurrentView(ViewState.INBOX)} className={`flex flex-col items-center gap-1 ${currentView === ViewState.INBOX ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`}>
              <MessageSquare className="w-6 h-6" />
            </button>
-           <button 
-             onClick={() => setMobileMenuOpen(true)}
-             className="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500"
-           >
+           <button onClick={() => setMobileMenuOpen(true)} className="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500">
              <MoreHorizontal className="w-6 h-6" />
            </button>
         </nav>

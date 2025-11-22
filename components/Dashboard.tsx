@@ -1,7 +1,12 @@
 
 import React from 'react';
-import { ArrowUpRight, Users, Eye, TrendingUp, Sparkles, Link as LinkIcon, CheckCircle2, Circle, CalendarClock, AlertCircle, MoreHorizontal, Twitter, Linkedin, Facebook, Instagram, PenSquare, Save } from 'lucide-react';
+import { ArrowUpRight, Users, Eye, TrendingUp, Sparkles, Link as LinkIcon, CheckCircle2, Circle, CalendarClock, AlertCircle, MoreHorizontal, Twitter, Linkedin, Facebook, Instagram, PenSquare, Save, AlertTriangle, X } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { Post } from '../types';
+
+interface DashboardProps {
+  posts?: Post[];
+}
 
 const data = [
   { name: 'Mon', visitors: 4000, engagement: 2400 },
@@ -13,7 +18,7 @@ const data = [
   { name: 'Sun', visitors: 3490, engagement: 4300 },
 ];
 
-const Dashboard: React.FC = () => {
+const Dashboard: React.FC<DashboardProps> = ({ posts = [] }) => {
   const onboardingSteps = [
     { id: 1, label: 'Connect a social account', completed: true },
     { id: 2, label: 'Create your first post', completed: true },
@@ -24,11 +29,15 @@ const Dashboard: React.FC = () => {
   const completedSteps = onboardingSteps.filter(s => s.completed).length;
   const progress = (completedSteps / onboardingSteps.length) * 100;
 
-  const upcomingPosts = [
-    { id: 1, content: "Launching our new summer collection! ☀️ #summer #fashion", platform: 'instagram', time: 'Today, 2:00 PM' },
-    { id: 2, content: "5 tips for better productivity. Thread 🧵", platform: 'twitter', time: 'Tomorrow, 9:00 AM' },
-    { id: 3, content: "We are hiring! Join our team.", platform: 'linkedin', time: 'Fri, 10:00 AM' },
-  ];
+  // Filter for scheduled posts and sort by date
+  const upcomingPosts = posts
+    .filter(p => p.status === 'scheduled')
+    .sort((a, b) => {
+        const dateA = new Date(`${a.scheduledDate}T${a.time || '00:00'}`);
+        const dateB = new Date(`${b.scheduledDate}T${b.time || '00:00'}`);
+        return dateA.getTime() - dateB.getTime();
+    })
+    .slice(0, 3);
 
   return (
     <div className="space-y-6 p-6 md:p-8 bg-slate-50 dark:bg-slate-950 min-h-full transition-colors duration-200">
@@ -43,6 +52,22 @@ const Dashboard: React.FC = () => {
             <option>Last 30 Days</option>
           </select>
         </div>
+      </div>
+
+      {/* Crisis Alert Widget (Mock) */}
+      <div className="bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-2xl p-4 flex items-start justify-between animate-in slide-in-from-top-2 shadow-sm">
+         <div className="flex gap-3">
+            <div className="bg-rose-100 dark:bg-rose-900/50 p-2 rounded-lg shrink-0">
+               <AlertTriangle className="w-6 h-6 text-rose-600 dark:text-rose-400" />
+            </div>
+            <div>
+               <h3 className="text-rose-800 dark:text-rose-200 font-bold">Negative Sentiment Spike Detected</h3>
+               <p className="text-rose-600 dark:text-rose-300 text-sm mt-1">Unusually high negative mentions on Twitter regarding "Server Downtime". Recommended action: Check Inbox.</p>
+            </div>
+         </div>
+         <button className="text-rose-500 hover:text-rose-700 dark:hover:text-rose-300">
+            <X className="w-5 h-5" />
+         </button>
       </div>
 
       {/* Onboarding Progress Widget */}
@@ -158,23 +183,28 @@ const Dashboard: React.FC = () => {
                  <button className="text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:underline">View Calendar</button>
               </div>
               <div className="space-y-4">
-                 {upcomingPosts.map((post) => (
+                 {upcomingPosts.length > 0 ? upcomingPosts.map((post) => (
                     <div key={post.id} className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800/50">
                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                          post.platform === 'instagram' ? 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' :
-                          post.platform === 'twitter' ? 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' :
+                          post.platforms.includes('instagram') ? 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' :
+                          post.platforms.includes('twitter') ? 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' :
                           'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
                        }`}>
-                          {post.platform === 'instagram' && <Instagram className="w-4 h-4" />}
-                          {post.platform === 'twitter' && <Twitter className="w-4 h-4" />}
-                          {post.platform === 'linkedin' && <Linkedin className="w-4 h-4" />}
+                          {post.platforms.includes('instagram') && <Instagram className="w-4 h-4" />}
+                          {post.platforms.includes('twitter') && <Twitter className="w-4 h-4" />}
+                          {post.platforms.includes('linkedin') && <Linkedin className="w-4 h-4" />}
+                          {!post.platforms.includes('instagram') && !post.platforms.includes('twitter') && !post.platforms.includes('linkedin') && <CheckCircle2 className="w-4 h-4" />}
                        </div>
                        <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-slate-900 dark:text-slate-200 line-clamp-1">{post.content}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{post.time}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{post.scheduledDate} • {post.time}</p>
                        </div>
                     </div>
-                 ))}
+                 )) : (
+                    <div className="text-center py-4 text-sm text-slate-500 dark:text-slate-400">
+                       No upcoming posts scheduled.
+                    </div>
+                 )}
               </div>
               <button className="w-full mt-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors">
                  Schedule New Post

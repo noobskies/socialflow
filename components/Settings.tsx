@@ -176,8 +176,18 @@ const Settings: React.FC<SettingsProps> = ({ showToast, branding, setBranding, u
 
       case 'team':
         return (
-          <div className="space-y-6 animate-in fade-in duration-300">
-             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+          <div className="space-y-6 animate-in fade-in duration-300 relative">
+             {userPlan !== 'agency' && (
+                <div className="absolute inset-0 z-20 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center text-center p-8 rounded-2xl">
+                   <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-xl">
+                      <Users className="w-8 h-8 text-white" />
+                   </div>
+                   <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Team Features Locked</h3>
+                   <p className="text-slate-600 dark:text-slate-400 max-w-md mb-6">Collaborate with your team, assign roles, and manage approval workflows with the Agency plan.</p>
+                   <button onClick={onOpenUpgrade} className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/30">Upgrade to Agency</button>
+                </div>
+             )}
+             <div className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 ${userPlan !== 'agency' ? 'opacity-50 pointer-events-none select-none' : ''}`}>
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <h2 className="text-xl font-bold text-slate-900 dark:text-white">Team Members</h2>
@@ -528,7 +538,7 @@ const Settings: React.FC<SettingsProps> = ({ showToast, branding, setBranding, u
               { id: 'developer', label: 'Developer API', icon: Code },
             ].map(item => {
               const Icon = item.icon;
-              const isLocked = (item.id === 'branding' || item.id === 'developer') && userPlan !== 'agency';
+              const isLocked = ((item.id === 'branding' || item.id === 'developer') && userPlan !== 'agency') || (item.id === 'team' && userPlan !== 'agency');
               
               return (
                 <button

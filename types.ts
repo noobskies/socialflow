@@ -258,4 +258,10 @@ export interface Bucket {
   color: string;
 }
 
+export interface HashtagGroup {
+  id: string;
+  name: string;
+  tags: string[];
+}
+
 export type ToastType = 'success' | 'error' | 'info';

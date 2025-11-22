@@ -1,40 +1,26 @@
 
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Twitter, Linkedin, Facebook, Instagram, Plus, X, Clock, Calendar as CalendarIcon, Youtube, Video, Pin, LayoutGrid, Kanban, MoreHorizontal, Eye, MousePointer2, MessageCircle, TrendingUp, ArrowUpRight, Grid3X3, Smartphone } from 'lucide-react';
-import { Draft, Platform, Post } from '../types';
+import { ChevronLeft, ChevronRight, Twitter, Linkedin, Facebook, Instagram, Plus, X, Clock, Calendar as CalendarIcon, Youtube, Video, Pin, LayoutGrid, Kanban, MoreHorizontal, Eye, MousePointer2, MessageCircle, TrendingUp, ArrowUpRight, Grid3X3, Smartphone, Download, FileText, Table } from 'lucide-react';
+import { Draft, Platform, Post, PlanTier } from '../types';
 
 interface CalendarProps {
   onCompose: (draft?: Draft) => void;
+  posts?: Post[];
+  onUpdatePost?: (post: Post) => void;
+  userPlan?: PlanTier;
 }
 
-const Calendar: React.FC<CalendarProps> = ({ onCompose }) => {
+const Calendar: React.FC<CalendarProps> = ({ onCompose, posts = [], onUpdatePost, userPlan = 'free' }) => {
   const [viewMode, setViewMode] = useState<'calendar' | 'kanban' | 'grid'>('calendar');
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [draggedPost, setDraggedPost] = useState<Post | null>(null);
+  const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
   
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
   
-  // Mock calendar data with type info
-  const [posts, setPosts] = useState<Post[]>([
-    { id: '1', scheduledDate: '2023-10-03', platforms: ['twitter'], content: 'Launching our new feature... 🚀', status: 'published', time: '9:00 AM' },
-    { id: '2', scheduledDate: '2023-10-03', platforms: ['linkedin'], content: 'Company growth update: We reached 10k users!', status: 'published', time: '11:30 AM' },
-    { id: '3', scheduledDate: '2023-10-05', platforms: ['facebook'], content: 'Community spotlight on our super users.', status: 'scheduled', time: '2:00 PM' },
-    { id: '4', scheduledDate: '2023-10-08', platforms: ['twitter'], content: 'Thread: 5 ways AI is changing content creation 🧵', status: 'pending_review', time: '10:00 AM' },
-    { id: '5', scheduledDate: '2023-10-12', platforms: ['linkedin'], content: 'We are hiring engineers! Apply now.', status: 'draft', time: '1:00 PM' },
-    { id: '6', scheduledDate: '2023-10-15', platforms: ['twitter'], content: 'Customer testimonial from @SarahJ.', status: 'scheduled', time: '3:45 PM' },
-    { id: '7', scheduledDate: '2023-10-15', platforms: ['instagram'], content: 'Team lunch photo at the new office! 🍕', status: 'pending_review', time: '4:00 PM', mediaUrl: 'https://picsum.photos/id/1015/400/400', mediaType: 'image' },
-    { id: '8', scheduledDate: '2023-10-20', platforms: ['youtube'], content: 'New Tutorial: Getting Started with SocialFlow', status: 'scheduled', time: '12:00 PM' },
-    { id: '9', scheduledDate: '2023-10-22', platforms: ['pinterest'], content: 'Summer Design Inspiration Board', status: 'published', time: '5:00 PM', mediaUrl: 'https://picsum.photos/id/1016/400/600', mediaType: 'image' },
-    { id: '10', scheduledDate: '2023-10-25', platforms: ['tiktok'], content: 'Day in the life of a Social Manager', status: 'draft', time: '9:00 AM' },
-    { id: '11', scheduledDate: '2023-10-27', platforms: ['instagram'], content: 'Product showcase teaser', status: 'scheduled', time: '11:00 AM', mediaUrl: 'https://picsum.photos/id/1018/400/400', mediaType: 'image' },
-    { id: '12', scheduledDate: '2023-10-29', platforms: ['instagram'], content: 'Monday Motivation 💪', status: 'draft', time: '8:00 AM', mediaUrl: 'https://picsum.photos/id/1019/400/400', mediaType: 'image' },
-    { id: '13', scheduledDate: '2023-11-01', platforms: ['instagram'], content: 'November Goals setting', status: 'scheduled', time: '10:00 AM', mediaUrl: 'https://picsum.photos/id/1020/400/400', mediaType: 'image' },
-    { id: '14', scheduledDate: '2023-11-05', platforms: ['instagram'], content: 'Behind the scenes', status: 'draft', time: '2:00 PM', mediaUrl: 'https://picsum.photos/id/1021/400/400', mediaType: 'video' },
-  ]);
-
   const handleDateClick = (day: number) => {
     const formattedDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     onCompose({ scheduledDate: formattedDate });
@@ -44,7 +30,6 @@ const Calendar: React.FC<CalendarProps> = ({ onCompose }) => {
   const handleDragStart = (e: React.DragEvent, post: Post) => {
     e.dataTransfer.effectAllowed = 'move';
     setDraggedPost(post);
-    // Set ghost image transparent if needed
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -54,13 +39,25 @@ const Calendar: React.FC<CalendarProps> = ({ onCompose }) => {
 
   const handleDrop = (e: React.DragEvent, day: number) => {
     e.preventDefault();
-    if (draggedPost) {
+    if (draggedPost && onUpdatePost) {
       const formattedDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      setPosts(prev => prev.map(p => 
-        p.id === draggedPost.id ? { ...p, scheduledDate: formattedDate, status: 'scheduled' } : p
-      ));
+      onUpdatePost({ 
+        ...draggedPost, 
+        scheduledDate: formattedDate, 
+        status: 'scheduled' 
+      });
       setDraggedPost(null);
     }
+  };
+
+  const handleExport = (format: 'pdf' | 'csv') => {
+    setIsExportMenuOpen(false);
+    // Simulate download
+    const link = document.createElement('a');
+    link.href = '#';
+    link.download = `content-calendar.${format}`;
+    // In a real app, we would generate the file here
+    alert(`Exporting calendar as ${format.toUpperCase()}...`);
   };
 
   const getPlatformIcon = (platform: Platform, className: string = "w-3 h-3") => {
@@ -75,13 +72,17 @@ const Calendar: React.FC<CalendarProps> = ({ onCompose }) => {
     }
   };
 
+  const isAgency = userPlan === 'agency';
+
   // Kanban Columns Configuration
-  const columns = [
+  const allColumns = [
     { id: 'draft', label: 'Drafts', color: 'bg-slate-100 dark:bg-slate-800', textColor: 'text-slate-600 dark:text-slate-400' },
     { id: 'pending_review', label: 'In Review', color: 'bg-amber-50 dark:bg-amber-900/20', textColor: 'text-amber-600 dark:text-amber-400' },
     { id: 'scheduled', label: 'Scheduled', color: 'bg-indigo-50 dark:bg-indigo-900/20', textColor: 'text-indigo-600 dark:text-indigo-400' },
     { id: 'published', label: 'Published', color: 'bg-emerald-50 dark:bg-emerald-900/20', textColor: 'text-emerald-600 dark:text-emerald-400' },
   ];
+
+  const columns = isAgency ? allColumns : allColumns.filter(col => col.id !== 'pending_review');
 
   // Grid View Logic (Instagram)
   const gridPosts = posts.filter(p => p.platforms.includes('instagram') || p.mediaUrl);
@@ -209,6 +210,36 @@ const Calendar: React.FC<CalendarProps> = ({ onCompose }) => {
           <p className="text-slate-500 dark:text-slate-400 mt-1">Plan, visualize, and manage your workflow</p>
         </div>
         <div className="flex items-center gap-3">
+            {/* Export Menu */}
+            <div className="relative">
+               <button 
+                 onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
+                 className="flex items-center px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm"
+               >
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+               </button>
+               {isExportMenuOpen && (
+                  <>
+                     <div className="fixed inset-0 z-30" onClick={() => setIsExportMenuOpen(false)}></div>
+                     <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden z-40 animate-in fade-in zoom-in-95">
+                        <button 
+                           onClick={() => handleExport('pdf')}
+                           className="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center"
+                        >
+                           <FileText className="w-4 h-4 mr-2 text-red-500" /> Save as PDF
+                        </button>
+                        <button 
+                           onClick={() => handleExport('csv')}
+                           className="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center border-t border-slate-100 dark:border-slate-800"
+                        >
+                           <Table className="w-4 h-4 mr-2 text-green-500" /> Export CSV
+                        </button>
+                     </div>
+                  </>
+               )}
+            </div>
+
             {/* View Toggle */}
             <div className="flex bg-white dark:bg-slate-900 p-1 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
                <button 

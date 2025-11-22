@@ -1,7 +1,7 @@
 
 import React, { useState, useRef } from 'react';
-import { Search, Filter, Image as ImageIcon, FileText, Video, MoreHorizontal, Upload, Plus, Download, Trash2, Rss, ExternalLink, PenSquare, RefreshCw, Archive, Repeat, Search as SearchIcon } from 'lucide-react';
-import { MediaAsset, Draft, RSSArticle, Bucket, PlanTier } from '../types';
+import { Search, Filter, Image as ImageIcon, FileText, Video, MoreHorizontal, Upload, Plus, Download, Trash2, Rss, ExternalLink, PenSquare, RefreshCw, Archive, Repeat, Search as SearchIcon, Hash, X, Clock, Save } from 'lucide-react';
+import { MediaAsset, Draft, RSSArticle, Bucket, PlanTier, HashtagGroup } from '../types';
 
 interface LibraryProps {
   onCompose: (draft: Draft) => void;
@@ -39,13 +39,25 @@ const MOCK_STOCK_PHOTOS = [
   'https://images.unsplash.com/photo-1551434678-e076c2236034?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
 ];
 
+const MOCK_HASHTAGS: HashtagGroup[] = [
+  { id: '1', name: 'Tech Startups', tags: ['#startup', '#tech', '#innovation', '#saas', '#growth'] },
+  { id: '2', name: 'Summer Vibes', tags: ['#summer', '#summervibes', '#sunshine', '#fun'] },
+  { id: '3', name: 'Monday Motivation', tags: ['#mondaymotivation', '#grind', '#success', '#goals'] },
+];
+
 const Library: React.FC<LibraryProps> = ({ onCompose, userPlan, onOpenUpgrade }) => {
-  const [activeTab, setActiveTab] = useState<'library' | 'rss' | 'buckets' | 'stock'>('library');
+  const [activeTab, setActiveTab] = useState<'library' | 'rss' | 'buckets' | 'stock' | 'hashtags'>('library');
   const [activeFilter, setActiveFilter] = useState<'all' | 'image' | 'video' | 'template'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [rssUrl, setRssUrl] = useState('');
   const [assets, setAssets] = useState<MediaAsset[]>(MOCK_ASSETS_INIT);
+  const [hashtags, setHashtags] = useState<HashtagGroup[]>(MOCK_HASHTAGS);
+  const [editingBucket, setEditingBucket] = useState<Bucket | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Hashtag local state
+  const [newTagName, setNewTagName] = useState('');
+  const [newTagContent, setNewTagContent] = useState('');
 
   const filteredAssets = assets.filter(asset => {
     const matchesFilter = activeFilter === 'all' || asset.type === activeFilter;
@@ -89,6 +101,25 @@ const Library: React.FC<LibraryProps> = ({ onCompose, userPlan, onOpenUpgrade })
     }
   };
 
+  const handleCreateHashtagGroup = () => {
+    if (!newTagName || !newTagContent) return;
+    const tags = newTagContent.split(' ').filter(t => t.startsWith('#'));
+    if (tags.length === 0) return;
+    
+    const newGroup: HashtagGroup = {
+      id: Date.now().toString(),
+      name: newTagName,
+      tags
+    };
+    setHashtags([newGroup, ...hashtags]);
+    setNewTagName('');
+    setNewTagContent('');
+  };
+
+  const handleDeleteHashtagGroup = (id: string) => {
+    setHashtags(prev => prev.filter(h => h.id !== id));
+  };
+
   return (
     <div className="p-6 md:p-8 h-full flex flex-col bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
       
@@ -100,6 +131,60 @@ const Library: React.FC<LibraryProps> = ({ onCompose, userPlan, onOpenUpgrade })
         className="hidden"
         accept="image/*,video/*"
       />
+
+      {/* Bucket Config Modal */}
+      {editingBucket && (
+         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-slate-800 p-6">
+               <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center">
+                     <Archive className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" />
+                     Configure Queue
+                  </h3>
+                  <button onClick={() => setEditingBucket(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                     <X className="w-5 h-5" />
+                  </button>
+               </div>
+               
+               <div className="space-y-4">
+                  <div>
+                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Bucket Name</label>
+                     <input type="text" value={editingBucket.name} readOnly className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400" />
+                  </div>
+                  
+                  <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-900/30">
+                     <h4 className="text-sm font-bold text-indigo-900 dark:text-indigo-200 mb-3 flex items-center">
+                        <Clock className="w-4 h-4 mr-2" /> Posting Schedule
+                     </h4>
+                     <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 p-2 rounded border border-indigo-100 dark:border-indigo-900/50">
+                           <span>Mondays</span>
+                           <span className="font-mono text-indigo-600 dark:text-indigo-400">09:00 AM</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 p-2 rounded border border-indigo-100 dark:border-indigo-900/50">
+                           <span>Wednesdays</span>
+                           <span className="font-mono text-indigo-600 dark:text-indigo-400">02:30 PM</span>
+                        </div>
+                     </div>
+                     <button className="mt-3 w-full py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-white dark:hover:bg-slate-800 rounded border border-transparent hover:border-indigo-200 dark:hover:border-indigo-800 transition-colors">
+                        + Add Time Slot
+                     </button>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                     <Repeat className="w-4 h-4" />
+                     <span>Recycle posts after publishing?</span>
+                     <input type="checkbox" checked className="ml-auto w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300" />
+                  </div>
+               </div>
+
+               <div className="mt-8 flex justify-end gap-3">
+                  <button onClick={() => setEditingBucket(null)} className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium">Cancel</button>
+                  <button onClick={() => setEditingBucket(null)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 shadow-sm">Save Configuration</button>
+               </div>
+            </div>
+         </div>
+      )}
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
@@ -113,14 +198,14 @@ const Library: React.FC<LibraryProps> = ({ onCompose, userPlan, onOpenUpgrade })
              className={`flex items-center px-4 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${activeTab === 'library' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
            >
              <ImageIcon className="w-4 h-4 mr-2" />
-             Media Library
+             Media
            </button>
            <button 
              onClick={() => setActiveTab('rss')}
              className={`flex items-center px-4 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${activeTab === 'rss' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
            >
              <Rss className="w-4 h-4 mr-2" />
-             Content Feeds
+             Feeds
            </button>
            <button 
              onClick={() => setActiveTab('buckets')}
@@ -130,11 +215,18 @@ const Library: React.FC<LibraryProps> = ({ onCompose, userPlan, onOpenUpgrade })
              Buckets
            </button>
            <button 
+             onClick={() => setActiveTab('hashtags')}
+             className={`flex items-center px-4 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${activeTab === 'hashtags' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+           >
+             <Hash className="w-4 h-4 mr-2" />
+             Hashtags
+           </button>
+           <button 
              onClick={() => setActiveTab('stock')}
              className={`flex items-center px-4 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${activeTab === 'stock' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
            >
              <SearchIcon className="w-4 h-4 mr-2" />
-             Stock Photos
+             Stock
            </button>
         </div>
       </div>
@@ -253,6 +345,78 @@ const Library: React.FC<LibraryProps> = ({ onCompose, userPlan, onOpenUpgrade })
             ))}
           </div>
         </>
+      ) : activeTab === 'hashtags' ? (
+         <div className="animate-in fade-in duration-300">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+               {/* Create New Group */}
+               <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                  <h3 className="font-bold text-slate-900 dark:text-white mb-4">Create New Group</h3>
+                  <div className="space-y-4">
+                     <div>
+                        <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Group Name</label>
+                        <input 
+                          type="text" 
+                          placeholder="e.g. Summer Campaign" 
+                          value={newTagName}
+                          onChange={(e) => setNewTagName(e.target.value)}
+                          className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                     </div>
+                     <div>
+                        <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Hashtags</label>
+                        <textarea 
+                          placeholder="#summer #sun #fun" 
+                          value={newTagContent}
+                          onChange={(e) => setNewTagContent(e.target.value)}
+                          className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 h-24 resize-none"
+                        />
+                     </div>
+                     <button 
+                       onClick={handleCreateHashtagGroup}
+                       disabled={!newTagName || !newTagContent}
+                       className="w-full py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                     >
+                        Save Group
+                     </button>
+                  </div>
+               </div>
+
+               {/* Group List */}
+               <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {hashtags.map(group => (
+                     <div key={group.id} className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group">
+                        <div className="flex justify-between items-start mb-3">
+                           <div className="flex items-center gap-2">
+                              <Hash className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                              <h3 className="font-bold text-slate-900 dark:text-white">{group.name}</h3>
+                           </div>
+                           <button 
+                              onClick={() => handleDeleteHashtagGroup(group.id)}
+                              className="text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                           >
+                              <Trash2 className="w-4 h-4" />
+                           </button>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 mb-4">
+                           {group.tags.map(tag => (
+                              <span key={tag} className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-md">
+                                 {tag}
+                              </span>
+                           ))}
+                        </div>
+                        <div className="flex justify-end">
+                           <button 
+                             onClick={() => onCompose({ content: `\n\n${group.tags.join(' ')}` })}
+                             className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 px-2 py-1 rounded transition-colors"
+                           >
+                              Use in Composer
+                           </button>
+                        </div>
+                     </div>
+                  ))}
+               </div>
+            </div>
+         </div>
       ) : activeTab === 'stock' ? (
         <div className="animate-in fade-in duration-300 relative h-full flex flex-col">
            {/* Search Header */}
@@ -322,7 +486,10 @@ const Library: React.FC<LibraryProps> = ({ onCompose, userPlan, onOpenUpgrade })
                     
                     <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">{bucket.postCount} Posts</span>
-                       <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-1 transition-transform flex items-center">
+                       <span 
+                         onClick={() => setEditingBucket(bucket)}
+                         className="text-xs font-bold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-1 transition-transform flex items-center hover:underline"
+                       >
                           Manage <ExternalLink className="w-3 h-3 ml-1" />
                        </span>
                     </div>

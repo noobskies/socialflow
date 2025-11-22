@@ -1,12 +1,14 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Wand2, Image as ImageIcon, Smile, CalendarClock, Loader2, Twitter, Facebook, Linkedin, Instagram, CheckCircle2, Sparkles, PenTool, X, Calendar, ShoppingBag, Plus, LayoutTemplate, Youtube, Video, Pin, Sliders, Save, RotateCcw, Users, Send, MessageSquare, Repeat, FilePlus, Play, Scissors, Captions, UploadCloud, MapPin, Hash, Globe } from 'lucide-react';
-import { generatePostContent, generateHashtags, refineContent, generateSocialImage, generateProductPost, generateVideoCaptions } from '../services/geminiService';
-import { Platform, Draft, Product, ToastType, PostComment, VideoEditorConfig, PlatformOptions } from '../types';
+import { Wand2, Image as ImageIcon, Smile, CalendarClock, Loader2, Twitter, Facebook, Linkedin, Instagram, CheckCircle2, Sparkles, PenTool, X, Calendar, ShoppingBag, Plus, LayoutTemplate, Youtube, Video, Pin, Sliders, Save, RotateCcw, Users, Send, MessageSquare, Repeat, FilePlus, Play, Scissors, Captions, UploadCloud, MapPin, Hash, Globe, Recycle, Copy, Eye, Shuffle, Type, BarChart2, AlertTriangle } from 'lucide-react';
+import { generatePostContent, generateHashtags, refineContent, generateSocialImage, generateProductPost, generateVideoCaptions, repurposeContent, generateVariations, generateAltText, analyzeDraft } from '../services/geminiService';
+import { Platform, Draft, Product, ToastType, PostComment, VideoEditorConfig, PlatformOptions, HashtagGroup, Post, PlanTier } from '../types';
 
 interface ComposerProps {
   initialDraft?: Draft;
   showToast: (message: string, type: ToastType) => void;
+  onPostCreated?: (post: Post) => void;
+  userPlan?: PlanTier;
 }
 
 // Mock Products for e-commerce integration
@@ -23,6 +25,12 @@ const AI_TEMPLATES = [
   { id: 'viral', name: 'Viral Hook', label: 'Controversial/Viral' },
 ];
 
+const MOCK_HASHTAG_GROUPS: HashtagGroup[] = [
+  { id: '1', name: 'Tech Startups', tags: ['#startup', '#tech', '#innovation', '#saas', '#growth'] },
+  { id: '2', name: 'Summer Vibes', tags: ['#summer', '#summervibes', '#sunshine', '#fun'] },
+  { id: '3', name: 'Monday Motivation', tags: ['#mondaymotivation', '#grind', '#success', '#goals'] },
+];
+
 const TIMEZONES = [
   { value: 'UTC', label: 'UTC' },
   { value: 'America/New_York', label: 'New York (EST)' },
@@ -32,7 +40,7 @@ const TIMEZONES = [
   { value: 'Asia/Tokyo', label: 'Tokyo (JST)' },
 ];
 
-const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
+const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast, onPostCreated, userPlan = 'free' }) => {
   const [content, setContent] = useState('');
   const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(['twitter']);
   
@@ -52,6 +60,12 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
   const [showAiPanel, setShowAiPanel] = useState(true);
   const [activeTab, setActiveTab] = useState<'write' | 'design' | 'team'>('write');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [aiMode, setAiMode] = useState<'create' | 'repurpose'>('create');
+  const [sourceText, setSourceText] = useState('');
+  const [repurposedContent, setRepurposedContent] = useState<{ twitter: string[], linkedin: string, instagram: string } | null>(null);
+  const [variations, setVariations] = useState<string[]>([]);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   
   // Writing State
   const [topic, setTopic] = useState('');
@@ -61,6 +75,8 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
   // Media State (Image & Video)
   const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
+  const [altText, setAltText] = useState('');
+  const [showAltTextModal, setShowAltTextModal] = useState(false);
   
   // Drag and Drop State
   const [isDragging, setIsDragging] = useState(false);
@@ -92,6 +108,11 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
   // Product Picker State
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 
+  // Hashtag Popover
+  const [isHashtagOpen, setIsHashtagOpen] = useState(false);
+
+  const isAgency = userPlan === 'agency';
+
   // Initialize from Draft
   useEffect(() => {
     if (initialDraft) {
@@ -111,8 +132,20 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
       if (initialDraft.platformOptions) {
         setPlatformOptions(initialDraft.platformOptions);
       }
+    } else {
+      // Auto-load from LocalStorage if no specific draft passed
+      const savedContent = localStorage.getItem('draft_content');
+      if (savedContent) setContent(savedContent);
     }
   }, [initialDraft]);
+
+  // Auto-save to LocalStorage
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      localStorage.setItem('draft_content', content);
+    }, 1000); // Debounce 1s
+    return () => clearTimeout(timeoutId);
+  }, [content]);
 
   const platforms: { id: Platform; icon: React.ElementType; color: string }[] = [
     { id: 'twitter', icon: Twitter, color: 'bg-sky-500' },
@@ -143,6 +176,7 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
     const objectUrl = URL.createObjectURL(file);
     setMediaUrl(objectUrl);
     setMediaType(fileType as 'image' | 'video');
+    setAltText(''); // Reset alt text on new file
     
     if (fileType === 'video') {
       setVideoConfig(prev => ({ ...prev, captions: false, captionsText: undefined }));
@@ -197,11 +231,79 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
   const handleTextGenerate = async () => {
     if (!topic) return;
     setIsGenerating(true);
+    setVariations([]); // Reset variations
     const platform = selectedPlatforms[0] || 'twitter';
     const text = await generatePostContent(topic, platform, tone, postType);
     setContent(text);
     setIsGenerating(false);
     showToast('Content generated successfully!', 'success');
+  };
+
+  const handleGenerateVariations = async () => {
+    if (!content) return;
+    setIsGenerating(true);
+    const platform = selectedPlatforms[0] || 'linkedin';
+    const newVariations = await generateVariations(content, platform);
+    setVariations(newVariations);
+    setIsGenerating(false);
+    showToast('Variations generated!', 'success');
+  };
+
+  const handleGenerateAltText = async () => {
+    if (!mediaUrl || mediaType !== 'image') return;
+    
+    setIsGenerating(true);
+    
+    try {
+      let base64Data = '';
+      if (mediaUrl.startsWith('data:image')) {
+        base64Data = mediaUrl;
+      } else {
+        // Attempt to fetch (works for some CORS friendly URLs, or local blobs)
+        const response = await fetch(mediaUrl);
+        const blob = await response.blob();
+        base64Data = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      const text = await generateAltText(base64Data);
+      setAltText(text);
+      showToast('Alt text generated!', 'success');
+    } catch (e) {
+      console.error(e);
+      showToast('Could not process image for Alt Text', 'error');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleRepurpose = async () => {
+    if (!sourceText) return;
+    setIsGenerating(true);
+    setRepurposedContent(null);
+    const result = await repurposeContent(sourceText);
+    setRepurposedContent(result);
+    setIsGenerating(false);
+    showToast('Content repurposed for multiple platforms!', 'success');
+  };
+
+  const handleAnalyzeDraft = async () => {
+    if (!content) return;
+    setIsGenerating(true);
+    const platform = selectedPlatforms[0] || 'linkedin';
+    const result = await analyzeDraft(content, platform);
+    setAnalysisResult(result);
+    setIsGenerating(false);
+    setShowAnalysisModal(true);
+  };
+
+  const applyRepurposed = (text: string, platform: Platform) => {
+    setContent(text);
+    setSelectedPlatforms([platform]);
+    showToast(`Applied ${platform} version to editor`, 'info');
   };
 
   const handleTemplateSelect = async (templateName: string) => {
@@ -240,6 +342,7 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
       if (imgData) {
         setMediaUrl(imgData);
         setMediaType('image');
+        setAltText(''); // Reset alt text
         showToast('Image generated successfully!', 'success');
       }
     } catch (e) {
@@ -293,32 +396,45 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
     showToast('Content refined!', 'success');
   };
 
-  const handleHashtags = async () => {
+  const handleAiHashtags = async () => {
     if(!content) return;
     setIsGenerating(true);
+    setIsHashtagOpen(false);
     const tags = await generateHashtags(content);
     setContent(prev => prev + '\n\n' + tags.join(' '));
-    
-    // Also auto-populate first comment for Instagram if empty
-    if (selectedPlatforms.includes('instagram') && !platformOptions.instagram?.firstComment) {
-       setPlatformOptions(prev => ({
-          ...prev,
-          instagram: { ...prev.instagram, firstComment: tags.join(' ') }
-       }));
-       showToast('Hashtags added to First Comment!', 'info');
-    } else {
-       setIsGenerating(false);
-       showToast('Hashtags added!', 'success');
-    }
     setIsGenerating(false);
+    showToast('AI Hashtags added!', 'success');
+  };
+
+  const handleInsertHashtagGroup = (group: HashtagGroup) => {
+     setContent(prev => prev + '\n\n' + group.tags.join(' '));
+     setIsHashtagOpen(false);
+     showToast(`Inserted "${group.name}" tags`, 'success');
   };
 
   const handleScheduleSubmit = () => {
     setIsScheduleModalOpen(false);
     const recurringMsg = repeatInterval !== 'never' ? ` (Repeats ${repeatInterval})` : '';
+    
+    if (onPostCreated) {
+      const newPost: Post = {
+        id: Date.now().toString(),
+        content,
+        platforms: selectedPlatforms,
+        scheduledDate: scheduleDate,
+        status: 'scheduled',
+        time: scheduleTime,
+        mediaUrl: mediaUrl || undefined,
+        mediaType: mediaType || undefined,
+        timezone: scheduleTimezone,
+        platformOptions
+      };
+      onPostCreated(newPost);
+    }
+
     showToast(`Post scheduled for ${scheduleDate} at ${scheduleTime} (${scheduleTimezone})${recurringMsg}`, 'success');
     setWorkflowStatus('approved');
-    // Resetting form would happen here in real app
+    localStorage.removeItem('draft_content'); // Clear auto-save on submit
   };
 
   const handleProductSelect = async (product: Product) => {
@@ -329,6 +445,7 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
     setTone('urgent'); 
     setMediaUrl(product.image);
     setMediaType('image');
+    setAltText(`Product image of ${product.name}`);
 
     const platform = selectedPlatforms[0] || 'instagram';
     const text = await generateProductPost(product.name, product.description, product.price, platform, 'persuasive');
@@ -378,6 +495,29 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
     showToast(msg, newStatus === 'rejected' ? 'error' : 'success');
   };
 
+  // Helper to split tweet threads
+  const getTweetParts = (text: string) => {
+    const MAX_LENGTH = 280;
+    if (text.length <= MAX_LENGTH) return [text];
+    
+    const parts = [];
+    let remaining = text;
+    
+    while (remaining.length > 0) {
+      if (remaining.length <= MAX_LENGTH) {
+        parts.push(remaining);
+        break;
+      }
+      
+      let splitIndex = remaining.lastIndexOf(' ', MAX_LENGTH);
+      if (splitIndex === -1) splitIndex = MAX_LENGTH; // Force split if no space
+      
+      parts.push(remaining.substring(0, splitIndex));
+      remaining = remaining.substring(splitIndex).trim();
+    }
+    return parts;
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-6 h-full flex flex-col overflow-hidden relative pb-24 md:pb-6 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
       
@@ -389,6 +529,62 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
         accept="image/*,video/*" 
         onChange={handleFileSelect}
       />
+
+      {/* Analysis Modal */}
+      {showAnalysisModal && analysisResult && (
+        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-in fade-in">
+           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-800">
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-indigo-50 dark:bg-indigo-900/20">
+                 <h3 className="font-bold text-xl text-indigo-900 dark:text-indigo-200 flex items-center">
+                    <Sparkles className="w-6 h-6 mr-2 text-indigo-600 dark:text-indigo-400" />
+                    Content Analysis
+                 </h3>
+                 <button onClick={() => setShowAnalysisModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                    <X className="w-6 h-6" />
+                 </button>
+              </div>
+              <div className="p-6 space-y-6">
+                 <div className="flex items-center justify-between">
+                    <div className="text-center">
+                       <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Quality Score</p>
+                       <div className="text-4xl font-black text-slate-900 dark:text-white">{analysisResult.score}<span className="text-lg text-slate-400 font-medium">/100</span></div>
+                    </div>
+                    <div className="h-12 w-px bg-slate-200 dark:bg-slate-700"></div>
+                    <div className="text-center">
+                       <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Predicted Reach</p>
+                       <div className={`text-lg font-bold px-3 py-1 rounded-full ${
+                          analysisResult.engagementPrediction === 'High' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 
+                          analysisResult.engagementPrediction === 'Medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                          'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+                       }`}>
+                          {analysisResult.engagementPrediction}
+                       </div>
+                    </div>
+                 </div>
+
+                 <div className="space-y-3">
+                    <h4 className="font-bold text-slate-800 dark:text-slate-200 flex items-center">
+                       <AlertTriangle className="w-4 h-4 mr-2 text-amber-500" />
+                       Suggestions for Improvement
+                    </h4>
+                    <ul className="space-y-2">
+                       {analysisResult.suggestions.map((s: string, i: number) => (
+                          <li key={i} className="flex items-start text-sm text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                             <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1.5 mr-3 shrink-0"></div>
+                             {s}
+                          </li>
+                       ))}
+                    </ul>
+                 </div>
+              </div>
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 flex justify-end">
+                 <button onClick={() => setShowAnalysisModal(false)} className="px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                    Got it
+                 </button>
+              </div>
+           </div>
+        </div>
+      )}
 
       {/* Image Editor Modal */}
       {isEditingImage && mediaUrl && mediaType === 'image' && (
@@ -450,6 +646,46 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
                 </div>
              </div>
           </div>
+        </div>
+      )}
+
+      {/* Alt Text Modal */}
+      {showAltTextModal && (
+        <div className="absolute inset-0 bg-slate-900/50 dark:bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-800">
+              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                 <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200 flex items-center">
+                    <Type className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" />
+                    Image Alt Text
+                 </h3>
+                 <button onClick={() => setShowAltTextModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                    <X className="w-5 h-5" />
+                 </button>
+              </div>
+              <div className="p-6 space-y-4">
+                 <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Description</label>
+                    <textarea 
+                       value={altText}
+                       onChange={(e) => setAltText(e.target.value)}
+                       className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white min-h-[100px] resize-none"
+                       placeholder="Describe the image for visually impaired users..."
+                    />
+                 </div>
+                 <button 
+                    onClick={handleGenerateAltText}
+                    disabled={isGenerating}
+                    className="w-full py-2 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 rounded-lg font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors flex items-center justify-center"
+                 >
+                    {isGenerating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                    Generate with AI
+                 </button>
+              </div>
+              <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 flex justify-end space-x-3">
+                 <button onClick={() => setShowAltTextModal(false)} className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg">Cancel</button>
+                 <button onClick={() => { setShowAltTextModal(false); showToast('Alt text saved', 'success'); }} className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Save</button>
+              </div>
+           </div>
         </div>
       )}
 
@@ -663,7 +899,7 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
              New Post
-             {workflowStatus !== 'draft' && (
+             {isAgency && workflowStatus !== 'draft' && (
                <span className={`text-xs px-2 py-1 rounded-full uppercase font-bold border ${
                  workflowStatus === 'approved' ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 border-emerald-200' :
                  workflowStatus === 'rejected' ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 border-rose-200' :
@@ -685,56 +921,91 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
              </button>
              
              {/* Workflow Actions */}
-             {workflowStatus === 'draft' ? (
-               <>
-                <button 
-                  onClick={handleSaveTemplate}
-                  disabled={!content}
-                  className="bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-900 px-3 py-2 rounded-lg text-sm font-medium hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors hidden sm:flex items-center"
-                  title="Save as Template"
-                >
-                   <FilePlus className="w-4 h-4" />
-                </button>
-                <button 
-                  onClick={() => showToast('Draft saved!', 'info')}
-                  className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors hidden sm:block"
-                >
-                  Save Draft
-                </button>
-                <button 
-                    onClick={() => changeStatus('pending_review')}
+             {isAgency ? (
+               // Agency Workflow: Draft -> Pending Review -> Approved -> Schedule
+               workflowStatus === 'draft' ? (
+                 <>
+                  <button 
+                    onClick={handleSaveTemplate}
                     disabled={!content}
-                    className="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 flex items-center shadow-lg shadow-indigo-500/30 dark:shadow-indigo-900/30 transition-all hover:scale-105 disabled:opacity-50 disabled:transform-none disabled:shadow-none"
-                >
-                  <Users className="w-4 h-4 mr-2" />
-                  Submit for Review
-                </button>
-               </>
-             ) : workflowStatus === 'pending_review' ? (
-               <>
-                  <button 
-                    onClick={() => changeStatus('rejected')}
-                    className="bg-white dark:bg-slate-800 text-rose-600 border border-rose-200 dark:border-rose-900 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+                    className="bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-900 px-3 py-2 rounded-lg text-sm font-medium hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors hidden sm:flex items-center"
+                    title="Save as Template"
                   >
-                    Reject
+                     <FilePlus className="w-4 h-4" />
                   </button>
                   <button 
-                      onClick={() => changeStatus('approved')}
-                      className="bg-emerald-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 flex items-center shadow-lg shadow-emerald-500/30 dark:shadow-emerald-900/30 transition-all hover:scale-105"
+                    onClick={() => {
+                        localStorage.setItem('draft_content', content);
+                        showToast('Draft saved!', 'info');
+                    }}
+                    className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors hidden sm:block"
                   >
-                    <CheckCircle2 className="w-4 h-4 mr-2" />
-                    Approve
+                    Save Draft
                   </button>
-               </>
+                  <button 
+                      onClick={() => changeStatus('pending_review')}
+                      disabled={!content}
+                      className="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 flex items-center shadow-lg shadow-indigo-500/30 dark:shadow-indigo-900/30 transition-all hover:scale-105 disabled:opacity-50 disabled:transform-none disabled:shadow-none"
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    Submit for Review
+                  </button>
+                 </>
+               ) : workflowStatus === 'pending_review' ? (
+                 <>
+                    <button 
+                      onClick={() => changeStatus('rejected')}
+                      className="bg-white dark:bg-slate-800 text-rose-600 border border-rose-200 dark:border-rose-900 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+                    >
+                      Reject
+                    </button>
+                    <button 
+                        onClick={() => changeStatus('approved')}
+                        className="bg-emerald-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 flex items-center shadow-lg shadow-emerald-500/30 dark:shadow-emerald-900/30 transition-all hover:scale-105"
+                    >
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      Approve
+                    </button>
+                 </>
+               ) : (
+                  <button 
+                      onClick={() => setIsScheduleModalOpen(true)}
+                      disabled={!content}
+                      className="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 flex items-center shadow-lg shadow-indigo-500/30 dark:shadow-indigo-900/30 transition-all hover:scale-105 disabled:opacity-50 disabled:transform-none disabled:shadow-none"
+                  >
+                    <CalendarClock className="w-4 h-4 mr-2" />
+                    Schedule
+                  </button>
+               )
              ) : (
-                <button 
-                    onClick={() => setIsScheduleModalOpen(true)}
+                // Single User Workflow: Draft -> Schedule
+                <>
+                  <button 
+                    onClick={handleSaveTemplate}
                     disabled={!content}
-                    className="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 flex items-center shadow-lg shadow-indigo-500/30 dark:shadow-indigo-900/30 transition-all hover:scale-105 disabled:opacity-50 disabled:transform-none disabled:shadow-none"
-                >
-                  <CalendarClock className="w-4 h-4 mr-2" />
-                  Schedule
-                </button>
+                    className="bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-900 px-3 py-2 rounded-lg text-sm font-medium hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors hidden sm:flex items-center"
+                    title="Save as Template"
+                  >
+                     <FilePlus className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => {
+                        localStorage.setItem('draft_content', content);
+                        showToast('Draft saved!', 'info');
+                    }}
+                    className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors hidden sm:block"
+                  >
+                    Save Draft
+                  </button>
+                  <button 
+                      onClick={() => setIsScheduleModalOpen(true)}
+                      disabled={!content}
+                      className="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 flex items-center shadow-lg shadow-indigo-500/30 dark:shadow-indigo-900/30 transition-all hover:scale-105 disabled:opacity-50 disabled:transform-none disabled:shadow-none"
+                  >
+                    <CalendarClock className="w-4 h-4 mr-2" />
+                    Schedule
+                  </button>
+                </>
              )}
         </div>
       </div>
@@ -804,7 +1075,7 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
              </div>
           )}
 
-          {/* Tools Panel (Gemini AI & Team) */}
+          {/* Tools Panel */}
           <div className="bg-white dark:bg-slate-900 rounded-xl border border-indigo-100 dark:border-indigo-900/50 shadow-sm overflow-hidden ring-1 ring-indigo-50 dark:ring-indigo-900/30">
             <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 px-4 py-3 border-b border-indigo-100 dark:border-indigo-900/30 flex justify-between items-center">
               <div className="flex items-center space-x-2 text-indigo-900 dark:text-indigo-200">
@@ -828,88 +1099,182 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
                 >
                   Designer
                 </button>
-                <button 
-                  onClick={() => setActiveTab('team')}
-                  className={`px-3 py-1 text-xs font-medium rounded-md transition-all flex items-center gap-1 ${activeTab === 'team' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
-                >
-                  Team
-                  {comments.length > 0 && <span className="w-2 h-2 bg-rose-500 rounded-full"></span>}
-                </button>
+                {isAgency && (
+                  <button 
+                    onClick={() => setActiveTab('team')}
+                    className={`px-3 py-1 text-xs font-medium rounded-md transition-all flex items-center gap-1 ${activeTab === 'team' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                  >
+                    Team
+                    {comments.length > 0 && <span className="w-2 h-2 bg-rose-500 rounded-full"></span>}
+                  </button>
+                )}
               </div>
             </div>
 
             <div className="p-5 bg-indigo-50/30 dark:bg-indigo-900/10">
               {activeTab === 'write' ? (
                 <div className="space-y-4 animate-in fade-in duration-300">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">What's this post about?</label>
-                    <input 
-                      type="text"
-                      value={topic}
-                      onChange={(e) => setTopic(e.target.value)}
-                      placeholder="e.g., Announcing our new eco-friendly packaging..."
-                      className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
-                    />
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex-1">
-                      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Tone</label>
-                      <select 
-                        value={tone} 
-                        onChange={(e) => setTone(e.target.value)}
-                        className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm"
-                      >
-                        <option value="professional">Professional</option>
-                        <option value="casual">Casual</option>
-                        <option value="funny">Funny & Witty</option>
-                        <option value="urgent">Urgent / FOMO</option>
-                        <option value="inspiring">Inspiring</option>
-                      </select>
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Type</label>
-                      <select 
-                        value={postType} 
-                        onChange={(e) => setPostType(e.target.value)}
-                        className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm"
-                      >
-                        <option value="general">General Update</option>
-                        <option value="announcement">Big Announcement</option>
-                        <option value="educational">Educational / Tips</option>
-                        <option value="promotion">Sales / Promotion</option>
-                        <option value="story">Personal Story</option>
-                      </select>
-                    </div>
-                  </div>
-                  
-                  {/* Quick Templates */}
-                  <div>
-                     <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 flex items-center">
-                       <LayoutTemplate className="w-3 h-3 mr-1" /> Quick Templates
-                     </label>
-                     <div className="flex flex-wrap gap-2">
-                       {AI_TEMPLATES.map(tpl => (
-                         <button
-                            key={tpl.id}
-                            onClick={() => handleTemplateSelect(tpl.name)}
-                            className="text-xs bg-white dark:bg-slate-800 border border-indigo-100 dark:border-indigo-900 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 dark:hover:bg-indigo-500 hover:text-white px-3 py-1.5 rounded-full transition-colors font-medium shadow-sm"
-                         >
-                           {tpl.label}
-                         </button>
-                       ))}
-                     </div>
-                  </div>
-
-                  <div className="flex justify-end pt-2">
+                  {/* AI Mode Toggle */}
+                  <div className="flex gap-4 border-b border-indigo-100 dark:border-indigo-900/30 pb-2 mb-2">
                     <button 
-                      onClick={handleTextGenerate}
-                      disabled={isGenerating || !topic}
-                      className="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center shadow-md shadow-indigo-200 dark:shadow-none transition-all active:scale-95 w-full sm:w-auto justify-center"
+                       onClick={() => setAiMode('create')}
+                       className={`text-xs font-bold uppercase tracking-wider pb-1 ${aiMode === 'create' ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
                     >
-                      {isGenerating ? <Loader2 className="w-4 h-4 mr-2 animate-spin"/> : <Wand2 className="w-4 h-4 mr-2" />}
-                      Generate Draft
+                       Create New
+                    </button>
+                    <button 
+                       onClick={() => setAiMode('repurpose')}
+                       className={`text-xs font-bold uppercase tracking-wider pb-1 ${aiMode === 'repurpose' ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                    >
+                       Repurpose Content
                     </button>
                   </div>
+
+                  {aiMode === 'create' ? (
+                    <>
+                      {/* Variations Output */}
+                      {variations.length > 0 && (
+                         <div className="mb-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            {variations.map((v, i) => (
+                               <div key={i} className="bg-white dark:bg-slate-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-900 cursor-pointer hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-md transition-all group relative" onClick={() => setContent(v)}>
+                                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-indigo-600 dark:text-indigo-400 text-xs font-bold">Use</div>
+                                  <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-3">{v}</p>
+                               </div>
+                            ))}
+                         </div>
+                      )}
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">What's this post about?</label>
+                        <input 
+                          type="text"
+                          value={topic}
+                          onChange={(e) => setTopic(e.target.value)}
+                          placeholder="e.g., Announcing our new eco-friendly packaging..."
+                          className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
+                        />
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="flex-1">
+                          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Tone</label>
+                          <select 
+                            value={tone} 
+                            onChange={(e) => setTone(e.target.value)}
+                            className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm"
+                          >
+                            <option value="professional">Professional</option>
+                            <option value="casual">Casual</option>
+                            <option value="funny">Funny & Witty</option>
+                            <option value="urgent">Urgent / FOMO</option>
+                            <option value="inspiring">Inspiring</option>
+                          </select>
+                        </div>
+                        <div className="flex-1">
+                          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Type</label>
+                          <select 
+                            value={postType} 
+                            onChange={(e) => setPostType(e.target.value)}
+                            className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm"
+                          >
+                            <option value="general">General Update</option>
+                            <option value="announcement">Big Announcement</option>
+                            <option value="educational">Educational / Tips</option>
+                            <option value="promotion">Sales / Promotion</option>
+                            <option value="story">Personal Story</option>
+                          </select>
+                        </div>
+                      </div>
+                      
+                      {/* Quick Templates */}
+                      <div>
+                         <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 flex items-center">
+                           <LayoutTemplate className="w-3 h-3 mr-1" /> Quick Templates
+                         </label>
+                         <div className="flex flex-wrap gap-2">
+                           {AI_TEMPLATES.map(tpl => (
+                             <button
+                                key={tpl.id}
+                                onClick={() => handleTemplateSelect(tpl.name)}
+                                className="text-xs bg-white dark:bg-slate-800 border border-indigo-100 dark:border-indigo-900 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 dark:hover:bg-indigo-500 hover:text-white px-3 py-1.5 rounded-full transition-colors font-medium shadow-sm"
+                             >
+                               {tpl.label}
+                             </button>
+                           ))}
+                         </div>
+                      </div>
+
+                      <div className="flex justify-end pt-2 gap-2">
+                        {content && (
+                           <button 
+                             onClick={handleGenerateVariations}
+                             disabled={isGenerating}
+                             className="bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center transition-colors"
+                           >
+                              {isGenerating ? <Loader2 className="w-4 h-4 mr-2 animate-spin"/> : <Shuffle className="w-4 h-4 mr-2" />}
+                              Variations
+                           </button>
+                        )}
+                        <button 
+                          onClick={handleTextGenerate}
+                          disabled={isGenerating || !topic}
+                          className="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center shadow-md shadow-indigo-200 dark:shadow-none transition-all active:scale-95 w-full sm:w-auto justify-center"
+                        >
+                          {isGenerating ? <Loader2 className="w-4 h-4 mr-2 animate-spin"/> : <Wand2 className="w-4 h-4 mr-2" />}
+                          Generate Draft
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    // Repurpose Mode
+                    <>
+                       <div>
+                          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Source Content</label>
+                          <textarea 
+                             value={sourceText}
+                             onChange={(e) => setSourceText(e.target.value)}
+                             placeholder="Paste your blog post, article, or video transcript here..."
+                             className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm min-h-[100px]"
+                          />
+                       </div>
+                       
+                       {repurposedContent ? (
+                          <div className="grid grid-cols-1 gap-3 mt-2">
+                             <div className="bg-white dark:bg-slate-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-900 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-700 group" onClick={() => applyRepurposed(repurposedContent.twitter.join('\n\n'), 'twitter')}>
+                                <div className="flex justify-between items-center mb-1">
+                                   <span className="text-xs font-bold text-sky-600 dark:text-sky-400">Twitter Thread</span>
+                                   <Copy className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100" />
+                                </div>
+                                <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2">{repurposedContent.twitter[0]}</p>
+                             </div>
+                             <div className="bg-white dark:bg-slate-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-900 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-700 group" onClick={() => applyRepurposed(repurposedContent.linkedin, 'linkedin')}>
+                                <div className="flex justify-between items-center mb-1">
+                                   <span className="text-xs font-bold text-blue-700 dark:text-blue-400">LinkedIn Post</span>
+                                   <Copy className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100" />
+                                </div>
+                                <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2">{repurposedContent.linkedin}</p>
+                             </div>
+                             <div className="bg-white dark:bg-slate-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-900 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-700 group" onClick={() => applyRepurposed(repurposedContent.instagram, 'instagram')}>
+                                <div className="flex justify-between items-center mb-1">
+                                   <span className="text-xs font-bold text-pink-600 dark:text-pink-400">Instagram Caption</span>
+                                   <Copy className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100" />
+                                </div>
+                                <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2">{repurposedContent.instagram}</p>
+                             </div>
+                          </div>
+                       ) : (
+                          <div className="flex justify-end pt-2">
+                            <button 
+                              onClick={handleRepurpose}
+                              disabled={isGenerating || !sourceText}
+                              className="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center shadow-md shadow-indigo-200 dark:shadow-none transition-all active:scale-95 w-full sm:w-auto justify-center"
+                            >
+                              {isGenerating ? <Loader2 className="w-4 h-4 mr-2 animate-spin"/> : <Recycle className="w-4 h-4 mr-2" />}
+                              Repurpose
+                            </button>
+                          </div>
+                       )}
+                    </>
+                  )}
                 </div>
               ) : activeTab === 'design' ? (
                 <div className="space-y-4 animate-in fade-in duration-300">
@@ -1028,6 +1393,15 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
                   )}
                   
                   <div className="absolute -top-2 -right-2 flex gap-1 opacity-0 group-hover/media:opacity-100 transition-opacity">
+                    {mediaType === 'image' && (
+                       <button 
+                         onClick={() => setShowAltTextModal(true)}
+                         className="bg-white dark:bg-slate-800 text-slate-500 hover:text-indigo-500 rounded-full p-1 shadow-md border border-slate-100 dark:border-slate-700"
+                         title="Alt Text"
+                       >
+                         <Type className="w-3 h-3" />
+                       </button>
+                    )}
                     <button 
                       onClick={() => mediaType === 'video' ? setIsEditingVideo(true) : setIsEditingImage(true)}
                       className="bg-white dark:bg-slate-800 text-slate-500 hover:text-indigo-500 rounded-full p-1 shadow-md border border-slate-100 dark:border-slate-700"
@@ -1044,6 +1418,12 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
                     </button>
                   </div>
                 </div>
+                {altText && (
+                   <div className="mt-2 text-xs text-slate-500 dark:text-slate-400 flex items-center">
+                      <Type className="w-3 h-3 mr-1" />
+                      <span className="truncate max-w-xs">ALT: {altText}</span>
+                   </div>
+                )}
               </div>
             )}
 
@@ -1079,12 +1459,49 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
                     Rewrite
                  </button>
                  <button 
-                    onClick={handleHashtags}
+                    onClick={handleAnalyzeDraft}
                     disabled={!content || isGenerating}
-                    className="px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg transition-colors border border-indigo-100 dark:border-indigo-800 shrink-0"
+                    className="px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg transition-colors border border-indigo-100 dark:border-indigo-800 shrink-0 flex items-center"
                  >
-                    + Hashtags
+                    <BarChart2 className="w-3 h-3 mr-1" /> Analyze
                  </button>
+                 
+                 {/* Hashtag Dropdown */}
+                 <div className="relative">
+                    <button 
+                       onClick={() => setIsHashtagOpen(!isHashtagOpen)}
+                       disabled={!content && isGenerating}
+                       className="px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg transition-colors border border-indigo-100 dark:border-indigo-800 shrink-0 flex items-center"
+                    >
+                       <Hash className="w-3 h-3 mr-1" /> Hashtags
+                    </button>
+                    {isHashtagOpen && (
+                       <div className="absolute bottom-full left-0 mb-2 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in-95 z-50">
+                          <button 
+                             onClick={handleAiHashtags}
+                             className="w-full text-left px-4 py-2.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center border-b border-slate-100 dark:border-slate-800"
+                          >
+                             <Sparkles className="w-3 h-3 mr-2 text-indigo-500" /> Generate AI Tags
+                          </button>
+                          <div className="py-1">
+                             <div className="px-4 py-1 text-[10px] font-bold text-slate-400 uppercase">Saved Groups</div>
+                             {MOCK_HASHTAG_GROUPS.map(group => (
+                                <button
+                                   key={group.id}
+                                   onClick={() => handleInsertHashtagGroup(group)}
+                                   className="w-full text-left px-4 py-2 text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 truncate"
+                                >
+                                   {group.name}
+                                </button>
+                             ))}
+                             {MOCK_HASHTAG_GROUPS.length === 0 && (
+                                <div className="px-4 py-2 text-xs text-slate-400 italic">No saved groups</div>
+                             )}
+                          </div>
+                       </div>
+                    )}
+                    {isHashtagOpen && <div className="fixed inset-0 z-40" onClick={() => setIsHashtagOpen(false)}></div>}
+                 </div>
               </div>
               <div className={`text-xs font-semibold px-2 py-1 rounded shrink-0 ${content.length > 280 ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'text-slate-400 dark:text-slate-500'}`}>
                 {content.length} chars
@@ -1106,8 +1523,12 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
             </div>
             
             <div className="space-y-6">
-              {selectedPlatforms.map(platform => (
-                  <div key={platform} className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden ${platform === 'tiktok' || platform === 'instagram' ? 'rounded-2xl' : 'rounded-xl'}`}>
+              {selectedPlatforms.map(platform => {
+                  const isTwitter = platform === 'twitter';
+                  const tweetParts = isTwitter ? getTweetParts(content) : [content];
+
+                  return tweetParts.map((part, index) => (
+                    <div key={`${platform}-${index}`} className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden ${platform === 'tiktok' || platform === 'instagram' ? 'rounded-2xl' : 'rounded-xl'} ${index > 0 ? 'mt-[-20px] border-t-0 rounded-t-none pt-6' : ''} relative z-${10-index}`}>
                       {/* Platform Header Simulation */}
                       <div className="flex items-center space-x-3 p-4 border-b border-slate-50 dark:border-slate-800/50">
                           <div className={`w-9 h-9 rounded-full flex items-center justify-center shadow-sm ${
@@ -1127,17 +1548,17 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
                               {platform === 'pinterest' && <Pin className="w-5 h-5 text-white" />}
                           </div>
                           <div>
-                              <p className="text-sm font-bold text-slate-900 dark:text-white">SocialFlow</p>
+                              <p className="text-sm font-bold text-slate-900 dark:text-white">SocialFlow {index > 0 && <span className="text-xs font-normal text-slate-400">(Thread {index + 1}/{tweetParts.length})</span>}</p>
                               <p className="text-xs text-slate-500 dark:text-slate-400">Just now • <span className="capitalize">{platform}</span></p>
                           </div>
                       </div>
                       
                       <div className="p-4 text-[15px] text-slate-800 dark:text-slate-200 whitespace-pre-wrap leading-relaxed font-normal">
-                          {content || <span className="text-slate-300 dark:text-slate-600 italic">Start writing to see how your post will look...</span>}
+                          {part || <span className="text-slate-300 dark:text-slate-600 italic">Start writing to see how your post will look...</span>}
                       </div>
 
-                      {/* Media Rendering */}
-                      {mediaUrl ? (
+                      {/* Media Rendering - Only show on first tweet or if it fits logic */}
+                      {mediaUrl && index === 0 && (
                         <div className={`${(platform === 'tiktok' || platform === 'instagram') ? 'aspect-[9/16] mx-4 mb-4' : 'aspect-video w-full'} bg-black rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800 relative`}>
                           {mediaType === 'video' ? (
                             <>
@@ -1156,10 +1577,13 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
                                )}
                             </>
                           ) : (
-                            <img src={mediaUrl} alt="Post attachment" className="w-full h-full object-cover" />
+                            <img src={mediaUrl} alt={altText || "Post attachment"} className="w-full h-full object-cover" />
                           )}
                         </div>
-                      ) : (
+                      )}
+                      
+                      {/* Placeholder for no media */}
+                      {!mediaUrl && index === 0 && selectedPlatforms.length === 1 && (
                          <div className="mx-4 mb-4 h-40 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 border-dashed flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 gap-2">
                             <ImageIcon className="w-6 h-6 opacity-50" />
                             <span className="text-xs font-medium">No media attached</span>
@@ -1167,7 +1591,7 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
                       )}
 
                       {/* Platform Specific Footer Preview */}
-                      {platform === 'instagram' && platformOptions.instagram?.firstComment && (
+                      {platform === 'instagram' && platformOptions.instagram?.firstComment && index === 0 && (
                          <div className="px-4 pb-4 pt-0 text-sm">
                             <span className="font-bold text-slate-900 dark:text-white mr-2">socialflow</span>
                             <span className="text-slate-700 dark:text-slate-300">{platformOptions.instagram.firstComment}</span>
@@ -1193,8 +1617,9 @@ const Composer: React.FC<ComposerProps> = ({ initialDraft, showToast }) => {
                              </>
                           )}
                       </div>
-                  </div>
-              ))}
+                    </div>
+                  ));
+              })}
               {selectedPlatforms.length === 0 && (
                   <div className="text-center py-12 text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
                       <PenTool className="w-8 h-8 mx-auto mb-2 opacity-50" />
