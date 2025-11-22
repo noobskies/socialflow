@@ -1,4 +1,5 @@
 
+
 import { GoogleGenAI } from "@google/genai";
 
 const TEXT_MODEL = "gemini-3-pro-preview";
@@ -240,3 +241,26 @@ export const suggestWorkflows = async (businessType: string): Promise<any[]> => 
       return [];
     }
   };
+
+export const generateVideoCaptions = async (description: string): Promise<string> => {
+  try {
+    const ai = getAiClient();
+    const prompt = `
+      Generate a short, engaging 30-second script/caption transcript for a video about: "${description}".
+      Format as time-stamped SRT style lines.
+      Example:
+      00:00 - Hey everyone!
+      00:05 - Check this out.
+    `;
+
+    const response = await ai.models.generateContent({
+      model: TEXT_MODEL,
+      contents: prompt,
+    });
+
+    return response.text || "00:00 - [Music Playing]";
+  } catch (error) {
+    console.error("Error generating captions:", error);
+    return "00:00 - [Error generating captions]";
+  }
+};

@@ -1,8 +1,12 @@
 
 import React, { useState } from 'react';
-import { Link as LinkIcon, Copy, ExternalLink, Plus, MoreHorizontal, Smartphone, Layout, Sparkles, Trash2, GripVertical, ArrowRight, Loader2 } from 'lucide-react';
-import { ShortLink, BioPageConfig } from '../types';
+import { Link as LinkIcon, Copy, ExternalLink, Plus, MoreHorizontal, Smartphone, Layout, Sparkles, Trash2, GripVertical, ArrowRight, Loader2, Mail, Users, Download } from 'lucide-react';
+import { ShortLink, BioPageConfig, ToastType, Lead } from '../types';
 import { generateBio } from '../services/geminiService';
+
+interface LinkManagerProps {
+  showToast: (message: string, type: ToastType) => void;
+}
 
 // Mock Data
 const MOCK_LINKS: ShortLink[] = [
@@ -11,8 +15,15 @@ const MOCK_LINKS: ShortLink[] = [
   { id: '3', title: 'Newsletter Signup', originalUrl: 'https://myshop.com/newsletter', shortCode: 'join', clicks: 342, createdAt: '2 weeks ago', tags: ['growth'] },
 ];
 
-const LinkManager: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'shortener' | 'bio'>('shortener');
+const MOCK_LEADS: Lead[] = [
+  { id: '1', email: 'sarah.j@example.com', source: 'Bio Link', capturedAt: '2 hours ago' },
+  { id: '2', email: 'mike.dev@tech.co', source: 'Bio Link', capturedAt: '5 hours ago' },
+  { id: '3', email: 'designer@creative.studio', source: 'Bio Link', capturedAt: '1 day ago' },
+  { id: '4', email: 'hello@startup.io', source: 'Bio Link', capturedAt: '2 days ago' },
+];
+
+const LinkManager: React.FC<LinkManagerProps> = ({ showToast }) => {
+  const [activeTab, setActiveTab] = useState<'shortener' | 'bio' | 'leads'>('shortener');
   const [links, setLinks] = useState<ShortLink[]>(MOCK_LINKS);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -27,7 +38,9 @@ const LinkManager: React.FC = () => {
       { id: '1', title: 'My Website', url: 'https://alex.com', active: true },
       { id: '2', title: 'Latest YouTube Video', url: 'https://youtube.com/watch?v=123', active: true },
       { id: '3', title: 'Book a Consultation', url: 'https://calendly.com/alex', active: true },
-    ]
+    ],
+    enableLeadCapture: true,
+    leadCaptureText: 'Join my weekly newsletter for tips!'
   });
 
   const [bioNiche, setBioNiche] = useState('');
@@ -38,12 +51,12 @@ const LinkManager: React.FC = () => {
     const newBio = await generateBio(bioConfig.username, bioNiche, 'professional yet fun');
     setBioConfig(prev => ({ ...prev, bio: newBio }));
     setIsGenerating(false);
+    showToast('Bio generated successfully!', 'success');
   };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    // In a real app, show a toast
-    alert('Copied to clipboard!');
+    showToast('Copied to clipboard!', 'success');
   };
 
   return (
@@ -67,6 +80,13 @@ const LinkManager: React.FC = () => {
           >
             <Layout className="w-4 h-4 mr-2" />
             Link in Bio
+          </button>
+          <button 
+            onClick={() => setActiveTab('leads')}
+            className={`flex items-center px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${activeTab === 'leads' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+          >
+            <Users className="w-4 h-4 mr-2" />
+            Leads
           </button>
         </div>
       </div>
@@ -153,7 +173,7 @@ const LinkManager: React.FC = () => {
             </div>
           </div>
         </div>
-      ) : (
+      ) : activeTab === 'bio' ? (
         <div className="flex flex-col lg:flex-row gap-8 h-[calc(100vh-200px)] animate-in fade-in duration-300">
           {/* Editor Panel */}
           <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
@@ -200,6 +220,35 @@ const LinkManager: React.FC = () => {
                      />
                   </div>
                 </div>
+              </div>
+
+              <hr className="border-slate-100 dark:border-slate-800" />
+
+              {/* Lead Capture Settings */}
+              <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-4 border border-indigo-100 dark:border-indigo-800">
+                 <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                       <Mail className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                       <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-200">Lead Capture Form</h3>
+                    </div>
+                    <button 
+                      onClick={() => setBioConfig(prev => ({ ...prev, enableLeadCapture: !prev.enableLeadCapture }))}
+                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${bioConfig.enableLeadCapture ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-600'}`}
+                    >
+                       <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${bioConfig.enableLeadCapture ? 'translate-x-5' : 'translate-x-1'}`} />
+                    </button>
+                 </div>
+                 {bioConfig.enableLeadCapture && (
+                    <div>
+                       <label className="block text-xs font-medium text-indigo-800 dark:text-indigo-300 mb-1">Call to Action Text</label>
+                       <input 
+                          type="text"
+                          value={bioConfig.leadCaptureText}
+                          onChange={(e) => setBioConfig(prev => ({...prev, leadCaptureText: e.target.value}))}
+                          className="w-full bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-800 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                       />
+                    </div>
+                 )}
               </div>
 
               <hr className="border-slate-100 dark:border-slate-800" />
@@ -270,6 +319,19 @@ const LinkManager: React.FC = () => {
                     <h3 className="font-bold text-xl mb-1">{bioConfig.displayName}</h3>
                     <p className="text-sm opacity-90 mb-8">{bioConfig.bio}</p>
                     
+                    {/* Lead Capture Preview */}
+                    {bioConfig.enableLeadCapture && (
+                       <div className="w-full mb-6 p-4 bg-white/20 backdrop-blur-md rounded-xl border border-white/30 text-left">
+                          <p className="text-xs font-bold mb-2 opacity-90">{bioConfig.leadCaptureText}</p>
+                          <div className="flex gap-2">
+                             <div className="flex-1 h-8 bg-white/20 rounded text-xs flex items-center px-2 opacity-70">Email...</div>
+                             <div className="w-8 h-8 bg-white text-indigo-600 rounded flex items-center justify-center">
+                                <ArrowRight className="w-4 h-4" />
+                             </div>
+                          </div>
+                       </div>
+                    )}
+
                     <div className="w-full space-y-3">
                       {bioConfig.links.filter(l => l.active).map(link => (
                         <a 
@@ -296,6 +358,59 @@ const LinkManager: React.FC = () => {
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-white dark:bg-slate-900 rounded-b-xl shadow-sm z-10"></div>
           </div>
         </div>
+      ) : (
+         <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+               <div>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">Subscribers</h2>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Leads collected from your Bio Page.</p>
+               </div>
+               <button className="flex items-center px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                  <Download className="w-4 h-4 mr-2" />
+                  Export CSV
+               </button>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+               <div className="overflow-x-auto">
+               <table className="w-full text-left">
+                  <thead>
+                     <tr className="border-b border-slate-100 dark:border-slate-800 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50/50 dark:bg-slate-800/50">
+                     <th className="py-4 pl-6">Email</th>
+                     <th className="py-4">Source</th>
+                     <th className="py-4">Captured</th>
+                     <th className="py-4 pr-6 text-right">Actions</th>
+                     </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                     {MOCK_LEADS.map(lead => (
+                     <tr key={lead.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                        <td className="py-4 pl-6">
+                           <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                 <Mail className="w-4 h-4" />
+                              </div>
+                              <span className="font-medium text-slate-900 dark:text-white text-sm">{lead.email}</span>
+                           </div>
+                        </td>
+                        <td className="py-4">
+                           <span className="text-sm text-slate-600 dark:text-slate-400">{lead.source}</span>
+                        </td>
+                        <td className="py-4">
+                           <span className="text-sm text-slate-500 dark:text-slate-400">{lead.capturedAt}</span>
+                        </td>
+                        <td className="py-4 pr-6 text-right">
+                           <button className="text-slate-400 hover:text-rose-500 p-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors">
+                              <Trash2 className="w-4 h-4" />
+                           </button>
+                        </td>
+                     </tr>
+                     ))}
+                  </tbody>
+               </table>
+               </div>
+            </div>
+         </div>
       )}
     </div>
   );

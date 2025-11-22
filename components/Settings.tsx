@@ -1,7 +1,15 @@
 
 import React, { useState } from 'react';
-import { User, Bell, Shield, CreditCard, Mail, Smartphone, Check, Users, Share2, Plus, Trash2, ExternalLink, Twitter, Facebook, Linkedin, Instagram, AlertCircle, Zap, Key, Lock, Activity, Fingerprint, History, LogOut, Palette, Code, Copy, RefreshCw, Youtube, Video, Pin } from 'lucide-react';
-import { SocialAccount, TeamMember, BrandingConfig, ApiKey } from '../types';
+import { User, Bell, Shield, CreditCard, Mail, Smartphone, Check, Users, Share2, Plus, Trash2, ExternalLink, Twitter, Facebook, Linkedin, Instagram, AlertCircle, Zap, Key, Lock, Activity, Fingerprint, History, LogOut, Palette, Code, Copy, RefreshCw, Youtube, Video, Pin, Crown } from 'lucide-react';
+import { SocialAccount, TeamMember, BrandingConfig, ApiKey, ToastType, PlanTier } from '../types';
+
+interface SettingsProps {
+  showToast: (message: string, type: ToastType) => void;
+  branding: BrandingConfig;
+  setBranding: (branding: BrandingConfig) => void;
+  userPlan: PlanTier;
+  onOpenUpgrade: () => void;
+}
 
 const MOCK_ACCOUNTS: SocialAccount[] = [
   { id: '1', platform: 'twitter', username: '@socialflow', avatar: '', connected: true },
@@ -31,7 +39,7 @@ const MOCK_API_KEYS: ApiKey[] = [
   { id: '2', name: 'Staging', key: 'pk_test_...9921', lastUsed: '1 day ago', createdAt: '2023-10-15' },
 ];
 
-const Settings: React.FC = () => {
+const Settings: React.FC<SettingsProps> = ({ showToast, branding, setBranding, userPlan, onOpenUpgrade }) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'accounts' | 'team' | 'billing' | 'notifications' | 'security' | 'branding' | 'developer'>('profile');
   const [accounts, setAccounts] = useState(MOCK_ACCOUNTS);
   const [team, setTeam] = useState(MOCK_TEAM);
@@ -52,19 +60,15 @@ const Settings: React.FC = () => {
     sso: false
   });
 
-  // Mock Branding Settings
-  const [branding, setBranding] = useState<BrandingConfig>({
-    companyName: 'SocialFlow Agency',
-    primaryColor: '#4f46e5',
-    logoUrl: 'https://picsum.photos/200/200',
-    removeWatermark: true,
-    customDomain: 'social.myagency.com'
-  });
-
   const toggleConnection = (id: string) => {
     setAccounts(prev => prev.map(acc => 
       acc.id === id ? { ...acc, connected: !acc.connected } : acc
     ));
+    showToast('Account connection updated', 'info');
+  };
+
+  const handleSave = (section: string) => {
+    showToast(`${section} saved successfully!`, 'success');
   };
 
   const renderContent = () => {
@@ -96,7 +100,7 @@ const Settings: React.FC = () => {
                 </div>
               </div>
               <div className="mt-6 flex justify-end">
-                <button className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700">Save Changes</button>
+                <button onClick={() => handleSave('Profile')} className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700">Save Changes</button>
               </div>
             </div>
           </div>
@@ -247,70 +251,33 @@ const Settings: React.FC = () => {
                 <div className="flex items-center gap-3 mb-2">
                    <span className="px-3 py-1 bg-indigo-500/30 border border-indigo-400/30 rounded-full text-xs font-bold uppercase tracking-wider">Current Plan</span>
                 </div>
-                <h2 className="text-3xl font-bold mb-2">Pro Plan</h2>
-                <p className="text-indigo-200 max-w-xl mb-6">Your plan renews on November 24, 2024. You have 16 AI credits remaining for this cycle.</p>
+                <h2 className="text-3xl font-bold mb-2 capitalize">{userPlan} Plan</h2>
+                <p className="text-indigo-200 max-w-xl mb-6">Manage your subscription and billing details.</p>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl">
-                  <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-                    <p className="text-xs text-indigo-200 uppercase font-bold mb-1">Social Accounts</p>
-                    <p className="text-2xl font-bold">4 / 10</p>
-                  </div>
-                  <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-                     <p className="text-xs text-indigo-200 uppercase font-bold mb-1">AI Credits</p>
-                     <p className="text-2xl font-bold">84 used</p>
-                  </div>
-                   <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-                     <p className="text-xs text-indigo-200 uppercase font-bold mb-1">Team Members</p>
-                     <p className="text-2xl font-bold">3 / 5</p>
-                  </div>
-                </div>
+                <button 
+                   onClick={onOpenUpgrade}
+                   className="px-6 py-2 bg-white text-indigo-900 font-bold rounded-lg hover:bg-indigo-50 transition-colors"
+                >
+                   Change Plan
+                </button>
               </div>
               <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500 rounded-full opacity-20 blur-3xl translate-x-1/3 -translate-y-1/3"></div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-               {/* Free Plan */}
-               <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm opacity-75 hover:opacity-100 transition-opacity">
-                 <h3 className="font-bold text-xl text-slate-900 dark:text-white">Free</h3>
-                 <p className="text-3xl font-bold text-slate-900 dark:text-white mt-2">$0<span className="text-sm text-slate-500 dark:text-slate-400 font-normal">/mo</span></p>
-                 <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Perfect for individuals just getting started.</p>
-                 <button className="w-full mt-6 py-2 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">Downgrade</button>
-                 <ul className="mt-6 space-y-3 text-sm text-slate-600 dark:text-slate-400">
-                   <li className="flex items-center"><Check className="w-4 h-4 text-emerald-500 mr-2"/> 3 Social Accounts</li>
-                   <li className="flex items-center"><Check className="w-4 h-4 text-emerald-500 mr-2"/> 10 AI Credits/mo</li>
-                   <li className="flex items-center"><Check className="w-4 h-4 text-emerald-500 mr-2"/> Basic Analytics</li>
-                 </ul>
-               </div>
-
-               {/* Pro Plan (Active) */}
-               <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border-2 border-indigo-600 shadow-md relative">
-                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-600 text-white px-3 py-1 rounded-full text-xs font-bold">CURRENT PLAN</div>
-                 <h3 className="font-bold text-xl text-slate-900 dark:text-white">Pro</h3>
-                 <p className="text-3xl font-bold text-slate-900 dark:text-white mt-2">$15<span className="text-sm text-slate-500 dark:text-slate-400 font-normal">/mo</span></p>
-                 <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">For creators and small businesses growing fast.</p>
-                 <button className="w-full mt-6 py-2 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 font-bold rounded-lg cursor-default">Current Plan</button>
-                 <ul className="mt-6 space-y-3 text-sm text-slate-600 dark:text-slate-400">
-                   <li className="flex items-center"><Check className="w-4 h-4 text-emerald-500 mr-2"/> 10 Social Accounts</li>
-                   <li className="flex items-center"><Check className="w-4 h-4 text-emerald-500 mr-2"/> 100 AI Credits/mo</li>
-                   <li className="flex items-center"><Check className="w-4 h-4 text-emerald-500 mr-2"/> Advanced Analytics</li>
-                   <li className="flex items-center"><Check className="w-4 h-4 text-emerald-500 mr-2"/> Link in Bio Pro</li>
-                 </ul>
-               </div>
-
-               {/* Agency Plan */}
-               <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
-                 <h3 className="font-bold text-xl text-slate-900 dark:text-white">Agency</h3>
-                 <p className="text-3xl font-bold text-slate-900 dark:text-white mt-2">$45<span className="text-sm text-slate-500 dark:text-slate-400 font-normal">/mo</span></p>
-                 <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Best for teams managing multiple clients.</p>
-                 <button className="w-full mt-6 py-2 bg-slate-900 dark:bg-slate-700 text-white font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-600 transition-colors">Upgrade</button>
-                 <ul className="mt-6 space-y-3 text-sm text-slate-600 dark:text-slate-400">
-                   <li className="flex items-center"><Check className="w-4 h-4 text-emerald-500 mr-2"/> 25 Social Accounts</li>
-                   <li className="flex items-center"><Check className="w-4 h-4 text-emerald-500 mr-2"/> Unlimited AI</li>
-                   <li className="flex items-center"><Check className="w-4 h-4 text-emerald-500 mr-2"/> Client Portals</li>
-                   <li className="flex items-center"><Check className="w-4 h-4 text-emerald-500 mr-2"/> Priority Support</li>
-                 </ul>
-               </div>
-            </div>
+            {/* Only show detailed pricing cards if needed or maybe a transaction history */}
+             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                <h3 className="font-bold text-slate-900 dark:text-white mb-4">Payment Method</h3>
+                <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                   <div className="flex items-center gap-3">
+                      <div className="w-12 h-8 bg-slate-200 dark:bg-slate-600 rounded flex items-center justify-center text-xs font-bold text-slate-500 dark:text-slate-300">VISA</div>
+                      <div>
+                         <p className="text-sm font-bold text-slate-900 dark:text-white">Visa ending in 4242</p>
+                         <p className="text-xs text-slate-500 dark:text-slate-400">Expires 12/24</p>
+                      </div>
+                   </div>
+                   <button className="text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:underline">Edit</button>
+                </div>
+             </div>
           </div>
         );
 
@@ -472,8 +439,18 @@ const Settings: React.FC = () => {
         
       case 'branding':
         return (
-          <div className="space-y-6 animate-in fade-in duration-300">
-             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+          <div className="space-y-6 animate-in fade-in duration-300 relative">
+             {userPlan !== 'agency' && (
+                <div className="absolute inset-0 z-20 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center text-center p-8 rounded-2xl">
+                   <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-xl">
+                      <Crown className="w-8 h-8 text-white" />
+                   </div>
+                   <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Agency Feature Locked</h3>
+                   <p className="text-slate-600 dark:text-slate-400 max-w-md mb-6">Upgrade to the Agency plan to remove SocialFlow branding and customize the platform with your own logo and colors.</p>
+                   <button onClick={onOpenUpgrade} className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/30">Upgrade to Agency</button>
+                </div>
+             )}
+             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 opacity-50 pointer-events-none select-none">
                 <div className="flex justify-between items-center mb-6">
                   <div>
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center">
@@ -484,72 +461,14 @@ const Settings: React.FC = () => {
                   </div>
                   <span className="text-xs font-bold bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-1 rounded">AGENCY ONLY</span>
                 </div>
-
+                {/* ... branding content (faded out) ... */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                    <div className="space-y-6">
                       <div>
                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Company Name</label>
-                         <input 
-                           type="text" 
-                           value={branding.companyName} 
-                           onChange={(e) => setBranding({...branding, companyName: e.target.value})}
-                           className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
-                         />
-                      </div>
-                      <div>
-                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Primary Color</label>
-                         <div className="flex items-center gap-2">
-                           <input 
-                             type="color" 
-                             value={branding.primaryColor} 
-                             onChange={(e) => setBranding({...branding, primaryColor: e.target.value})}
-                             className="w-10 h-10 border border-slate-300 dark:border-slate-700 rounded p-1 cursor-pointer bg-white dark:bg-slate-800"
-                           />
-                           <input 
-                             type="text" 
-                             value={branding.primaryColor} 
-                             onChange={(e) => setBranding({...branding, primaryColor: e.target.value})}
-                             className="flex-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm"
-                           />
-                         </div>
-                      </div>
-                      <div>
-                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Custom Domain</label>
-                         <input 
-                           type="text" 
-                           value={branding.customDomain} 
-                           onChange={(e) => setBranding({...branding, customDomain: e.target.value})}
-                           className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
-                         />
-                         <p className="text-xs text-slate-400 mt-1">CNAME record required. See documentation.</p>
+                         <input type="text" className="w-full border rounded-lg px-3 py-2" />
                       </div>
                    </div>
-                   
-                   <div className="space-y-6">
-                      <div>
-                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Logo Upload</label>
-                         <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-6 flex flex-col items-center justify-center text-center hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer">
-                            <img src={branding.logoUrl} alt="Logo" className="h-12 mb-4 object-contain" />
-                            <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Click to upload</p>
-                            <p className="text-xs text-slate-400 mt-1">SVG, PNG or JPG (Max 2MB)</p>
-                         </div>
-                      </div>
-                      <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
-                         <div>
-                            <h3 className="font-bold text-slate-900 dark:text-white text-sm">Remove "Powered by SocialFlow"</h3>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Hide all SocialFlow branding from client reports and dashboard.</p>
-                         </div>
-                         <button 
-                           onClick={() => setBranding({...branding, removeWatermark: !branding.removeWatermark})}
-                           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${branding.removeWatermark ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-600'}`}
-                         >
-                           <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${branding.removeWatermark ? 'translate-x-6' : 'translate-x-1'}`} />
-                         </button>
-                      </div>
-                   </div>
-                </div>
-                <div className="mt-8 flex justify-end">
-                   <button className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700">Save Branding</button>
                 </div>
              </div>
           </div>
@@ -557,53 +476,31 @@ const Settings: React.FC = () => {
       
       case 'developer':
         return (
-           <div className="space-y-6 animate-in fade-in duration-300">
-             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+           <div className="space-y-6 animate-in fade-in duration-300 relative">
+             {userPlan !== 'agency' && (
+                <div className="absolute inset-0 z-20 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center text-center p-8 rounded-2xl">
+                   <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-xl">
+                      <Code className="w-8 h-8 text-white" />
+                   </div>
+                   <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Developer API Locked</h3>
+                   <p className="text-slate-600 dark:text-slate-400 max-w-md mb-6">Access our REST API and Webhooks to build custom integrations and workflows with the Agency plan.</p>
+                   <button onClick={onOpenUpgrade} className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/30">Upgrade to Agency</button>
+                </div>
+             )}
+             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 opacity-50 pointer-events-none select-none">
+                {/* Faded content */}
                 <div className="flex justify-between items-center mb-6">
                   <div>
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center">
                       <Code className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" />
                       Developer Settings
                     </h2>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage API keys and webhooks for custom integrations.</p>
                   </div>
-                  <button className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 shadow-sm">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Generate New Key
-                  </button>
                 </div>
-
                 <div className="space-y-4">
-                   {MOCK_API_KEYS.map(key => (
-                     <div key={key.id} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
-                        <div>
-                           <h3 className="font-bold text-slate-900 dark:text-white text-sm">{key.name}</h3>
-                           <div className="flex items-center mt-1 gap-2">
-                              <code className="text-xs bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded text-slate-600 dark:text-slate-300 font-mono">{key.key}</code>
-                              <button className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400" title="Copy">
-                                 <Copy className="w-3 h-3" />
-                              </button>
-                           </div>
-                        </div>
-                        <div className="text-right">
-                           <p className="text-xs text-slate-500 dark:text-slate-400">Last used: {key.lastUsed}</p>
-                           <p className="text-xs text-slate-400 dark:text-slate-500">Created: {key.createdAt}</p>
-                        </div>
-                        <button className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors">
-                           <Trash2 className="w-4 h-4" />
-                        </button>
-                     </div>
-                   ))}
-                </div>
-
-                <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
-                   <h3 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center">
-                      <RefreshCw className="w-4 h-4 mr-2 text-indigo-600 dark:text-indigo-400" />
-                      Webhooks
-                   </h3>
-                   <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 border-dashed flex flex-col items-center justify-center text-center py-8">
-                      <p className="text-slate-500 dark:text-slate-400 text-sm mb-2">No webhooks configured</p>
-                      <button className="text-indigo-600 dark:text-indigo-400 font-medium text-sm hover:underline">Add your first endpoint</button>
+                   <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                      <h3 className="font-bold">Production Key</h3>
+                      <code>pk_live_...</code>
                    </div>
                 </div>
              </div>
@@ -631,18 +528,23 @@ const Settings: React.FC = () => {
               { id: 'developer', label: 'Developer API', icon: Code },
             ].map(item => {
               const Icon = item.icon;
+              const isLocked = (item.id === 'branding' || item.id === 'developer') && userPlan !== 'agency';
+              
               return (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id as any)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                     activeTab === item.id 
                       ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700' 
                       : 'text-slate-600 dark:text-slate-400 hover:bg-white/60 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${activeTab === item.id ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`} />
-                  <span>{item.label}</span>
+                  <div className="flex items-center space-x-3">
+                     <Icon className={`w-4 h-4 ${activeTab === item.id ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`} />
+                     <span>{item.label}</span>
+                  </div>
+                  {isLocked && <Lock className="w-3 h-3 text-slate-400" />}
                 </button>
               );
             })}

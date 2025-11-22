@@ -1,16 +1,31 @@
 
-import React from 'react';
-import { LayoutDashboard, PenSquare, Calendar as CalendarIcon, BarChart3, Settings, Zap, MessageSquare, FolderOpen, Link, Workflow, Sun, Moon, Monitor } from 'lucide-react';
-import { ViewState } from '../types';
+import React, { useState } from 'react';
+import { LayoutDashboard, PenSquare, Calendar as CalendarIcon, BarChart3, Settings, Zap, MessageSquare, FolderOpen, Link, Workflow, Sun, Moon, Monitor, Bell, ChevronDown, Plus, Check, HelpCircle, Crown } from 'lucide-react';
+import { ViewState, Workspace, BrandingConfig, PlanTier } from '../types';
 
 interface SidebarProps {
   currentView: ViewState;
   setView: (view: ViewState) => void;
   currentTheme: 'light' | 'dark' | 'system';
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
+  branding: BrandingConfig;
+  userPlan: PlanTier;
+  onOpenNotifications?: () => void;
+  onOpenHelp?: () => void;
+  onOpenUpgrade?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, currentTheme, setTheme }) => {
+const MOCK_WORKSPACES: Workspace[] = [
+  { id: '1', name: 'SocialFlow Agency', role: 'owner' },
+  { id: '2', name: 'Client: TechCorp', role: 'member' },
+  { id: '3', name: 'Client: GreenFoods', role: 'owner' },
+];
+
+const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, currentTheme, setTheme, branding, userPlan, onOpenNotifications, onOpenHelp, onOpenUpgrade }) => {
+  const [workspaces, setWorkspaces] = useState<Workspace[]>(MOCK_WORKSPACES);
+  const [activeWorkspace, setActiveWorkspace] = useState<Workspace>(MOCK_WORKSPACES[0]);
+  const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
+
   const navItems = [
     { id: ViewState.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
     { id: ViewState.COMPOSER, label: 'Create Post', icon: PenSquare },
@@ -22,15 +37,71 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, currentTheme, s
     { id: ViewState.ANALYTICS, label: 'Analytics', icon: BarChart3 },
   ];
 
+  // Use branding logo if available, otherwise default icon
+  const hasCustomLogo = branding.logoUrl && branding.logoUrl.length > 0 && userPlan === 'agency';
+
+  // Credits Logic
+  const totalCredits = userPlan === 'free' ? 10 : userPlan === 'pro' ? 100 : Infinity;
+  const usedCredits = 8; // Mock usage
+  const creditsPercent = totalCredits === Infinity ? 100 : (usedCredits / totalCredits) * 100;
+
   return (
     <div className="w-64 h-full bg-slate-900 text-white flex flex-col border-r border-slate-800 shadow-xl">
-      <div className="p-6 flex items-center space-x-3 border-b border-slate-800">
-        <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
-          <Zap className="w-5 h-5 text-white fill-current" />
-        </div>
-        <span className="text-xl font-bold tracking-tight">SocialFlow AI</span>
+      {/* Workspace Switcher / Branding Header */}
+      <div className="p-4 border-b border-slate-800 relative z-20">
+        <button 
+          onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
+          className="w-full flex items-center justify-between hover:bg-slate-800 p-2 rounded-lg transition-colors group"
+        >
+          <div className="flex items-center space-x-3 overflow-hidden">
+            {hasCustomLogo ? (
+               <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-white flex items-center justify-center">
+                  <img src={branding.logoUrl} alt="Logo" className="w-full h-full object-contain" />
+               </div>
+            ) : (
+               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-900/50 group-hover:scale-105 transition-transform shrink-0">
+                 <Zap className="w-5 h-5 text-white fill-current" />
+               </div>
+            )}
+            <div className="text-left min-w-0">
+              <span className="block text-sm font-bold tracking-tight truncate w-32">
+                 {hasCustomLogo ? branding.companyName : activeWorkspace.name}
+              </span>
+              <span className="block text-[10px] text-slate-400 uppercase font-semibold tracking-wider truncate">
+                 {hasCustomLogo ? activeWorkspace.name : activeWorkspace.role}
+              </span>
+            </div>
+          </div>
+          <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform shrink-0 ${isWorkspaceDropdownOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {isWorkspaceDropdownOpen && (
+          <div className="absolute top-full left-4 right-4 mt-2 bg-slate-800 rounded-xl border border-slate-700 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 z-50">
+            <div className="max-h-60 overflow-y-auto">
+              {workspaces.map(ws => (
+                <button
+                  key={ws.id}
+                  onClick={() => {
+                    setActiveWorkspace(ws);
+                    setIsWorkspaceDropdownOpen(false);
+                  }}
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-700/50 transition-colors text-sm"
+                >
+                  <span className={ws.id === activeWorkspace.id ? 'text-white font-medium' : 'text-slate-300'}>{ws.name}</span>
+                  {ws.id === activeWorkspace.id && <Check className="w-4 h-4 text-indigo-400" />}
+                </button>
+              ))}
+            </div>
+            <div className="border-t border-slate-700 p-2">
+               <button className="w-full flex items-center justify-center px-4 py-2 text-xs font-medium text-slate-300 hover:bg-slate-700 rounded-lg transition-colors">
+                  <Plus className="w-3 h-3 mr-2" /> Create Workspace
+               </button>
+            </div>
+          </div>
+        )}
       </div>
 
+      {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -52,10 +123,29 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, currentTheme, s
         })}
       </nav>
 
-      <div className="p-4 border-t border-slate-800">
+      {/* Footer Tools */}
+      <div className="p-4 border-t border-slate-800 space-y-4">
         
+        {/* Usage Stats / Upgrade */}
+        <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700">
+           <div className="flex justify-between items-center mb-2">
+              <span className="text-xs font-semibold text-slate-300">AI Credits</span>
+              <span className="text-xs text-slate-400">{userPlan === 'agency' ? 'Unlimited' : `${usedCredits}/${totalCredits}`}</span>
+           </div>
+           {userPlan !== 'agency' && (
+             <div className="w-full bg-slate-700 rounded-full h-1.5 mb-2">
+                <div className="bg-indigo-500 h-1.5 rounded-full transition-all" style={{ width: `${creditsPercent}%` }}></div>
+             </div>
+           )}
+           {userPlan === 'free' && (
+              <button onClick={onOpenUpgrade} className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm flex items-center justify-center">
+                 <Crown className="w-3 h-3 mr-1" /> Upgrade to Pro
+              </button>
+           )}
+        </div>
+
         {/* Theme Switcher */}
-        <div className="flex bg-slate-950/50 p-1 rounded-lg mb-4 border border-slate-800">
+        <div className="flex bg-slate-950/50 p-1 rounded-lg border border-slate-800">
           <button 
             onClick={() => setTheme('light')}
             className={`flex-1 flex justify-center py-1.5 rounded-md transition-colors ${currentTheme === 'light' ? 'bg-slate-800 text-white' : 'text-slate-500 hover:text-slate-300'}`}
@@ -79,29 +169,44 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, currentTheme, s
           </button>
         </div>
 
-        <button 
-            onClick={() => setView(ViewState.SETTINGS)}
-            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors ${
-                currentView === ViewState.SETTINGS 
-                ? 'bg-indigo-600 text-white' 
-                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-            }`}
-        >
-          <Settings className="w-5 h-5" />
-          <span className="font-medium">Settings</span>
-        </button>
-        <div className="mt-4 bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-          <div className="flex items-center space-x-3">
-            <img 
-              src="https://picsum.photos/100/100" 
-              alt="User" 
-              className="w-10 h-10 rounded-full border-2 border-indigo-500"
-            />
-            <div>
-              <p className="text-sm font-semibold text-white">Alex Creator</p>
-              <p className="text-xs text-indigo-400">Pro Plan</p>
-            </div>
+        <div className="grid grid-cols-2 gap-2">
+           <button 
+               onClick={() => setView(ViewState.SETTINGS)}
+               className={`flex items-center justify-center space-x-2 px-3 py-2 rounded-lg transition-colors border border-slate-700 ${
+                   currentView === ViewState.SETTINGS 
+                   ? 'bg-slate-800 text-white' 
+                   : 'bg-transparent text-slate-400 hover:text-white hover:bg-slate-800'
+               }`}
+           >
+             <Settings className="w-4 h-4" />
+             <span className="text-xs font-medium">Settings</span>
+           </button>
+           <button 
+               onClick={onOpenHelp}
+               className="flex items-center justify-center space-x-2 px-3 py-2 rounded-lg transition-colors border border-slate-700 bg-transparent text-slate-400 hover:text-white hover:bg-slate-800"
+           >
+             <HelpCircle className="w-4 h-4" />
+             <span className="text-xs font-medium">Help</span>
+           </button>
+        </div>
+
+        <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700 flex items-center space-x-3">
+          <div className="relative shrink-0">
+             <img 
+               src="https://picsum.photos/100/100" 
+               alt="User" 
+               className="w-9 h-9 rounded-full border-2 border-indigo-500"
+             />
+             <div className="absolute -top-1 -right-1 bg-emerald-500 w-2.5 h-2.5 rounded-full border-2 border-slate-800"></div>
           </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-white truncate">Alex Creator</p>
+            <p className="text-[10px] text-indigo-400 truncate uppercase font-bold">{userPlan} Plan</p>
+          </div>
+          <button onClick={onOpenNotifications} className="text-slate-400 hover:text-white transition-colors relative">
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-slate-800"></span>
+          </button>
         </div>
       </div>
     </div>

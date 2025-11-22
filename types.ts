@@ -1,5 +1,6 @@
 
 export type Platform = 'twitter' | 'linkedin' | 'instagram' | 'facebook' | 'tiktok' | 'youtube' | 'pinterest';
+export type PlanTier = 'free' | 'pro' | 'agency';
 
 export interface SocialAccount {
   id: string;
@@ -9,21 +10,76 @@ export interface SocialAccount {
   connected: boolean;
 }
 
+export interface PostComment {
+  id: string;
+  author: string;
+  avatar: string;
+  content: string;
+  timestamp: string;
+}
+
+export interface PlatformOptions {
+  instagram?: {
+    firstComment?: string;
+    location?: string;
+    collabUser?: string;
+  };
+  twitter?: {
+    isThread?: boolean;
+    replySettings?: 'everyone' | 'mentioned' | 'followers';
+  };
+  pinterest?: {
+    destinationLink?: string;
+    boardId?: string;
+  };
+  youtube?: {
+    visibility?: 'public' | 'private' | 'unlisted';
+    tags?: string[];
+  };
+}
+
 export interface Post {
   id: string;
   content: string;
   platforms: Platform[];
   scheduledDate: string; // ISO string
-  status: 'scheduled' | 'published' | 'draft';
+  status: 'scheduled' | 'published' | 'draft' | 'pending_review' | 'approved' | 'rejected';
   mediaUrl?: string;
+  mediaType?: 'image' | 'video';
   time?: string;
+  timezone?: string;
+  comments?: PostComment[];
+  platformOptions?: PlatformOptions;
 }
 
 export interface Draft {
   content?: string;
   mediaUrl?: string;
+  mediaType?: 'image' | 'video';
   scheduledDate?: string;
   platforms?: Platform[];
+  status?: 'draft' | 'pending_review' | 'approved' | 'rejected';
+  comments?: PostComment[];
+  platformOptions?: PlatformOptions;
+}
+
+export interface VideoEditorConfig {
+  duration: number;
+  trimStart: number;
+  trimEnd: number;
+  thumbnailTime: number;
+  captions: boolean;
+  captionsText?: string;
+}
+
+export interface ListeningResult {
+  id: string;
+  keyword: string;
+  platform: Platform;
+  author: string;
+  content: string;
+  sentiment: 'positive' | 'neutral' | 'negative';
+  timestamp: string;
 }
 
 export interface AnalyticsData {
@@ -48,7 +104,7 @@ export enum ViewState {
 export interface User {
   name: string;
   email: string;
-  plan: 'free' | 'pro' | 'agency';
+  plan: PlanTier;
 }
 
 export interface SocialMessage {
@@ -100,6 +156,26 @@ export interface BioPageConfig {
   avatar: string;
   theme: 'light' | 'dark' | 'colorful';
   links: { id: string; title: string; url: string; active: boolean }[];
+  enableLeadCapture?: boolean;
+  leadCaptureText?: string;
+}
+
+export interface Lead {
+  id: string;
+  email: string;
+  name?: string;
+  source: string;
+  capturedAt: string;
+}
+
+export interface RSSArticle {
+  id: string;
+  title: string;
+  source: string;
+  url: string;
+  publishedAt: string;
+  imageUrl?: string;
+  snippet: string;
 }
 
 export interface Workflow {
@@ -148,3 +224,38 @@ export interface ApiKey {
   lastUsed: string;
   createdAt: string;
 }
+
+export interface Notification {
+  id: string;
+  type: 'info' | 'success' | 'warning' | 'mention';
+  title: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+}
+
+export interface Workspace {
+  id: string;
+  name: string;
+  role: 'owner' | 'member';
+  logo?: string;
+}
+
+export interface Report {
+  id: string;
+  name: string;
+  dateRange: string;
+  createdAt: string;
+  status: 'ready' | 'generating';
+  format: 'pdf' | 'csv';
+}
+
+export interface Bucket {
+  id: string;
+  name: string;
+  postCount: number;
+  schedule: string; // e.g., "Every Mon, Wed"
+  color: string;
+}
+
+export type ToastType = 'success' | 'error' | 'info';
