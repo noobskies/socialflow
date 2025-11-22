@@ -388,3 +388,67 @@ export const analyzeDraft = async (content: string, platform: string): Promise<a
     };
   }
 };
+
+export const generatePostFromRSS = async (title: string, snippet: string, source: string): Promise<string> => {
+  try {
+    const ai = getAiClient();
+    const prompt = `
+      Create an engaging social media post sharing this news article.
+      Title: "${title}"
+      Source: "${source}"
+      Snippet: "${snippet}"
+      
+      Constraints:
+      - Write a hook to grab attention.
+      - Summarize the key point briefly.
+      - Include a call to action to read more.
+      - Add 3 relevant hashtags.
+      - Keep it professional but energetic.
+    `;
+
+    const response = await ai.models.generateContent({
+      model: TEXT_MODEL,
+      contents: prompt,
+    });
+
+    return response.text || "";
+  } catch (error) {
+    console.error("Error generating RSS post:", error);
+    return `${title}\n\n${snippet}`;
+  }
+};
+
+export const getTrendingTopics = async (niche: string): Promise<any[]> => {
+  try {
+    const ai = getAiClient();
+    const prompt = `
+      Identify 3 trending topics or viral content ideas for a content creator in the "${niche}" niche.
+      
+      Return a JSON array. Each object must have:
+      - id: string (unique id)
+      - topic: string (headline)
+      - volume: string (e.g., "High", "Very High")
+      - difficulty: string ("Easy", "Medium", "Hard")
+      - context: string (why it's trending)
+      
+      Example: [{"id": "1", "topic": "AI Marketing", "volume": "High", "difficulty": "Medium", "context": "New tools released"}]
+    `;
+
+    const response = await ai.models.generateContent({
+      model: TEXT_MODEL,
+      contents: prompt,
+      config: { responseMimeType: 'application/json' }
+    });
+
+    const text = response.text || "[]";
+    const jsonStr = text.substring(text.indexOf('['), text.lastIndexOf(']') + 1);
+    return JSON.parse(jsonStr);
+  } catch (error) {
+    console.error("Error fetching trends:", error);
+    return [
+      { id: '1', topic: 'Sustainable Tech', volume: 'High', difficulty: 'Medium', context: 'Growing interest in eco-friendly gadgets' },
+      { id: '2', topic: 'Remote Work Tips', volume: 'Medium', difficulty: 'Easy', context: 'Always relevant for professionals' },
+      { id: '3', topic: 'AI Ethics', volume: 'High', difficulty: 'Hard', context: 'Hot debate topic currently' }
+    ];
+  }
+};

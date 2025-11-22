@@ -1,19 +1,28 @@
 
 import React, { useState, useRef } from 'react';
-import { Search, Filter, Image as ImageIcon, FileText, Video, MoreHorizontal, Upload, Plus, Download, Trash2, Rss, ExternalLink, PenSquare, RefreshCw, Archive, Repeat, Search as SearchIcon, Hash, X, Clock, Save } from 'lucide-react';
-import { MediaAsset, Draft, RSSArticle, Bucket, PlanTier, HashtagGroup } from '../types';
+import { Search, Filter, Image as ImageIcon, FileText, Video, MoreHorizontal, Upload, Plus, Download, Trash2, Rss, ExternalLink, PenSquare, RefreshCw, Archive, Repeat, Search as SearchIcon, Hash, X, Clock, Save, Loader2, CalendarCheck, Zap, Folder as FolderIcon, FolderOpen } from 'lucide-react';
+import { MediaAsset, Draft, RSSArticle, Bucket, PlanTier, HashtagGroup, Post, Folder } from '../types';
+import { generatePostFromRSS } from '../services/geminiService';
 
 interface LibraryProps {
   onCompose: (draft: Draft) => void;
   userPlan: PlanTier;
   onOpenUpgrade: () => void;
+  onPostCreated?: (post: Post) => void;
 }
 
+const MOCK_FOLDERS: Folder[] = [
+  { id: 'all', name: 'All Uploads', type: 'system', icon: 'folder-open' },
+  { id: 'campaign-a', name: 'Summer Campaign', type: 'user' },
+  { id: 'evergreen', name: 'Evergreen', type: 'user' },
+  { id: 'videos', name: 'Video Assets', type: 'user' },
+];
+
 const MOCK_ASSETS_INIT: MediaAsset[] = [
-  { id: '1', type: 'image', url: 'https://picsum.photos/id/101/400/400', name: 'Summer Campaign Hero', createdAt: '2 days ago', tags: ['summer', 'hero'] },
+  { id: '1', type: 'image', url: 'https://picsum.photos/id/101/400/400', name: 'Summer Campaign Hero', createdAt: '2 days ago', tags: ['summer', 'hero'], folderId: 'campaign-a' },
   { id: '2', type: 'image', url: 'https://picsum.photos/id/103/400/400', name: 'Product Teaser v2', createdAt: '3 days ago', tags: ['product', 'teaser'] },
-  { id: '3', type: 'template', content: 'Exciting news! 🚀 We are thrilled to announce [Product Name]...', name: 'Product Launch Template', createdAt: '1 week ago', tags: ['launch', 'announcement'] },
-  { id: '4', type: 'video', url: 'https://picsum.photos/id/104/400/400', name: 'Behind the Scenes', createdAt: '1 week ago', tags: ['bts', 'video'] },
+  { id: '3', type: 'template', content: 'Exciting news! 🚀 We are thrilled to announce [Product Name]...', name: 'Product Launch Template', createdAt: '1 week ago', tags: ['launch', 'announcement'], folderId: 'evergreen' },
+  { id: '4', type: 'video', url: 'https://picsum.photos/id/104/400/400', name: 'Behind the Scenes', createdAt: '1 week ago', tags: ['bts', 'video'], folderId: 'videos' },
   { id: '5', type: 'image', url: 'https://picsum.photos/id/106/400/400', name: 'Team Offsite', createdAt: '2 weeks ago', tags: ['team', 'culture'] },
   { id: '6', type: 'template', content: 'Join us for our upcoming webinar on [Topic] this [Day]! 📅 Register here: [Link]', name: 'Webinar Invite', createdAt: '2 weeks ago', tags: ['webinar', 'event'] },
 ];
@@ -45,25 +54,30 @@ const MOCK_HASHTAGS: HashtagGroup[] = [
   { id: '3', name: 'Monday Motivation', tags: ['#mondaymotivation', '#grind', '#success', '#goals'] },
 ];
 
-const Library: React.FC<LibraryProps> = ({ onCompose, userPlan, onOpenUpgrade }) => {
+const Library: React.FC<LibraryProps> = ({ onCompose, userPlan, onOpenUpgrade, onPostCreated }) => {
   const [activeTab, setActiveTab] = useState<'library' | 'rss' | 'buckets' | 'stock' | 'hashtags'>('library');
+  const [activeFolder, setActiveFolder] = useState<string>('all');
+  const [folders, setFolders] = useState<Folder[]>(MOCK_FOLDERS);
+  const [assets, setAssets] = useState<MediaAsset[]>(MOCK_ASSETS_INIT);
+  
   const [activeFilter, setActiveFilter] = useState<'all' | 'image' | 'video' | 'template'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [rssUrl, setRssUrl] = useState('');
-  const [assets, setAssets] = useState<MediaAsset[]>(MOCK_ASSETS_INIT);
   const [hashtags, setHashtags] = useState<HashtagGroup[]>(MOCK_HASHTAGS);
   const [editingBucket, setEditingBucket] = useState<Bucket | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [generatingRssId, setGeneratingRssId] = useState<string | null>(null);
 
   // Hashtag local state
   const [newTagName, setNewTagName] = useState('');
   const [newTagContent, setNewTagContent] = useState('');
 
   const filteredAssets = assets.filter(asset => {
+    const matchesFolder = activeFolder === 'all' || asset.folderId === activeFolder;
     const matchesFilter = activeFilter === 'all' || asset.type === activeFilter;
     const matchesSearch = asset.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           asset.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesFilter && matchesSearch;
+    return matchesFolder && matchesFilter && matchesSearch;
   });
 
   const handleUseAsset = (asset: MediaAsset) => {
@@ -74,12 +88,31 @@ const Library: React.FC<LibraryProps> = ({ onCompose, userPlan, onOpenUpgrade })
     });
   };
 
-  const handleUseArticle = (article: RSSArticle) => {
+  const handleUseArticle = async (article: RSSArticle) => {
+    setGeneratingRssId(article.id);
+    const postContent = await generatePostFromRSS(article.title, article.snippet, article.source);
+    setGeneratingRssId(null);
+    
     onCompose({
-      content: `${article.title}\n\n${article.snippet}\n\nRead more: ${article.url}`,
+      content: `${postContent}\n\n${article.url}`,
       mediaUrl: article.imageUrl,
-      mediaType: 'image'
+      mediaType: 'image',
+      platforms: ['twitter', 'linkedin']
     });
+  };
+
+  const handleAutoSchedule = (bucket: Bucket) => {
+    if (!onPostCreated) return;
+    
+    // Simulate creating posts
+    const mockPosts: Post[] = [
+      { id: Date.now().toString(), content: `${bucket.name} Post 1`, scheduledDate: '2023-11-06', time: '09:00', platforms: ['twitter'], status: 'scheduled' },
+      { id: (Date.now()+1).toString(), content: `${bucket.name} Post 2`, scheduledDate: '2023-11-08', time: '09:00', platforms: ['linkedin'], status: 'scheduled' },
+      { id: (Date.now()+2).toString(), content: `${bucket.name} Post 3`, scheduledDate: '2023-11-10', time: '09:00', platforms: ['instagram'], status: 'scheduled' },
+    ];
+
+    mockPosts.forEach(p => onPostCreated(p));
+    alert(`Scheduled ${mockPosts.length} posts from ${bucket.name} bucket!`);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,7 +127,8 @@ const Library: React.FC<LibraryProps> = ({ onCompose, userPlan, onOpenUpgrade })
         url,
         name: file.name,
         createdAt: 'Just now',
-        tags: ['uploaded']
+        tags: ['uploaded'],
+        folderId: activeFolder !== 'all' ? activeFolder : undefined
       };
 
       setAssets([newAsset, ...assets]);
@@ -118,6 +152,13 @@ const Library: React.FC<LibraryProps> = ({ onCompose, userPlan, onOpenUpgrade })
 
   const handleDeleteHashtagGroup = (id: string) => {
     setHashtags(prev => prev.filter(h => h.id !== id));
+  };
+
+  const handleCreateFolder = () => {
+    const name = prompt("Enter folder name:");
+    if (name) {
+      setFolders([...folders, { id: name.toLowerCase().replace(/\s+/g, '-'), name, type: 'user' }]);
+    }
   };
 
   return (
@@ -232,119 +273,154 @@ const Library: React.FC<LibraryProps> = ({ onCompose, userPlan, onOpenUpgrade })
       </div>
 
       {activeTab === 'library' ? (
-        <>
-          {/* Filters and Search */}
-          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-              {['all', 'image', 'video', 'template'].map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setActiveFilter(type as any)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${
-                    activeFilter === type 
-                      ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800' 
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
-            <div className="relative w-full md:w-64">
-              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-              <input 
-                type="text"
-                placeholder="Search assets..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              />
-            </div>
-             <div className="flex gap-2">
-                <button 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                >
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload
-                </button>
-                <button className="flex items-center px-3 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 shadow-sm transition-colors">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create
-                </button>
-            </div>
+        <div className="flex flex-col lg:flex-row gap-6 h-full overflow-hidden">
+          {/* Folder Sidebar */}
+          <div className="w-full lg:w-64 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 flex flex-col shadow-sm h-fit lg:h-auto overflow-y-auto">
+             <div className="flex justify-between items-center mb-4">
+               <h3 className="font-bold text-slate-700 dark:text-slate-300 text-sm uppercase tracking-wider">Folders</h3>
+               <button onClick={handleCreateFolder} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-slate-500">
+                 <Plus className="w-4 h-4" />
+               </button>
+             </div>
+             <div className="space-y-1">
+               {folders.map(folder => (
+                 <button
+                   key={folder.id}
+                   onClick={() => setActiveFolder(folder.id)}
+                   className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                     activeFolder === folder.id 
+                       ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300' 
+                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                   }`}
+                 >
+                   <div className="flex items-center gap-2">
+                     {folder.id === 'all' ? <FolderOpen className="w-4 h-4" /> : <FolderIcon className="w-4 h-4" />}
+                     <span className="truncate max-w-[120px]">{folder.name}</span>
+                   </div>
+                   {folder.id !== 'all' && (
+                     <span className="text-xs bg-slate-200 dark:bg-slate-700 px-1.5 rounded-full text-slate-500 dark:text-slate-400">
+                       {assets.filter(a => a.folderId === folder.id).length}
+                     </span>
+                   )}
+                 </button>
+               ))}
+             </div>
           </div>
 
-          {/* Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 overflow-y-auto pb-10">
-            {filteredAssets.map((asset) => (
-              <div key={asset.id} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm group hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col">
-                {/* Preview Area */}
-                <div className="relative h-48 bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
-                  {asset.type === 'image' || asset.type === 'video' ? (
-                    <>
-                      <img src={asset.url} alt={asset.name} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300" />
-                      {asset.type === 'video' && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                          <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
-                            <Video className="w-5 h-5 text-slate-900 ml-1" />
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="p-6 w-full h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex flex-col">
-                      <FileText className="w-8 h-8 text-indigo-400 mb-3" />
-                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-4 leading-relaxed font-medium">{asset.content}</p>
-                    </div>
-                  )}
-                  
-                  {/* Overlay Actions */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <button 
-                      onClick={() => handleUseAsset(asset)}
-                      className="p-2 bg-white rounded-lg hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 transition-colors" 
-                      title="Use in Composer"
-                    >
-                      <PenSquare className="w-5 h-5" />
-                    </button>
-                    <button className="p-2 bg-white rounded-lg hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 transition-colors" title="Download">
-                      <Download className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Filters and Search */}
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm mb-6 flex flex-col md:flex-row justify-between items-center gap-4 shrink-0">
+              <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+                {['all', 'image', 'video', 'template'].map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setActiveFilter(type as any)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${
+                      activeFilter === type 
+                        ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800' 
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+              <div className="relative w-full md:w-64">
+                <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                <input 
+                  type="text"
+                  placeholder="Search assets..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                />
+              </div>
+              <div className="flex gap-2">
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                  >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload
+                  </button>
+                  <button className="flex items-center px-3 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 shadow-sm transition-colors">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create
+                  </button>
+              </div>
+            </div>
 
-                {/* Metadata */}
-                <div className="p-4 flex-1 flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-2">
-                        {asset.type === 'image' && <ImageIcon className="w-4 h-4 text-slate-400" />}
-                        {asset.type === 'video' && <Video className="w-4 h-4 text-slate-400" />}
-                        {asset.type === 'template' && <FileText className="w-4 h-4 text-slate-400" />}
-                        <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">{asset.type}</span>
+            {/* Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 overflow-y-auto pb-10 pr-2">
+              {filteredAssets.map((asset) => (
+                <div key={asset.id} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm group hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col">
+                  {/* Preview Area */}
+                  <div className="relative h-40 bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+                    {asset.type === 'image' || asset.type === 'video' ? (
+                      <>
+                        <img src={asset.url} alt={asset.name} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300" />
+                        {asset.type === 'video' && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                            <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+                              <Video className="w-5 h-5 text-slate-900 ml-1" />
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="p-6 w-full h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex flex-col">
+                        <FileText className="w-8 h-8 text-indigo-400 mb-3" />
+                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-4 leading-relaxed font-medium">{asset.content}</p>
                       </div>
-                      <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                        <MoreHorizontal className="w-4 h-4" />
+                    )}
+                    
+                    {/* Overlay Actions */}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <button 
+                        onClick={() => handleUseAsset(asset)}
+                        className="p-2 bg-white rounded-lg hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 transition-colors" 
+                        title="Use in Composer"
+                      >
+                        <PenSquare className="w-5 h-5" />
+                      </button>
+                      <button className="p-2 bg-white rounded-lg hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 transition-colors" title="Download">
+                        <Download className="w-5 h-5" />
                       </button>
                     </div>
-                    <h3 className="font-semibold text-slate-900 dark:text-white truncate mb-1" title={asset.name}>{asset.name}</h3>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {asset.tags.map(tag => (
-                        <span key={tag} className="text-[10px] px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full">
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
                   </div>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-3 pt-3 border-t border-slate-50 dark:border-slate-800">
-                    Added {asset.createdAt}
-                  </p>
+
+                  {/* Metadata */}
+                  <div className="p-4 flex-1 flex flex-col justify-between">
+                    <div>
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center gap-2">
+                          {asset.type === 'image' && <ImageIcon className="w-4 h-4 text-slate-400" />}
+                          {asset.type === 'video' && <Video className="w-4 h-4 text-slate-400" />}
+                          {asset.type === 'template' && <FileText className="w-4 h-4 text-slate-400" />}
+                          <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">{asset.type}</span>
+                        </div>
+                        <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <h3 className="font-semibold text-slate-900 dark:text-white truncate mb-1 text-sm" title={asset.name}>{asset.name}</h3>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {asset.tags.map(tag => (
+                          <span key={tag} className="text-[10px] px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full">
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-3 pt-3 border-t border-slate-50 dark:border-slate-800">
+                      Added {asset.createdAt}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </>
+        </div>
       ) : activeTab === 'hashtags' ? (
          <div className="animate-in fade-in duration-300">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -484,14 +560,20 @@ const Library: React.FC<LibraryProps> = ({ onCompose, userPlan, onOpenUpgrade })
                        {bucket.schedule}
                     </div>
                     
-                    <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                       <span className="text-sm font-medium text-slate-600 dark:text-slate-300">{bucket.postCount} Posts</span>
-                       <span 
-                         onClick={() => setEditingBucket(bucket)}
-                         className="text-xs font-bold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-1 transition-transform flex items-center hover:underline"
-                       >
-                          Manage <ExternalLink className="w-3 h-3 ml-1" />
-                       </span>
+                    <div className="space-y-3">
+                        <button 
+                           onClick={() => handleAutoSchedule(bucket)}
+                           className="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors border border-indigo-100 dark:border-indigo-800"
+                        >
+                           <CalendarCheck className="w-4 h-4 mr-2" />
+                           Auto-Fill Calendar
+                        </button>
+                        <button 
+                           onClick={() => setEditingBucket(bucket)}
+                           className="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700"
+                        >
+                           Configure Rules
+                        </button>
                     </div>
                  </div>
               ))}
@@ -545,10 +627,11 @@ const Library: React.FC<LibraryProps> = ({ onCompose, userPlan, onOpenUpgrade })
                        <div className="flex gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
                           <button 
                             onClick={() => handleUseArticle(article)}
-                            className="flex-1 flex items-center justify-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+                            disabled={generatingRssId === article.id}
+                            className="flex-1 flex items-center justify-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-75"
                           >
-                             <PenSquare className="w-4 h-4 mr-2" />
-                             Create Post
+                             {generatingRssId === article.id ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Zap className="w-4 h-4 mr-2" />}
+                             {generatingRssId === article.id ? 'Generating...' : 'Create AI Post'}
                           </button>
                           <button className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-lg">
                              <ExternalLink className="w-4 h-4" />

@@ -1,11 +1,16 @@
 
-import React from 'react';
-import { ArrowUpRight, Users, Eye, TrendingUp, Sparkles, Link as LinkIcon, CheckCircle2, Circle, CalendarClock, AlertCircle, MoreHorizontal, Twitter, Linkedin, Facebook, Instagram, PenSquare, Save, AlertTriangle, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowUpRight, Users, Eye, TrendingUp, Sparkles, Link as LinkIcon, CheckCircle2, Circle, CalendarClock, AlertCircle, MoreHorizontal, Twitter, Linkedin, Facebook, Instagram, PenSquare, Save, AlertTriangle, X, RefreshCw, Flame, ChevronRight } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { Post } from '../types';
+import { Post, Trend, ToastType, SocialAccount, Draft } from '../types';
+import { getTrendingTopics } from '../services/geminiService';
 
 interface DashboardProps {
   posts?: Post[];
+  accounts?: SocialAccount[];
+  onPostCreated?: (post: Post) => void;
+  showToast?: (message: string, type: ToastType) => void;
+  onCompose?: (draft: Draft) => void;
 }
 
 const data = [
@@ -18,10 +23,51 @@ const data = [
   { name: 'Sun', visitors: 3490, engagement: 4300 },
 ];
 
-const Dashboard: React.FC<DashboardProps> = ({ posts = [] }) => {
+const Dashboard: React.FC<DashboardProps> = ({ posts = [], accounts = [], onPostCreated, showToast, onCompose }) => {
+  const [trends, setTrends] = useState<Trend[]>([]);
+  const [loadingTrends, setLoadingTrends] = useState(false);
+  const [niche, setNiche] = useState('Tech & Marketing');
+  const [quickDraftContent, setQuickDraftContent] = useState('');
+
+  useEffect(() => {
+    loadTrends();
+  }, []);
+
+  const loadTrends = async () => {
+    setLoadingTrends(true);
+    const newTrends = await getTrendingTopics(niche);
+    setTrends(newTrends);
+    setLoadingTrends(false);
+  };
+
+  const handleSaveQuickDraft = () => {
+    if (!quickDraftContent.trim()) return;
+    
+    if (onPostCreated) {
+      const newPost: Post = {
+        id: Date.now().toString(),
+        content: quickDraftContent,
+        platforms: [], // No specific platform for quick draft
+        scheduledDate: new Date().toISOString().split('T')[0], // Default to today
+        status: 'draft',
+        time: '12:00'
+      };
+      onPostCreated(newPost);
+      setQuickDraftContent('');
+      if (showToast) showToast('Quick draft saved to content calendar', 'success');
+    }
+  };
+
+  // Calculate Account Stats
+  const connectedAccountsCount = accounts.filter(a => a.connected).length;
+  const totalAccountsCount = accounts.length;
+  const healthPercentage = Math.round((connectedAccountsCount / totalAccountsCount) * 100);
+  
+  const instagramConnected = accounts.find(a => a.platform === 'instagram')?.connected;
+
   const onboardingSteps = [
-    { id: 1, label: 'Connect a social account', completed: true },
-    { id: 2, label: 'Create your first post', completed: true },
+    { id: 1, label: 'Connect a social account', completed: connectedAccountsCount > 0 },
+    { id: 2, label: 'Create your first post', completed: posts.length > 0 },
     { id: 3, label: 'Setup your Link in Bio', completed: false },
     { id: 4, label: 'Invite a team member', completed: false },
   ];
@@ -132,24 +178,69 @@ const Dashboard: React.FC<DashboardProps> = ({ posts = [] }) => {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Main Chart */}
-        <div className="xl:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Engagement Overview</h3>
-            <div className="h-[350px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" strokeOpacity={0.2} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                <Tooltip 
-                    contentStyle={{ backgroundColor: '#1e293b', borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
-                    itemStyle={{ color: '#fff' }}
-                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                />
-                <Bar dataKey="visitors" fill="#6366f1" radius={[4, 4, 0, 0]} barSize={40} />
-                <Bar dataKey="engagement" fill="#cbd5e1" radius={[4, 4, 0, 0]} barSize={40} />
-                </BarChart>
-            </ResponsiveContainer>
-            </div>
+        <div className="xl:col-span-2 space-y-6">
+           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Engagement Overview</h3>
+               <div className="h-[350px] w-full">
+               <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" strokeOpacity={0.2} />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                  <Tooltip 
+                     contentStyle={{ backgroundColor: '#1e293b', borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
+                     itemStyle={{ color: '#fff' }}
+                     cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  />
+                  <Bar dataKey="visitors" fill="#6366f1" radius={[4, 4, 0, 0]} barSize={40} />
+                  <Bar dataKey="engagement" fill="#cbd5e1" radius={[4, 4, 0, 0]} barSize={40} />
+                  </BarChart>
+               </ResponsiveContainer>
+               </div>
+           </div>
+
+           {/* Trending Topics AI Widget */}
+           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                 <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center">
+                    <Flame className="w-5 h-5 mr-2 text-orange-500" />
+                    Trending Now
+                 </h3>
+                 <button 
+                   onClick={loadTrends}
+                   disabled={loadingTrends}
+                   className="p-2 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                 >
+                    <RefreshCw className={`w-4 h-4 ${loadingTrends ? 'animate-spin' : ''}`} />
+                 </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                 {trends.length > 0 ? trends.map(trend => (
+                    <div key={trend.id} className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col h-full">
+                       <div className="flex justify-between items-start mb-2">
+                          <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded ${trend.difficulty === 'Easy' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : trend.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+                             {trend.difficulty}
+                          </span>
+                          <span className="text-xs text-slate-400 font-medium">{trend.volume} Vol</span>
+                       </div>
+                       <h4 className="font-bold text-slate-900 dark:text-white mb-2 line-clamp-2">{trend.topic}</h4>
+                       <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-3 mb-4 flex-1">
+                          {trend.context}
+                       </p>
+                       <button 
+                          onClick={() => onCompose && onCompose({ content: `Thinking about: ${trend.topic}\n\nContext: ${trend.context}` })}
+                          className="w-full py-2 bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-xs font-bold rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors flex items-center justify-center"
+                        >
+                          <PenSquare className="w-3 h-3 mr-2" /> Draft Post
+                       </button>
+                    </div>
+                 )) : (
+                    <div className="col-span-3 text-center py-8 text-slate-400 dark:text-slate-500">
+                       {loadingTrends ? 'AI is identifying trends...' : 'No trends loaded.'}
+                    </div>
+                 )}
+              </div>
+           </div>
         </div>
 
         <div className="space-y-6">
@@ -163,10 +254,16 @@ const Dashboard: React.FC<DashboardProps> = ({ posts = [] }) => {
               </div>
               <textarea 
                 placeholder="What's on your mind?" 
+                value={quickDraftContent}
+                onChange={(e) => setQuickDraftContent(e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 resize-none h-24 mb-3 transition-all"
               ></textarea>
               <div className="flex justify-end relative z-10">
-                 <button className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors flex items-center shadow-sm">
+                 <button 
+                   onClick={handleSaveQuickDraft}
+                   disabled={!quickDraftContent.trim()}
+                   className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors flex items-center shadow-sm disabled:opacity-50"
+                 >
                     <Save className="w-4 h-4 mr-2" />
                     Save Draft
                  </button>
@@ -206,7 +303,10 @@ const Dashboard: React.FC<DashboardProps> = ({ posts = [] }) => {
                     </div>
                  )}
               </div>
-              <button className="w-full mt-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors">
+              <button 
+                onClick={() => onCompose && onCompose({})}
+                className="w-full mt-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              >
                  Schedule New Post
               </button>
            </div>
@@ -216,23 +316,30 @@ const Dashboard: React.FC<DashboardProps> = ({ posts = [] }) => {
                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Account Health</h3>
                <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                     <span className="text-sm font-medium text-slate-700 dark:text-slate-300">All Systems Operational</span>
+                     <div className={`w-2 h-2 rounded-full ${healthPercentage === 100 ? 'bg-emerald-500' : 'bg-amber-500'} animate-pulse`}></div>
+                     <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{healthPercentage === 100 ? 'All Systems Operational' : 'Some Accounts Disconnected'}</span>
                   </div>
-                  <span className="text-xs font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded">100%</span>
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded ${healthPercentage === 100 ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'}`}>{healthPercentage}%</span>
                </div>
                <div className="space-y-3">
                   <div className="flex items-center justify-between text-sm">
                      <span className="text-slate-500 dark:text-slate-400">Connected Accounts</span>
-                     <span className="font-bold text-slate-900 dark:text-white">4 / 10</span>
+                     <span className="font-bold text-slate-900 dark:text-white">{connectedAccountsCount} / {totalAccountsCount}</span>
                   </div>
                   <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5">
-                     <div className="bg-indigo-600 h-1.5 rounded-full w-[40%]"></div>
+                     <div className={`h-1.5 rounded-full transition-all duration-500 ${healthPercentage === 100 ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${healthPercentage}%` }}></div>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-400 mt-2">
-                     <AlertCircle className="w-3 h-3" />
-                     <span>Instagram token expires in 5 days</span>
-                  </div>
+                  {instagramConnected ? (
+                     <div className="flex items-center gap-2 text-xs text-slate-400 mt-2">
+                        <AlertCircle className="w-3 h-3" />
+                        <span>Instagram token expires in 5 days</span>
+                     </div>
+                  ) : (
+                     <div className="flex items-center gap-2 text-xs text-rose-500 mt-2 font-medium">
+                        <AlertCircle className="w-3 h-3" />
+                        <span>Instagram disconnected</span>
+                     </div>
+                  )}
                </div>
            </div>
         </div>

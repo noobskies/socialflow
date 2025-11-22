@@ -1,13 +1,14 @@
 
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, Users, MousePointer2, Share2, MessageCircle, Trophy, Target, Download, FileText, Plus, Calendar, Loader2, FileBarChart, ThumbsUp, Eye, TrendingUp, Lock, Star } from 'lucide-react';
-import { ToastType, Report, Platform, PlanTier } from '../types';
+import { ArrowUpRight, ArrowDownRight, Users, MousePointer2, Share2, MessageCircle, Trophy, Target, Download, FileText, Plus, Calendar, Loader2, FileBarChart, ThumbsUp, Eye, TrendingUp, Lock, Star, RefreshCw } from 'lucide-react';
+import { ToastType, Report, Platform, PlanTier, Draft } from '../types';
 
 interface AnalyticsProps {
   showToast: (message: string, type: ToastType) => void;
   userPlan: PlanTier;
   onOpenUpgrade: () => void;
+  onCompose?: (draft: Draft) => void;
 }
 
 const engagementData = [
@@ -49,7 +50,7 @@ const MOCK_REPORTS: Report[] = [
   { id: '3', name: 'Competitor Analysis: TechCorp', dateRange: 'Last 30 Days', createdAt: 'Generating...', status: 'generating', format: 'csv' },
 ];
 
-const Analytics: React.FC<AnalyticsProps> = ({ showToast, userPlan, onOpenUpgrade }) => {
+const Analytics: React.FC<AnalyticsProps> = ({ showToast, userPlan, onOpenUpgrade, onCompose }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'competitors' | 'reports'>('overview');
   const [reports, setReports] = useState<Report[]>(MOCK_REPORTS);
 
@@ -58,6 +59,17 @@ const Analytics: React.FC<AnalyticsProps> = ({ showToast, userPlan, onOpenUpgrad
     setTimeout(() => {
       showToast('Report downloaded successfully', 'success');
     }, 2000);
+  };
+
+  const handleRecycle = (post: any) => {
+    if (onCompose) {
+      onCompose({
+        content: post.content,
+        platforms: [post.platform],
+        status: 'draft'
+      });
+      showToast('Post content recycled to composer!', 'success');
+    }
   };
 
   const createReport = () => {
@@ -278,7 +290,8 @@ const Analytics: React.FC<AnalyticsProps> = ({ showToast, userPlan, onOpenUpgrad
                            <th className="py-4">Platform</th>
                            <th className="py-4">Impressions</th>
                            <th className="py-4">Engagement</th>
-                           <th className="py-4 pr-6">CTR / ROI</th>
+                           <th className="py-4">CTR / ROI</th>
+                           <th className="py-4 pr-6 text-right">Actions</th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
@@ -312,11 +325,19 @@ const Analytics: React.FC<AnalyticsProps> = ({ showToast, userPlan, onOpenUpgrad
                                     {post.engagement}
                                  </div>
                               </td>
-                              <td className="py-4 pr-6">
+                              <td className="py-4">
                                  <div className="flex items-center text-sm font-bold text-emerald-600 dark:text-emerald-400">
                                     <TrendingUp className="w-4 h-4 mr-1" />
                                     {post.ctr}
                                  </div>
+                              </td>
+                              <td className="py-4 pr-6 text-right">
+                                 <button 
+                                   onClick={() => handleRecycle(post)}
+                                   className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium text-xs flex items-center justify-end ml-auto"
+                                 >
+                                    <RefreshCw className="w-3 h-3 mr-1" /> Recycle
+                                 </button>
                               </td>
                            </tr>
                         ))}

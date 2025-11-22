@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { User, Bell, Shield, CreditCard, Mail, Smartphone, Check, Users, Share2, Plus, Trash2, ExternalLink, Twitter, Facebook, Linkedin, Instagram, AlertCircle, Zap, Key, Lock, Activity, Fingerprint, History, LogOut, Palette, Code, Copy, RefreshCw, Youtube, Video, Pin, Crown } from 'lucide-react';
+import { User, Bell, Shield, CreditCard, Mail, Smartphone, Check, Users, Share2, Plus, Trash2, ExternalLink, Twitter, Facebook, Linkedin, Instagram, AlertCircle, Zap, Key, Lock, Activity, Fingerprint, History, LogOut, Palette, Code, Copy, RefreshCw, Youtube, Video, Pin, Crown, Loader2 } from 'lucide-react';
 import { SocialAccount, TeamMember, BrandingConfig, ApiKey, ToastType, PlanTier } from '../types';
 
 interface SettingsProps {
@@ -9,22 +9,14 @@ interface SettingsProps {
   setBranding: (branding: BrandingConfig) => void;
   userPlan: PlanTier;
   onOpenUpgrade: () => void;
+  accounts: SocialAccount[];
+  onToggleConnection: (id: string) => void;
 }
 
-const MOCK_ACCOUNTS: SocialAccount[] = [
-  { id: '1', platform: 'twitter', username: '@socialflow', avatar: '', connected: true },
-  { id: '2', platform: 'linkedin', username: 'SocialFlow Inc.', avatar: '', connected: true },
-  { id: '3', platform: 'facebook', username: 'SocialFlow', avatar: '', connected: false },
-  { id: '4', platform: 'instagram', username: '@socialflow.ai', avatar: '', connected: true },
-  { id: '5', platform: 'tiktok', username: '@socialflow_tok', avatar: '', connected: false },
-  { id: '6', platform: 'youtube', username: 'SocialFlow TV', avatar: '', connected: false },
-  { id: '7', platform: 'pinterest', username: 'SocialFlow Pins', avatar: '', connected: false },
-];
-
 const MOCK_TEAM: TeamMember[] = [
-  { id: '1', name: 'Alex Creator', email: 'alex@socialflow.ai', role: 'admin', avatar: 'https://picsum.photos/id/1011/100', status: 'active' },
-  { id: '2', name: 'Sarah Design', email: 'sarah@socialflow.ai', role: 'editor', avatar: 'https://picsum.photos/id/1027/100', status: 'active' },
-  { id: '3', name: 'Mike Analyst', email: 'mike@socialflow.ai', role: 'viewer', avatar: 'https://picsum.photos/id/1005/100', status: 'invited' },
+  { id: '1', name: 'Alex Creator', email: 'alex@socialflow.ai', role: 'admin', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&fit=crop', status: 'active' },
+  { id: '2', name: 'Sarah Design', email: 'sarah@socialflow.ai', role: 'editor', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&fit=crop', status: 'active' },
+  { id: '3', name: 'Mike Analyst', email: 'mike@socialflow.ai', role: 'viewer', avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=100&fit=crop', status: 'invited' },
 ];
 
 const MOCK_AUDIT_LOG = [
@@ -34,15 +26,10 @@ const MOCK_AUDIT_LOG = [
   { id: 4, action: 'Connected Twitter', user: 'Sarah Design', ip: '10.0.0.15', location: 'New York, US', date: '1 week ago' },
 ];
 
-const MOCK_API_KEYS: ApiKey[] = [
-  { id: '1', name: 'Production App', key: 'pk_live_...4829', lastUsed: '2 mins ago', createdAt: '2023-09-01' },
-  { id: '2', name: 'Staging', key: 'pk_test_...9921', lastUsed: '1 day ago', createdAt: '2023-10-15' },
-];
-
-const Settings: React.FC<SettingsProps> = ({ showToast, branding, setBranding, userPlan, onOpenUpgrade }) => {
+const Settings: React.FC<SettingsProps> = ({ showToast, branding, setBranding, userPlan, onOpenUpgrade, accounts, onToggleConnection }) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'accounts' | 'team' | 'billing' | 'notifications' | 'security' | 'branding' | 'developer'>('profile');
-  const [accounts, setAccounts] = useState(MOCK_ACCOUNTS);
   const [team, setTeam] = useState(MOCK_TEAM);
+  const [connectingId, setConnectingId] = useState<string | null>(null);
 
   // Mock Notification Settings
   const [notifications, setNotifications] = useState({
@@ -60,11 +47,20 @@ const Settings: React.FC<SettingsProps> = ({ showToast, branding, setBranding, u
     sso: false
   });
 
-  const toggleConnection = (id: string) => {
-    setAccounts(prev => prev.map(acc => 
-      acc.id === id ? { ...acc, connected: !acc.connected } : acc
-    ));
-    showToast('Account connection updated', 'info');
+  const handleConnectionToggle = (id: string, isConnected: boolean) => {
+    if (isConnected) {
+      // Disconnect immediately
+      onToggleConnection(id);
+      showToast('Account disconnected', 'info');
+    } else {
+      // Simulate connection flow
+      setConnectingId(id);
+      setTimeout(() => {
+        onToggleConnection(id);
+        setConnectingId(null);
+        showToast('Account connected successfully!', 'success');
+      }, 1500);
+    }
   };
 
   const handleSave = (section: string) => {
@@ -79,7 +75,7 @@ const Settings: React.FC<SettingsProps> = ({ showToast, branding, setBranding, u
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Profile Settings</h2>
               <div className="flex items-center space-x-6 mb-8">
-                <img src="https://picsum.photos/100/100" alt="Profile" className="w-24 h-24 rounded-full border-4 border-slate-100 dark:border-slate-800" />
+                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&fit=crop" alt="Profile" className="w-24 h-24 rounded-full border-4 border-slate-100 dark:border-slate-800 object-cover" />
                 <div>
                   <button className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">Change Avatar</button>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">JPG, GIF or PNG. Max 1MB.</p>
@@ -157,14 +153,19 @@ const Settings: React.FC<SettingsProps> = ({ showToast, branding, setBranding, u
                         </span>
                       )}
                       <button 
-                        onClick={() => toggleConnection(acc.id)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        onClick={() => handleConnectionToggle(acc.id, acc.connected)}
+                        disabled={connectingId === acc.id}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center min-w-[100px] justify-center ${
                           acc.connected 
                             ? 'border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 hover:border-red-100 dark:hover:border-red-900' 
                             : 'bg-slate-900 dark:bg-slate-700 text-white hover:bg-slate-800 dark:hover:bg-slate-600'
                         }`}
                       >
-                        {acc.connected ? 'Disconnect' : 'Connect'}
+                        {connectingId === acc.id ? (
+                           <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                           acc.connected ? 'Disconnect' : 'Connect'
+                        )}
                       </button>
                     </div>
                   </div>
@@ -214,7 +215,7 @@ const Settings: React.FC<SettingsProps> = ({ showToast, branding, setBranding, u
                       <tr key={member.id} className="group">
                         <td className="py-4 pl-2">
                           <div className="flex items-center space-x-3">
-                            <img src={member.avatar} className="w-10 h-10 rounded-full" alt={member.name} />
+                            <img src={member.avatar} className="w-10 h-10 rounded-full object-cover" alt={member.name} />
                             <div>
                               <p className="font-bold text-slate-900 dark:text-white text-sm">{member.name}</p>
                               <p className="text-xs text-slate-500 dark:text-slate-400">{member.email}</p>

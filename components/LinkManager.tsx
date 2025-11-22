@@ -32,7 +32,7 @@ const LinkManager: React.FC<LinkManagerProps> = ({ showToast }) => {
     username: '@alexcreator',
     displayName: 'Alex Creator',
     bio: 'Digital creator passionate about tech & design. 🎨✨',
-    avatar: 'https://picsum.photos/id/1011/200',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&fit=crop',
     theme: 'colorful',
     links: [
       { id: '1', title: 'My Website', url: 'https://alex.com', active: true },
@@ -185,7 +185,7 @@ const LinkManager: React.FC<LinkManagerProps> = ({ showToast }) => {
               {/* Profile Section */}
               <div className="space-y-4">
                 <div className="flex items-center space-x-4">
-                   <img src={bioConfig.avatar} alt="Avatar" className="w-16 h-16 rounded-full border-2 border-slate-100 dark:border-slate-800" />
+                   <img src={bioConfig.avatar} alt="Avatar" className="w-16 h-16 rounded-full border-2 border-slate-100 dark:border-slate-800 object-cover" />
                    <button className="text-sm text-indigo-600 dark:text-indigo-400 font-medium hover:underline">Change Image</button>
                 </div>
                 <div>
@@ -262,155 +262,130 @@ const LinkManager: React.FC<LinkManagerProps> = ({ showToast }) => {
                   </button>
                 </div>
                 
-                {bioConfig.links.map((link, idx) => (
-                  <div key={link.id} className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 flex items-start gap-3 group">
-                    <div className="mt-2 text-slate-400 cursor-move hover:text-slate-600 dark:hover:text-slate-300">
-                       <GripVertical className="w-4 h-4" />
+                {bioConfig.links.map((link, index) => (
+                  <div key={link.id} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 group">
+                    <div className="cursor-move text-slate-400 hover:text-slate-600">
+                      <GripVertical className="w-4 h-4" />
                     </div>
-                    <div className="flex-1 space-y-2">
+                    <div className="flex-1">
                        <input 
-                         type="text"
+                         type="text" 
                          value={link.title}
                          onChange={(e) => {
-                           const newLinks = [...bioConfig.links];
-                           newLinks[idx].title = e.target.value;
-                           setBioConfig({...bioConfig, links: newLinks});
+                            const newLinks = [...bioConfig.links];
+                            newLinks[index].title = e.target.value;
+                            setBioConfig({...bioConfig, links: newLinks});
                          }}
-                         className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-2 py-1 text-sm font-medium outline-none focus:border-indigo-500 text-slate-900 dark:text-white"
+                         className="block w-full text-sm font-bold bg-transparent outline-none text-slate-900 dark:text-white mb-1"
                        />
                        <input 
-                         type="text"
+                         type="text" 
                          value={link.url}
                          onChange={(e) => {
                             const newLinks = [...bioConfig.links];
-                            newLinks[idx].url = e.target.value;
+                            newLinks[index].url = e.target.value;
                             setBioConfig({...bioConfig, links: newLinks});
                          }}
-                         className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-2 py-1 text-xs text-slate-500 dark:text-slate-400 outline-none focus:border-indigo-500"
+                         className="block w-full text-xs text-slate-500 bg-transparent outline-none"
                        />
                     </div>
-                    <div className="flex flex-col gap-2">
-                       <button className={`w-8 h-5 rounded-full p-1 transition-colors ${link.active ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`} onClick={() => {
-                           const newLinks = [...bioConfig.links];
-                           newLinks[idx].active = !newLinks[idx].active;
-                           setBioConfig({...bioConfig, links: newLinks});
-                       }}>
-                          <div className={`w-3 h-3 bg-white rounded-full shadow-sm transition-transform ${link.active ? 'translate-x-3' : 'translate-x-0'}`} />
-                       </button>
-                       <button className="text-slate-400 hover:text-rose-500 p-1">
-                          <Trash2 className="w-4 h-4" />
-                       </button>
-                    </div>
+                    <button 
+                      onClick={() => {
+                         const newLinks = bioConfig.links.filter((_, i) => i !== index);
+                         setBioConfig({...bioConfig, links: newLinks});
+                      }}
+                      className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-opacity"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 ))}
               </div>
-
             </div>
           </div>
 
-          {/* Preview Phone */}
-          <div className="w-full lg:w-80 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-3xl border-8 border-white dark:border-slate-700 shadow-xl overflow-hidden relative transition-colors duration-200">
-              <div className={`w-full h-full overflow-y-auto hide-scrollbar ${
-                bioConfig.theme === 'dark' ? 'bg-slate-900 text-white' : 
-                bioConfig.theme === 'colorful' ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white' : 'bg-white text-slate-900'
-              }`}>
-                 <div className="p-8 flex flex-col items-center text-center pt-16">
-                    <img src={bioConfig.avatar} alt="Avatar" className="w-24 h-24 rounded-full border-4 border-white/20 shadow-lg mb-4 object-cover" />
-                    <h3 className="font-bold text-xl mb-1">{bioConfig.displayName}</h3>
-                    <p className="text-sm opacity-90 mb-8">{bioConfig.bio}</p>
-                    
-                    {/* Lead Capture Preview */}
-                    {bioConfig.enableLeadCapture && (
-                       <div className="w-full mb-6 p-4 bg-white/20 backdrop-blur-md rounded-xl border border-white/30 text-left">
-                          <p className="text-xs font-bold mb-2 opacity-90">{bioConfig.leadCaptureText}</p>
-                          <div className="flex gap-2">
-                             <div className="flex-1 h-8 bg-white/20 rounded text-xs flex items-center px-2 opacity-70">Email...</div>
-                             <div className="w-8 h-8 bg-white text-indigo-600 rounded flex items-center justify-center">
-                                <ArrowRight className="w-4 h-4" />
-                             </div>
-                          </div>
-                       </div>
-                    )}
+          {/* Preview Panel */}
+          <div className="w-full lg:w-[380px] shrink-0 flex justify-center items-start pt-8">
+             <div className="w-[320px] h-[650px] bg-slate-900 rounded-[40px] border-8 border-slate-800 shadow-2xl overflow-hidden relative">
+                {/* Phone Frame */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-6 bg-slate-800 rounded-b-xl z-20"></div>
+                
+                {/* Bio Page Content */}
+                <div className={`w-full h-full overflow-y-auto bg-white pt-12 pb-8 px-6 ${bioConfig.theme === 'dark' ? 'bg-slate-900 text-white' : bioConfig.theme === 'colorful' ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white' : 'bg-slate-50 text-slate-900'}`}>
+                   <div className="flex flex-col items-center text-center mb-8">
+                      <img src={bioConfig.avatar} className="w-24 h-24 rounded-full border-4 border-white/20 mb-4 object-cover" alt="Profile" />
+                      <h2 className="font-bold text-xl mb-1">{bioConfig.displayName}</h2>
+                      <p className="text-sm opacity-90">{bioConfig.username}</p>
+                      <p className="text-sm mt-3 opacity-80 leading-relaxed">{bioConfig.bio}</p>
+                   </div>
+                   
+                   {bioConfig.enableLeadCapture && (
+                      <div className="mb-6">
+                         <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4">
+                            <p className="text-sm font-bold mb-3 text-center">{bioConfig.leadCaptureText}</p>
+                            <input type="email" placeholder="Email Address" className="w-full mb-2 px-3 py-2 rounded-lg bg-white/20 border border-white/30 text-sm placeholder:text-white/60 outline-none" disabled />
+                            <button className="w-full py-2 bg-white text-indigo-600 rounded-lg text-sm font-bold" disabled>Subscribe</button>
+                         </div>
+                      </div>
+                   )}
 
-                    <div className="w-full space-y-3">
+                   <div className="space-y-3">
                       {bioConfig.links.filter(l => l.active).map(link => (
-                        <a 
-                          key={link.id}
-                          href="#" 
-                          className={`block w-full py-3.5 px-4 rounded-xl text-sm font-bold transition-transform hover:scale-[1.02] active:scale-95 shadow-lg ${
-                            bioConfig.theme === 'colorful' 
-                             ? 'bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30' 
-                             : 'bg-slate-900 text-white'
-                          }`}
-                        >
-                          {link.title}
-                        </a>
+                         <div key={link.id} className="w-full p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-center font-bold text-sm hover:bg-white/20 transition-colors cursor-pointer">
+                            {link.title}
+                         </div>
                       ))}
-                    </div>
-                    
-                    <div className="mt-12">
-                      <p className="text-[10px] opacity-60 font-medium">Powered by SocialFlow</p>
-                    </div>
-                 </div>
-              </div>
-              
-              {/* Phone Notch */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-white dark:bg-slate-900 rounded-b-xl shadow-sm z-10"></div>
+                   </div>
+                   
+                   <div className="mt-8 text-center">
+                      <p className="text-[10px] opacity-50 font-bold uppercase tracking-widest">Powered by SocialFlow</p>
+                   </div>
+                </div>
+             </div>
           </div>
         </div>
       ) : (
-         <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
-               <div>
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">Subscribers</h2>
-                  <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Leads collected from your Bio Page.</p>
-               </div>
-               <button className="flex items-center px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                  <Download className="w-4 h-4 mr-2" />
-                  Export CSV
-               </button>
-            </div>
-
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-               <div className="overflow-x-auto">
-               <table className="w-full text-left">
-                  <thead>
-                     <tr className="border-b border-slate-100 dark:border-slate-800 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50/50 dark:bg-slate-800/50">
-                     <th className="py-4 pl-6">Email</th>
-                     <th className="py-4">Source</th>
-                     <th className="py-4">Captured</th>
-                     <th className="py-4 pr-6 text-right">Actions</th>
-                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                     {MOCK_LEADS.map(lead => (
-                     <tr key={lead.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                        <td className="py-4 pl-6">
-                           <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                                 <Mail className="w-4 h-4" />
-                              </div>
-                              <span className="font-medium text-slate-900 dark:text-white text-sm">{lead.email}</span>
-                           </div>
-                        </td>
-                        <td className="py-4">
-                           <span className="text-sm text-slate-600 dark:text-slate-400">{lead.source}</span>
-                        </td>
-                        <td className="py-4">
-                           <span className="text-sm text-slate-500 dark:text-slate-400">{lead.capturedAt}</span>
-                        </td>
-                        <td className="py-4 pr-6 text-right">
-                           <button className="text-slate-400 hover:text-rose-500 p-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors">
-                              <Trash2 className="w-4 h-4" />
-                           </button>
-                        </td>
-                     </tr>
-                     ))}
-                  </tbody>
-               </table>
-               </div>
-            </div>
-         </div>
+        <div className="animate-in fade-in duration-300">
+           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                 <table className="w-full text-left">
+                    <thead>
+                       <tr className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                          <th className="py-4 pl-6">Email Address</th>
+                          <th className="py-4">Source</th>
+                          <th className="py-4">Captured</th>
+                          <th className="py-4 pr-6 text-right">Actions</th>
+                       </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                       {MOCK_LEADS.map(lead => (
+                          <tr key={lead.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                             <td className="py-4 pl-6 font-medium text-slate-900 dark:text-white text-sm">{lead.email}</td>
+                             <td className="py-4 text-sm text-slate-500 dark:text-slate-400">{lead.source}</td>
+                             <td className="py-4 text-sm text-slate-500 dark:text-slate-400">{lead.capturedAt}</td>
+                             <td className="py-4 pr-6 text-right">
+                                <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                                   <Mail className="w-4 h-4" />
+                                </button>
+                             </td>
+                          </tr>
+                       ))}
+                    </tbody>
+                 </table>
+              </div>
+              {MOCK_LEADS.length === 0 && (
+                 <div className="p-12 text-center text-slate-400 dark:text-slate-500">
+                    <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>No leads captured yet.</p>
+                 </div>
+              )}
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 text-center">
+                 <button className="text-indigo-600 dark:text-indigo-400 font-medium text-sm hover:underline flex items-center justify-center">
+                    <Download className="w-4 h-4 mr-2" /> Export CSV
+                 </button>
+              </div>
+           </div>
+        </div>
       )}
     </div>
   );

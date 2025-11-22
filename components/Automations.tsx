@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Zap, ShoppingBag, MessageSquare, Rss, Plus, ArrowRight, Power, CheckCircle2, Bot, Loader2, Slack, Globe, Mail } from 'lucide-react';
+import { Zap, ShoppingBag, MessageSquare, Rss, Plus, ArrowRight, Power, CheckCircle2, Bot, Loader2, Slack, Globe, Mail, X } from 'lucide-react';
 import { Workflow, Integration } from '../types';
 import { suggestWorkflows } from '../services/geminiService';
 
@@ -55,6 +54,12 @@ const Automations: React.FC = () => {
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
 
+  // Create Workflow State
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newWorkflow, setNewWorkflow] = useState<{name: string, trigger: string, action: string}>({
+    name: '', trigger: '', action: ''
+  });
+
   const toggleWorkflow = (id: string) => {
     setWorkflows(prev => prev.map(w => 
       w.id === id ? { ...w, active: !w.active } : w
@@ -76,7 +81,7 @@ const Automations: React.FC = () => {
   };
 
   const addSuggestion = (s: any) => {
-    const newWorkflow: Workflow = {
+    const workflow: Workflow = {
       id: Date.now().toString(),
       name: s.name,
       description: s.description,
@@ -86,12 +91,109 @@ const Automations: React.FC = () => {
       stats: { runs: 0, lastRun: 'Never' },
       icon: 'zap'
     };
-    setWorkflows([...workflows, newWorkflow]);
+    setWorkflows([...workflows, workflow]);
     setSuggestions(suggestions.filter(item => item !== s));
   };
 
+  const handleCreateWorkflow = () => {
+    if (!newWorkflow.name || !newWorkflow.trigger || !newWorkflow.action) return;
+    const workflow: Workflow = {
+      id: Date.now().toString(),
+      name: newWorkflow.name,
+      description: `Custom workflow triggered by ${newWorkflow.trigger}`,
+      trigger: newWorkflow.trigger,
+      action: newWorkflow.action,
+      active: true,
+      stats: { runs: 0, lastRun: 'Never' },
+      icon: 'zap'
+    };
+    setWorkflows([...workflows, workflow]);
+    setIsCreateModalOpen(false);
+    setNewWorkflow({ name: '', trigger: '', action: '' });
+  };
+
   return (
-    <div className="p-6 md:p-8 h-full flex flex-col bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+    <div className="p-6 md:p-8 h-full flex flex-col bg-slate-50 dark:bg-slate-950 transition-colors duration-200 relative">
+      
+      {/* Create Workflow Modal */}
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in">
+           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg border border-slate-200 dark:border-slate-800 p-6">
+              <div className="flex justify-between items-center mb-6">
+                 <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center">
+                    <Zap className="w-6 h-6 mr-2 text-indigo-600 dark:text-indigo-400" />
+                    Build Workflow
+                 </h3>
+                 <button onClick={() => setIsCreateModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                    <X className="w-5 h-5" />
+                 </button>
+              </div>
+              
+              <div className="space-y-4">
+                 <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Workflow Name</label>
+                    <input 
+                      type="text" 
+                      value={newWorkflow.name}
+                      onChange={(e) => setNewWorkflow({...newWorkflow, name: e.target.value})}
+                      placeholder="e.g. Auto-Welcome New Followers"
+                      className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                 </div>
+                 
+                 <div className="grid grid-cols-2 gap-4">
+                    <div>
+                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Trigger (When)</label>
+                       <select 
+                         value={newWorkflow.trigger}
+                         onChange={(e) => setNewWorkflow({...newWorkflow, trigger: e.target.value})}
+                         className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500"
+                       >
+                          <option value="">Select Trigger</option>
+                          <option value="New Follower">New Follower</option>
+                          <option value="New Comment">New Comment</option>
+                          <option value="New Shopify Product">New Shopify Product</option>
+                          <option value="New WordPress Post">New WordPress Post</option>
+                          <option value="Mentioned in Post">Mentioned in Post</option>
+                       </select>
+                    </div>
+                    <div>
+                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Action (Then)</label>
+                       <select 
+                         value={newWorkflow.action}
+                         onChange={(e) => setNewWorkflow({...newWorkflow, action: e.target.value})}
+                         className="w-full border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500"
+                       >
+                          <option value="">Select Action</option>
+                          <option value="Send DM">Send DM</option>
+                          <option value="Auto-Reply">Auto-Reply</option>
+                          <option value="Draft Post">Draft Post</option>
+                          <option value="Notify Slack">Notify Slack</option>
+                          <option value="Add to List">Add to List</option>
+                       </select>
+                    </div>
+                 </div>
+
+                 <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-900/30 flex items-center text-sm text-indigo-800 dark:text-indigo-200">
+                    <Bot className="w-5 h-5 mr-3 shrink-0" />
+                    This workflow will run automatically based on your settings.
+                 </div>
+              </div>
+
+              <div className="mt-8 flex justify-end gap-3">
+                 <button onClick={() => setIsCreateModalOpen(false)} className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium">Cancel</button>
+                 <button 
+                   onClick={handleCreateWorkflow}
+                   disabled={!newWorkflow.name || !newWorkflow.trigger || !newWorkflow.action}
+                   className="px-6 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 shadow-sm disabled:opacity-50"
+                 >
+                    Create Workflow
+                 </button>
+              </div>
+           </div>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Automations</h1>
@@ -166,7 +268,10 @@ const Automations: React.FC = () => {
               </div>
             ))}
             
-            <button className="w-full py-4 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl text-slate-500 dark:text-slate-400 font-medium hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center justify-center bg-slate-50/50 dark:bg-slate-900/50">
+            <button 
+              onClick={() => setIsCreateModalOpen(true)}
+              className="w-full py-4 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl text-slate-500 dark:text-slate-400 font-medium hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center justify-center bg-slate-50/50 dark:bg-slate-900/50"
+            >
               <Plus className="w-5 h-5 mr-2" />
               Build Custom Workflow
             </button>

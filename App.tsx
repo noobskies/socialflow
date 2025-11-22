@@ -15,7 +15,7 @@ import Toast from './components/Toast';
 import Notifications from './components/Notifications';
 import HelpModal from './components/HelpModal';
 import UpgradeModal from './components/UpgradeModal';
-import { ViewState, Draft, ToastType, BrandingConfig, PlanTier, Post } from './types';
+import { ViewState, Draft, ToastType, BrandingConfig, PlanTier, Post, SocialAccount } from './types';
 import { Menu, LayoutDashboard, PenSquare, MessageSquare, Calendar as CalendarIcon, MoreHorizontal, Keyboard, X } from 'lucide-react';
 
 // Keyboard Shortcuts Modal Component
@@ -66,13 +66,23 @@ const INITIAL_POSTS: Post[] = [
   { id: '4', scheduledDate: '2023-10-08', platforms: ['twitter'], content: 'Thread: 5 ways AI is changing content creation 🧵', status: 'pending_review', time: '10:00' },
   { id: '5', scheduledDate: '2023-10-12', platforms: ['linkedin'], content: 'We are hiring engineers! Apply now.', status: 'draft', time: '13:00' },
   { id: '6', scheduledDate: '2023-10-15', platforms: ['twitter'], content: 'Customer testimonial from @SarahJ.', status: 'scheduled', time: '15:45' },
-  { id: '7', scheduledDate: '2023-10-15', platforms: ['instagram'], content: 'Team lunch photo at the new office! 🍕', status: 'pending_review', time: '16:00', mediaUrl: 'https://picsum.photos/id/1015/400/400', mediaType: 'image' },
+  { id: '7', scheduledDate: '2023-10-15', platforms: ['instagram'], content: 'Team lunch photo at the new office! 🍕', status: 'pending_review', time: '16:00', mediaUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&q=80', mediaType: 'image' },
   { id: '8', scheduledDate: '2023-10-20', platforms: ['youtube'], content: 'New Tutorial: Getting Started with SocialFlow', status: 'scheduled', time: '12:00' },
-  { id: '9', scheduledDate: '2023-10-22', platforms: ['pinterest'], content: 'Summer Design Inspiration Board', status: 'published', time: '17:00', mediaUrl: 'https://picsum.photos/id/1016/400/600', mediaType: 'image' },
+  { id: '9', scheduledDate: '2023-10-22', platforms: ['pinterest'], content: 'Summer Design Inspiration Board', status: 'published', time: '17:00', mediaUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80', mediaType: 'image' },
   { id: '10', scheduledDate: '2023-10-25', platforms: ['tiktok'], content: 'Day in the life of a Social Manager', status: 'draft', time: '09:00' },
-  { id: '11', scheduledDate: '2023-10-27', platforms: ['instagram'], content: 'Product showcase teaser', status: 'scheduled', time: '11:00', mediaUrl: 'https://picsum.photos/id/1018/400/400', mediaType: 'image' },
-  { id: '12', scheduledDate: '2023-10-29', platforms: ['instagram'], content: 'Monday Motivation 💪', status: 'draft', time: '08:00', mediaUrl: 'https://picsum.photos/id/1019/400/400', mediaType: 'image' },
-  { id: '13', scheduledDate: '2023-11-01', platforms: ['instagram'], content: 'November Goals setting', status: 'scheduled', time: '10:00', mediaUrl: 'https://picsum.photos/id/1020/400/400', mediaType: 'image' },
+  { id: '11', scheduledDate: '2023-10-27', platforms: ['instagram'], content: 'Product showcase teaser', status: 'scheduled', time: '11:00', mediaUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80', mediaType: 'image' },
+  { id: '12', scheduledDate: '2023-10-29', platforms: ['instagram'], content: 'Monday Motivation 💪', status: 'draft', time: '08:00', mediaUrl: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=800&q=80', mediaType: 'image' },
+  { id: '13', scheduledDate: '2023-11-01', platforms: ['instagram'], content: 'November Goals setting', status: 'scheduled', time: '10:00', mediaUrl: 'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=800&q=80', mediaType: 'image' },
+];
+
+const INITIAL_ACCOUNTS: SocialAccount[] = [
+  { id: '1', platform: 'twitter', username: '@socialflow', avatar: '', connected: true },
+  { id: '2', platform: 'linkedin', username: 'SocialFlow Inc.', avatar: '', connected: true },
+  { id: '3', platform: 'facebook', username: 'SocialFlow', avatar: '', connected: false },
+  { id: '4', platform: 'instagram', username: '@socialflow.ai', avatar: '', connected: true },
+  { id: '5', platform: 'tiktok', username: '@socialflow_tok', avatar: '', connected: false },
+  { id: '6', platform: 'youtube', username: 'SocialFlow TV', avatar: '', connected: false },
+  { id: '7', platform: 'pinterest', username: 'SocialFlow Pins', avatar: '', connected: false },
 ];
 
 const App: React.FC = () => {
@@ -85,10 +95,9 @@ const App: React.FC = () => {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   
-  // Global Post State
+  // Global State
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
-
-  // User Plan State
+  const [accounts, setAccounts] = useState<SocialAccount[]>(INITIAL_ACCOUNTS);
   const [userPlan, setUserPlan] = useState<PlanTier>('free');
 
   // Branding State (Agency)
@@ -182,11 +191,16 @@ const App: React.FC = () => {
 
   const handlePostCreated = (newPost: Post) => {
     setPosts(prev => [...prev, newPost]);
-    // No toast needed here as Composer handles it
   };
 
   const handleUpdatePost = (updatedPost: Post) => {
     setPosts(prev => prev.map(p => p.id === updatedPost.id ? updatedPost : p));
+  };
+
+  const handleToggleAccount = (id: string) => {
+    setAccounts(prev => prev.map(acc => 
+      acc.id === id ? { ...acc, connected: !acc.connected } : acc
+    ));
   };
 
   const handleUpgrade = (plan: PlanTier) => {
@@ -198,25 +212,33 @@ const App: React.FC = () => {
   const renderView = () => {
     switch (currentView) {
       case ViewState.DASHBOARD:
-        return <Dashboard posts={posts} />;
+        return <Dashboard posts={posts} accounts={accounts} onPostCreated={handlePostCreated} showToast={showToast} onCompose={handleCompose} />;
       case ViewState.COMPOSER:
         return <Composer initialDraft={initialDraft} showToast={showToast} onPostCreated={handlePostCreated} userPlan={userPlan} />;
       case ViewState.INBOX:
         return <Inbox showToast={showToast} />;
       case ViewState.CALENDAR:
-        return <Calendar onCompose={handleCompose} posts={posts} onUpdatePost={handleUpdatePost} userPlan={userPlan} />;
+        return <Calendar onCompose={handleCompose} posts={posts} onUpdatePost={handleUpdatePost} onPostCreated={handlePostCreated} userPlan={userPlan} />;
       case ViewState.LIBRARY:
-        return <Library onCompose={handleCompose} userPlan={userPlan} onOpenUpgrade={() => setIsUpgradeModalOpen(true)} />;
+        return <Library onCompose={handleCompose} userPlan={userPlan} onOpenUpgrade={() => setIsUpgradeModalOpen(true)} onPostCreated={handlePostCreated} />;
       case ViewState.LINKS:
         return <LinkManager showToast={showToast} />;
       case ViewState.AUTOMATIONS:
         return <Automations />;
       case ViewState.ANALYTICS:
-        return <Analytics showToast={showToast} userPlan={userPlan} onOpenUpgrade={() => setIsUpgradeModalOpen(true)} />;
+        return <Analytics showToast={showToast} userPlan={userPlan} onOpenUpgrade={() => setIsUpgradeModalOpen(true)} onCompose={handleCompose} />;
       case ViewState.SETTINGS:
-        return <Settings showToast={showToast} branding={branding} setBranding={setBranding} userPlan={userPlan} onOpenUpgrade={() => setIsUpgradeModalOpen(true)} />;
+        return <Settings 
+          showToast={showToast} 
+          branding={branding} 
+          setBranding={setBranding} 
+          userPlan={userPlan} 
+          onOpenUpgrade={() => setIsUpgradeModalOpen(true)}
+          accounts={accounts}
+          onToggleConnection={handleToggleAccount}
+        />;
       default:
-        return <Dashboard posts={posts} />;
+        return <Dashboard posts={posts} accounts={accounts} onPostCreated={handlePostCreated} showToast={showToast} onCompose={handleCompose} />;
     }
   };
 
@@ -258,7 +280,7 @@ const App: React.FC = () => {
            <div className="flex items-center gap-3">
              <button onClick={() => setIsNotificationsOpen(true)} className="relative p-1">
                <div className="w-2 h-2 bg-red-500 rounded-full absolute top-0 right-0 border border-white dark:border-slate-900"></div>
-               <img src="https://picsum.photos/100/100" alt="User" className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700" />
+               <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&fit=crop" alt="User" className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700" />
              </button>
            </div>
         </div>

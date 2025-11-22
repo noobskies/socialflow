@@ -38,6 +38,12 @@ export interface PlatformOptions {
   };
 }
 
+export interface PollConfig {
+  question?: string; // Optional, can use main content
+  options: string[];
+  duration: number; // days
+}
+
 export interface Post {
   id: string;
   content: string;
@@ -50,6 +56,7 @@ export interface Post {
   timezone?: string;
   comments?: PostComment[];
   platformOptions?: PlatformOptions;
+  poll?: PollConfig;
 }
 
 export interface Draft {
@@ -61,6 +68,7 @@ export interface Draft {
   status?: 'draft' | 'pending_review' | 'approved' | 'rejected';
   comments?: PostComment[];
   platformOptions?: PlatformOptions;
+  poll?: PollConfig;
 }
 
 export interface VideoEditorConfig {
@@ -128,6 +136,22 @@ export interface MediaAsset {
   name: string;
   createdAt: string;
   tags: string[];
+  folderId?: string;
+}
+
+export interface Folder {
+  id: string;
+  name: string;
+  type: 'system' | 'user';
+  icon?: string;
+}
+
+export interface Trend {
+  id: string;
+  topic: string;
+  volume: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  context: string;
 }
 
 export interface TeamMember {

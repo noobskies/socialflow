@@ -1,20 +1,22 @@
 
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Twitter, Linkedin, Facebook, Instagram, Plus, X, Clock, Calendar as CalendarIcon, Youtube, Video, Pin, LayoutGrid, Kanban, MoreHorizontal, Eye, MousePointer2, MessageCircle, TrendingUp, ArrowUpRight, Grid3X3, Smartphone, Download, FileText, Table } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { ChevronLeft, ChevronRight, Twitter, Linkedin, Facebook, Instagram, Plus, X, Clock, Calendar as CalendarIcon, Youtube, Video, Pin, LayoutGrid, Kanban, MoreHorizontal, Eye, MousePointer2, MessageCircle, TrendingUp, ArrowUpRight, Grid3X3, Smartphone, Download, FileText, Table, UploadCloud } from 'lucide-react';
 import { Draft, Platform, Post, PlanTier } from '../types';
 
 interface CalendarProps {
   onCompose: (draft?: Draft) => void;
   posts?: Post[];
   onUpdatePost?: (post: Post) => void;
+  onPostCreated?: (post: Post) => void;
   userPlan?: PlanTier;
 }
 
-const Calendar: React.FC<CalendarProps> = ({ onCompose, posts = [], onUpdatePost, userPlan = 'free' }) => {
+const Calendar: React.FC<CalendarProps> = ({ onCompose, posts = [], onUpdatePost, onPostCreated, userPlan = 'free' }) => {
   const [viewMode, setViewMode] = useState<'calendar' | 'kanban' | 'grid'>('calendar');
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [draggedPost, setDraggedPost] = useState<Post | null>(null);
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const currentDate = new Date();
@@ -52,12 +54,50 @@ const Calendar: React.FC<CalendarProps> = ({ onCompose, posts = [], onUpdatePost
 
   const handleExport = (format: 'pdf' | 'csv') => {
     setIsExportMenuOpen(false);
-    // Simulate download
     const link = document.createElement('a');
     link.href = '#';
     link.download = `content-calendar.${format}`;
-    // In a real app, we would generate the file here
     alert(`Exporting calendar as ${format.toUpperCase()}...`);
+  };
+
+  const handleBulkImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0]) return;
+    
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      if (!text) return;
+      
+      // Simple CSV parser: date,time,content,platform
+      const lines = text.split('\n').slice(1); // Skip header
+      let count = 0;
+      
+      lines.forEach(line => {
+        if (!line.trim()) return;
+        const [date, time, content, platform] = line.split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+        
+        if (date && content && onPostCreated) {
+          const newPost: Post = {
+            id: `imported-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            content,
+            scheduledDate: date,
+            time: time || '12:00',
+            platforms: [platform as Platform || 'twitter'],
+            status: 'scheduled'
+          };
+          onPostCreated(newPost);
+          count++;
+        }
+      });
+      
+      alert(`Successfully imported ${count} posts!`);
+    };
+    
+    reader.readAsText(file);
+    // Reset input
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const getPlatformIcon = (platform: Platform, className: string = "w-3 h-3") => {
@@ -89,7 +129,14 @@ const Calendar: React.FC<CalendarProps> = ({ onCompose, posts = [], onUpdatePost
 
   return (
     <div className="p-6 md:p-8 h-full flex flex-col relative bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
-      
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        onChange={handleBulkImport} 
+        className="hidden" 
+        accept=".csv" 
+      />
+
       {/* Post Details Modal */}
       {selectedPost && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/50 dark:bg-slate-950/70 backdrop-blur-sm p-4" onClick={() => setSelectedPost(null)}>
@@ -137,6 +184,17 @@ const Calendar: React.FC<CalendarProps> = ({ onCompose, posts = [], onUpdatePost
                 {/* Content Preview */}
                 <div className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-xl border border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-sm leading-relaxed whitespace-pre-wrap mb-6 shadow-inner">
                    {selectedPost.content}
+                   {selectedPost.poll && (
+                      <div className="mt-4 space-y-2">
+                         {selectedPost.poll.options.map((opt, i) => (
+                            <div key={i} className="flex items-center justify-between border border-slate-200 dark:border-slate-700 rounded-full px-4 py-2 text-xs bg-white dark:bg-slate-900">
+                               <span>{opt}</span>
+                               <span className="text-slate-400">0%</span>
+                            </div>
+                         ))}
+                         <div className="text-xs text-slate-400 text-center mt-2">{selectedPost.poll.duration} days remaining</div>
+                      </div>
+                   )}
                 </div>
                 
                 {selectedPost.mediaUrl && (
@@ -189,7 +247,8 @@ const Calendar: React.FC<CalendarProps> = ({ onCompose, posts = [], onUpdatePost
                       scheduledDate: selectedPost.scheduledDate,
                       mediaUrl: selectedPost.mediaUrl,
                       mediaType: selectedPost.mediaType,
-                      status: selectedPost.status === 'published' ? 'draft' : selectedPost.status as any
+                      status: selectedPost.status === 'published' ? 'draft' : selectedPost.status as any,
+                      poll: selectedPost.poll
                     });
                   }}
                   className="px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
@@ -210,6 +269,16 @@ const Calendar: React.FC<CalendarProps> = ({ onCompose, posts = [], onUpdatePost
           <p className="text-slate-500 dark:text-slate-400 mt-1">Plan, visualize, and manage your workflow</p>
         </div>
         <div className="flex items-center gap-3">
+            {/* Bulk Import */}
+            <button 
+               onClick={() => fileInputRef.current?.click()}
+               className="flex items-center px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm"
+               title="Import CSV (date, time, content, platform)"
+            >
+               <UploadCloud className="w-4 h-4 mr-2" />
+               Import
+            </button>
+
             {/* Export Menu */}
             <div className="relative">
                <button 
@@ -365,10 +434,7 @@ const Calendar: React.FC<CalendarProps> = ({ onCompose, posts = [], onUpdatePost
         <div className="flex-1 overflow-x-auto overflow-y-hidden animate-in fade-in duration-300">
            <div className="flex h-full gap-6 min-w-[1000px] pb-4">
               {columns.map(col => {
-                 const colPosts = posts.filter(p => 
-                    // Map custom statuses to column IDs if needed, or use direct match
-                    p.status === col.id
-                 );
+                 const colPosts = posts.filter(p => p.status === col.id);
 
                  return (
                     <div key={col.id} className="flex-1 flex flex-col bg-slate-100/50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
@@ -456,7 +522,7 @@ const Calendar: React.FC<CalendarProps> = ({ onCompose, posts = [], onUpdatePost
                <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
                   <div className="flex items-center gap-4 mb-4">
                      <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 p-0.5">
-                        <img src="https://picsum.photos/id/1011/100" alt="Profile" className="w-full h-full rounded-full border-2 border-white dark:border-slate-900 object-cover" />
+                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&fit=crop" alt="Profile" className="w-full h-full rounded-full border-2 border-white dark:border-slate-900 object-cover" />
                      </div>
                      <div className="flex-1 flex justify-around text-center">
                         <div>

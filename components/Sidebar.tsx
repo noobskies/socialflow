@@ -212,7 +212,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, currentTheme, s
         <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700 flex items-center space-x-3">
           <div className="relative shrink-0">
              <img 
-               src="https://picsum.photos/100/100" 
+               src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&fit=crop" 
                alt="User" 
                className="w-9 h-9 rounded-full border-2 border-indigo-500"
              />
