@@ -33,7 +33,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { Post, Trend, ToastType, SocialAccount, Draft } from "../types";
-import { getTrendingTopics } from "../services/geminiService";
+import { getTrendingTopics } from "@/services/geminiService";
 
 interface DashboardProps {
   posts?: Post[];

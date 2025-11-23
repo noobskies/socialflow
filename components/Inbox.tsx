@@ -23,7 +23,7 @@ import {
   Minus,
 } from "lucide-react";
 import { SocialMessage, Platform, ToastType, ListeningResult } from "../types";
-import { generateReply } from "../services/geminiService";
+import { generateReply } from "@/services/geminiService";
 
 interface InboxProps {
   showToast: (message: string, type: ToastType) => void;

@@ -37,7 +37,7 @@ import {
   Post,
   Folder,
 } from "../types";
-import { generatePostFromRSS } from "../services/geminiService";
+import { generatePostFromRSS } from "@/services/geminiService";
 
 interface LibraryProps {
   onCompose: (draft: Draft) => void;

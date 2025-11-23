@@ -56,7 +56,7 @@ import {
   generateVariations,
   generateAltText,
   analyzeDraft,
-} from "../services/geminiService";
+} from "@/services/geminiService";
 import {
   Platform,
   Draft,
@@ -68,7 +68,13 @@ import {
   HashtagGroup,
   Post,
   PlanTier,
-} from "../types";
+} from "@/types";
+import {
+  MOCK_PRODUCTS,
+  AI_TEMPLATES,
+  TIMEZONES,
+  MOCK_HASHTAG_GROUPS,
+} from "@/utils/constants";
 
 interface ComposerProps {
   initialDraft?: Draft;
@@ -76,75 +82,6 @@ interface ComposerProps {
   onPostCreated?: (post: Post) => void;
   userPlan?: PlanTier;
 }
-
-// Mock Products for e-commerce integration
-const MOCK_PRODUCTS: Product[] = [
-  {
-    id: "1",
-    name: "Premium Leather Bag",
-    price: "$129.00",
-    description:
-      "Handcrafted Italian leather messenger bag. Perfect for the modern professional.",
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400",
-    inventory: 12,
-  },
-  {
-    id: "2",
-    name: "Wireless Noise-Cancelling Headphones",
-    price: "$249.99",
-    description:
-      "Immerse yourself in music with industry-leading noise cancellation.",
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
-    inventory: 45,
-  },
-  {
-    id: "3",
-    name: "Organic Coffee Blend",
-    price: "$18.50",
-    description:
-      "Rich, smooth medium roast. Ethically sourced and roasted in small batches.",
-    image: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400",
-    inventory: 120,
-  },
-];
-
-const AI_TEMPLATES = [
-  { id: "pas", name: "Problem-Agitate-Solve", label: "PAS Framework" },
-  {
-    id: "aida",
-    name: "Attention-Interest-Desire-Action",
-    label: "AIDA Framework",
-  },
-  { id: "story", name: "Storytelling", label: "Hero's Journey" },
-  { id: "viral", name: "Viral Hook", label: "Controversial/Viral" },
-];
-
-const MOCK_HASHTAG_GROUPS: HashtagGroup[] = [
-  {
-    id: "1",
-    name: "Tech Startups",
-    tags: ["#startup", "#tech", "#innovation", "#saas", "#growth"],
-  },
-  {
-    id: "2",
-    name: "Summer Vibes",
-    tags: ["#summer", "#summervibes", "#sunshine", "#fun"],
-  },
-  {
-    id: "3",
-    name: "Monday Motivation",
-    tags: ["#mondaymotivation", "#grind", "#success", "#goals"],
-  },
-];
-
-const TIMEZONES = [
-  { value: "UTC", label: "UTC" },
-  { value: "America/New_York", label: "New York (EST)" },
-  { value: "America/Los_Angeles", label: "Los Angeles (PST)" },
-  { value: "Europe/London", label: "London (GMT)" },
-  { value: "Europe/Paris", label: "Paris (CET)" },
-  { value: "Asia/Tokyo", label: "Tokyo (JST)" },
-];
 
 const Composer: React.FC<ComposerProps> = ({
   initialDraft,

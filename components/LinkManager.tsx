@@ -17,7 +17,7 @@ import {
   Download,
 } from "lucide-react";
 import { ShortLink, BioPageConfig, ToastType, Lead } from "../types";
-import { generateBio } from "../services/geminiService";
+import { generateBio } from "@/services/geminiService";
 
 interface LinkManagerProps {
   showToast: (message: string, type: ToastType) => void;

@@ -16,7 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { Workflow, Integration } from "../types";
-import { suggestWorkflows } from "../services/geminiService";
+import { suggestWorkflows } from "@/services/geminiService";
 
 // Mock Data
 const MOCK_INTEGRATIONS: Integration[] = [
