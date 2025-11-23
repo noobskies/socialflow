@@ -1,10 +1,9 @@
-
 import { GoogleGenAI } from "@google/genai";
 
 const TEXT_MODEL = "gemini-3-pro-preview";
 const IMAGE_MODEL = "gemini-3-pro-image-preview";
 
-// Helper to get a fresh client instance. 
+// Helper to get a fresh client instance.
 // This is crucial for flows where the API key might be selected/updated during the session.
 const getAiClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -61,7 +60,7 @@ export const generateVariations = async (
     const response = await ai.models.generateContent({
       model: TEXT_MODEL,
       contents: prompt,
-      config: { responseMimeType: 'application/json' }
+      config: { responseMimeType: "application/json" },
     });
 
     const text = response.text || "[]";
@@ -81,10 +80,17 @@ export const generateAltText = async (imageBase64: string): Promise<string> => {
       model: TEXT_MODEL, // gemini-3-pro supports vision
       contents: {
         parts: [
-          { inlineData: { mimeType: 'image/png', data: imageBase64.split(',')[1] } },
-          { text: "Write a concise, descriptive alt text for this image for accessibility purposes. Max 1 sentence." }
-        ]
-      }
+          {
+            inlineData: {
+              mimeType: "image/png",
+              data: imageBase64.split(",")[1],
+            },
+          },
+          {
+            text: "Write a concise, descriptive alt text for this image for accessibility purposes. Max 1 sentence.",
+          },
+        ],
+      },
     });
 
     return response.text || "Image description unavailable.";
@@ -94,7 +100,9 @@ export const generateAltText = async (imageBase64: string): Promise<string> => {
   }
 };
 
-export const repurposeContent = async (sourceText: string): Promise<{ twitter: string[]; linkedin: string; instagram: string }> => {
+export const repurposeContent = async (
+  sourceText: string
+): Promise<{ twitter: string[]; linkedin: string; instagram: string }> => {
   try {
     const ai = getAiClient();
     const prompt = `
@@ -113,17 +121,17 @@ export const repurposeContent = async (sourceText: string): Promise<{ twitter: s
     const response = await ai.models.generateContent({
       model: TEXT_MODEL,
       contents: prompt,
-      config: { responseMimeType: 'application/json' }
+      config: { responseMimeType: "application/json" },
     });
 
     const text = response.text || "{}";
     return JSON.parse(text);
   } catch (error) {
     console.error("Error repurposing content:", error);
-    return { 
-      twitter: ["Error generating thread."], 
-      linkedin: "Error generating post.", 
-      instagram: "Error generating caption." 
+    return {
+      twitter: ["Error generating thread."],
+      linkedin: "Error generating post.",
+      instagram: "Error generating caption.",
     };
   }
 };
@@ -205,26 +213,28 @@ export const generateHashtags = async (content: string): Promise<string[]> => {
     });
 
     const text = response.text || "";
-    return text.split(/\s+/).filter(t => t.startsWith('#'));
+    return text.split(/\s+/).filter((t) => t.startsWith("#"));
   } catch (error) {
     return [];
   }
 };
 
-export const generateSocialImage = async (prompt: string): Promise<string | null> => {
+export const generateSocialImage = async (
+  prompt: string
+): Promise<string | null> => {
   try {
     const ai = getAiClient();
     const response = await ai.models.generateContent({
       model: IMAGE_MODEL,
       contents: {
-        parts: [{ text: prompt }]
+        parts: [{ text: prompt }],
       },
       config: {
         imageConfig: {
           aspectRatio: "1:1",
-          imageSize: "1K"
-        }
-      }
+          imageSize: "1K",
+        },
+      },
     });
 
     for (const part of response.candidates?.[0]?.content?.parts || []) {
@@ -241,7 +251,7 @@ export const generateSocialImage = async (prompt: string): Promise<string | null
 
 export const generateReply = async (
   message: string,
-  tone: 'supportive' | 'witty' | 'professional' | 'gratitude'
+  tone: "supportive" | "witty" | "professional" | "gratitude"
 ): Promise<string> => {
   try {
     const ai = getAiClient();
@@ -300,10 +310,12 @@ export const generateBio = async (
   }
 };
 
-export const suggestWorkflows = async (businessType: string): Promise<any[]> => {
-    try {
-      const ai = getAiClient();
-      const prompt = `
+export const suggestWorkflows = async (
+  businessType: string
+): Promise<any[]> => {
+  try {
+    const ai = getAiClient();
+    const prompt = `
         Suggest 3 automation workflows for a social media manager working for a "${businessType}".
         Return a JSON array where each object has:
         - name: Title of the workflow
@@ -314,23 +326,28 @@ export const suggestWorkflows = async (businessType: string): Promise<any[]> => 
         Example:
         [{"name": "Auto-Reply", "description": "Reply to DMs", "trigger": "New DM", "action": "Send Welcome Msg"}]
       `;
-  
-      const response = await ai.models.generateContent({
-        model: TEXT_MODEL,
-        contents: prompt,
-      });
-  
-      const text = response.text || "[]";
-      // Basic cleanup to ensure we get array content
-      const jsonStr = text.substring(text.indexOf('['), text.lastIndexOf(']') + 1);
-      return JSON.parse(jsonStr);
-    } catch (error) {
-      console.error("Error generating workflows:", error);
-      return [];
-    }
-  };
 
-export const generateVideoCaptions = async (description: string): Promise<string> => {
+    const response = await ai.models.generateContent({
+      model: TEXT_MODEL,
+      contents: prompt,
+    });
+
+    const text = response.text || "[]";
+    // Basic cleanup to ensure we get array content
+    const jsonStr = text.substring(
+      text.indexOf("["),
+      text.lastIndexOf("]") + 1
+    );
+    return JSON.parse(jsonStr);
+  } catch (error) {
+    console.error("Error generating workflows:", error);
+    return [];
+  }
+};
+
+export const generateVideoCaptions = async (
+  description: string
+): Promise<string> => {
   try {
     const ai = getAiClient();
     const prompt = `
@@ -353,7 +370,10 @@ export const generateVideoCaptions = async (description: string): Promise<string
   }
 };
 
-export const analyzeDraft = async (content: string, platform: string): Promise<any> => {
+export const analyzeDraft = async (
+  content: string,
+  platform: string
+): Promise<any> => {
   try {
     const ai = getAiClient();
     const prompt = `
@@ -373,7 +393,7 @@ export const analyzeDraft = async (content: string, platform: string): Promise<a
     const response = await ai.models.generateContent({
       model: TEXT_MODEL,
       contents: prompt,
-      config: { responseMimeType: 'application/json' }
+      config: { responseMimeType: "application/json" },
     });
 
     const text = response.text || "{}";
@@ -384,12 +404,16 @@ export const analyzeDraft = async (content: string, platform: string): Promise<a
       score: 0,
       sentiment: "Unknown",
       engagementPrediction: "Unknown",
-      suggestions: ["Could not analyze content."]
+      suggestions: ["Could not analyze content."],
     };
   }
 };
 
-export const generatePostFromRSS = async (title: string, snippet: string, source: string): Promise<string> => {
+export const generatePostFromRSS = async (
+  title: string,
+  snippet: string,
+  source: string
+): Promise<string> => {
   try {
     const ai = getAiClient();
     const prompt = `
@@ -437,18 +461,39 @@ export const getTrendingTopics = async (niche: string): Promise<any[]> => {
     const response = await ai.models.generateContent({
       model: TEXT_MODEL,
       contents: prompt,
-      config: { responseMimeType: 'application/json' }
+      config: { responseMimeType: "application/json" },
     });
 
     const text = response.text || "[]";
-    const jsonStr = text.substring(text.indexOf('['), text.lastIndexOf(']') + 1);
+    const jsonStr = text.substring(
+      text.indexOf("["),
+      text.lastIndexOf("]") + 1
+    );
     return JSON.parse(jsonStr);
   } catch (error) {
     console.error("Error fetching trends:", error);
     return [
-      { id: '1', topic: 'Sustainable Tech', volume: 'High', difficulty: 'Medium', context: 'Growing interest in eco-friendly gadgets' },
-      { id: '2', topic: 'Remote Work Tips', volume: 'Medium', difficulty: 'Easy', context: 'Always relevant for professionals' },
-      { id: '3', topic: 'AI Ethics', volume: 'High', difficulty: 'Hard', context: 'Hot debate topic currently' }
+      {
+        id: "1",
+        topic: "Sustainable Tech",
+        volume: "High",
+        difficulty: "Medium",
+        context: "Growing interest in eco-friendly gadgets",
+      },
+      {
+        id: "2",
+        topic: "Remote Work Tips",
+        volume: "Medium",
+        difficulty: "Easy",
+        context: "Always relevant for professionals",
+      },
+      {
+        id: "3",
+        topic: "AI Ethics",
+        volume: "High",
+        difficulty: "Hard",
+        context: "Hot debate topic currently",
+      },
     ];
   }
 };

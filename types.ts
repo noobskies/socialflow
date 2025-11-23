@@ -1,6 +1,12 @@
-
-export type Platform = 'twitter' | 'linkedin' | 'instagram' | 'facebook' | 'tiktok' | 'youtube' | 'pinterest';
-export type PlanTier = 'free' | 'pro' | 'agency';
+export type Platform =
+  | "twitter"
+  | "linkedin"
+  | "instagram"
+  | "facebook"
+  | "tiktok"
+  | "youtube"
+  | "pinterest";
+export type PlanTier = "free" | "pro" | "agency";
 
 export interface SocialAccount {
   id: string;
@@ -26,14 +32,14 @@ export interface PlatformOptions {
   };
   twitter?: {
     isThread?: boolean;
-    replySettings?: 'everyone' | 'mentioned' | 'followers';
+    replySettings?: "everyone" | "mentioned" | "followers";
   };
   pinterest?: {
     destinationLink?: string;
     boardId?: string;
   };
   youtube?: {
-    visibility?: 'public' | 'private' | 'unlisted';
+    visibility?: "public" | "private" | "unlisted";
     tags?: string[];
   };
 }
@@ -49,9 +55,15 @@ export interface Post {
   content: string;
   platforms: Platform[];
   scheduledDate: string; // ISO string
-  status: 'scheduled' | 'published' | 'draft' | 'pending_review' | 'approved' | 'rejected';
+  status:
+    | "scheduled"
+    | "published"
+    | "draft"
+    | "pending_review"
+    | "approved"
+    | "rejected";
   mediaUrl?: string;
-  mediaType?: 'image' | 'video';
+  mediaType?: "image" | "video";
   time?: string;
   timezone?: string;
   comments?: PostComment[];
@@ -62,10 +74,10 @@ export interface Post {
 export interface Draft {
   content?: string;
   mediaUrl?: string;
-  mediaType?: 'image' | 'video';
+  mediaType?: "image" | "video";
   scheduledDate?: string;
   platforms?: Platform[];
-  status?: 'draft' | 'pending_review' | 'approved' | 'rejected';
+  status?: "draft" | "pending_review" | "approved" | "rejected";
   comments?: PostComment[];
   platformOptions?: PlatformOptions;
   poll?: PollConfig;
@@ -86,7 +98,7 @@ export interface ListeningResult {
   platform: Platform;
   author: string;
   content: string;
-  sentiment: 'positive' | 'neutral' | 'negative';
+  sentiment: "positive" | "neutral" | "negative";
   timestamp: string;
 }
 
@@ -98,15 +110,15 @@ export interface AnalyticsData {
 }
 
 export enum ViewState {
-  DASHBOARD = 'DASHBOARD',
-  COMPOSER = 'COMPOSER',
-  CALENDAR = 'CALENDAR',
-  ANALYTICS = 'ANALYTICS',
-  INBOX = 'INBOX',
-  LIBRARY = 'LIBRARY',
-  SETTINGS = 'SETTINGS',
-  LINKS = 'LINKS',
-  AUTOMATIONS = 'AUTOMATIONS'
+  DASHBOARD = "DASHBOARD",
+  COMPOSER = "COMPOSER",
+  CALENDAR = "CALENDAR",
+  ANALYTICS = "ANALYTICS",
+  INBOX = "INBOX",
+  LIBRARY = "LIBRARY",
+  SETTINGS = "SETTINGS",
+  LINKS = "LINKS",
+  AUTOMATIONS = "AUTOMATIONS",
 }
 
 export interface User {
@@ -123,14 +135,14 @@ export interface SocialMessage {
   authorAvatar: string;
   content: string;
   timestamp: string;
-  type: 'comment' | 'dm' | 'mention';
+  type: "comment" | "dm" | "mention";
   unread: boolean;
   replied?: boolean;
 }
 
 export interface MediaAsset {
   id: string;
-  type: 'image' | 'video' | 'template';
+  type: "image" | "video" | "template";
   url?: string; // for images/videos
   content?: string; // for text templates
   name: string;
@@ -142,7 +154,7 @@ export interface MediaAsset {
 export interface Folder {
   id: string;
   name: string;
-  type: 'system' | 'user';
+  type: "system" | "user";
   icon?: string;
 }
 
@@ -150,7 +162,7 @@ export interface Trend {
   id: string;
   topic: string;
   volume: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  difficulty: "Easy" | "Medium" | "Hard";
   context: string;
 }
 
@@ -158,9 +170,9 @@ export interface TeamMember {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'editor' | 'viewer';
+  role: "admin" | "editor" | "viewer";
   avatar: string;
-  status: 'active' | 'invited';
+  status: "active" | "invited";
 }
 
 export interface ShortLink {
@@ -178,7 +190,7 @@ export interface BioPageConfig {
   displayName: string;
   bio: string;
   avatar: string;
-  theme: 'light' | 'dark' | 'colorful';
+  theme: "light" | "dark" | "colorful";
   links: { id: string; title: string; url: string; active: boolean }[];
   enableLeadCapture?: boolean;
   leadCaptureText?: string;
@@ -219,7 +231,7 @@ export interface Workflow {
 export interface Integration {
   id: string;
   name: string;
-  category: 'ecommerce' | 'communication' | 'content';
+  category: "ecommerce" | "communication" | "content";
   icon: string;
   connected: boolean;
 }
@@ -251,7 +263,7 @@ export interface ApiKey {
 
 export interface Notification {
   id: string;
-  type: 'info' | 'success' | 'warning' | 'mention';
+  type: "info" | "success" | "warning" | "mention";
   title: string;
   message: string;
   timestamp: string;
@@ -261,7 +273,7 @@ export interface Notification {
 export interface Workspace {
   id: string;
   name: string;
-  role: 'owner' | 'member';
+  role: "owner" | "member";
   logo?: string;
 }
 
@@ -270,8 +282,8 @@ export interface Report {
   name: string;
   dateRange: string;
   createdAt: string;
-  status: 'ready' | 'generating';
-  format: 'pdf' | 'csv';
+  status: "ready" | "generating";
+  format: "pdf" | "csv";
 }
 
 export interface Bucket {
@@ -288,4 +300,4 @@ export interface HashtagGroup {
   tags: string[];
 }
 
-export type ToastType = 'success' | 'error' | 'info';
+export type ToastType = "success" | "error" | "info";
