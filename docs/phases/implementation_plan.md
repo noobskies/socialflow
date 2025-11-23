@@ -32,18 +32,23 @@ Complete frontend refactoring to transform SocialFlow AI from a flat, monolithic
 ```
 /socialflow
 ├── App.tsx (150 lines - orchestrator only)
-├── /features
-│   ├── /dashboard (5 widgets + useDashboard hook)
-│   └── /composer (14 components + useComposer hook)
-├── /hooks (5 custom hooks)
-├── /utils (4 utility modules)
-├── /types (3 organized modules)
-├── /components
-│   ├── /ui (Button, Input, Modal, Card)
-│   ├── /feedback (Toast, Notifications, Help, Shortcuts)
-│   └── /layout (Sidebar, MobileNav)
-└── /services (geminiService)
+├── /src (all source code organized here)
+│   ├── /features
+│   │   ├── /dashboard (5 widgets + useDashboard hook)
+│   │   └── /composer (14 components + useComposer hook)
+│   ├── /hooks (5 custom hooks)
+│   ├── /utils (4 utility modules)
+│   ├── /types (3 organized modules)
+│   ├── /components
+│   │   ├── /ui (Button, Input, Modal, Card)
+│   │   ├── /feedback (Toast, Notifications, Help, Shortcuts)
+│   │   └── /layout (Sidebar, MobileNav)
+│   └── /services (geminiService)
+├── /components (legacy - will be migrated to /src/components)
+└── /docs (project documentation)
 ```
+
+**Note:** All new code is organized under `/src`. Path aliases (`@/types`, `@/hooks`, etc.) point to `/src` subdirectories for clean imports.
 
 ## Phase Documentation
 
@@ -68,10 +73,11 @@ Each phase has its own detailed documentation file with:
 
 **Deliverables:**
 
-- `/features`, `/hooks`, `/utils`, `/types` directories
-- Path aliases in tsconfig.json and vite.config.ts
-- Types split into domain.ts, ui.ts, features.ts
-- Constants extracted to `/utils/constants.ts`
+- `/src/features`, `/src/hooks`, `/src/utils`, `/src/types` directories
+- `/services` moved to `/src/services`
+- Path aliases in tsconfig.json and vite.config.ts (pointing to `/src`)
+- Types split into domain.ts, ui.ts, features.ts under `/src/types`
+- Constants extracted to `/src/utils/constants.ts`
 
 **Read:** `cat phase1_foundation.md`
 
@@ -89,14 +95,14 @@ Each phase has its own detailed documentation file with:
 
 **Deliverables:**
 
-- `/hooks/useToast.ts` - Toast notification management
-- `/hooks/useModal.ts` - Modal state management
-- `/hooks/useTheme.ts` - Theme with localStorage
-- `/hooks/useKeyboard.ts` - Global keyboard shortcuts
-- `/hooks/useLocalStorage.ts` - Debounced persistence
-- `/utils/dates.ts` - Date formatting
-- `/utils/formatting.ts` - Text utilities
-- `/utils/validation.ts` - Validation helpers
+- `/src/hooks/useToast.ts` - Toast notification management
+- `/src/hooks/useModal.ts` - Modal state management
+- `/src/hooks/useTheme.ts` - Theme with localStorage
+- `/src/hooks/useKeyboard.ts` - Global keyboard shortcuts
+- `/src/hooks/useLocalStorage.ts` - Debounced persistence
+- `/src/utils/dates.ts` - Date formatting
+- `/src/utils/formatting.ts` - Text utilities
+- `/src/utils/validation.ts` - Validation helpers
 
 **Read:** `cat phase2_hooks.md`
 
@@ -114,12 +120,12 @@ Each phase has its own detailed documentation file with:
 
 **Deliverables:**
 
-- `/features/dashboard/DashboardStats.tsx` - Stats cards
-- `/features/dashboard/TrendingWidget.tsx` - AI trends
-- `/features/dashboard/QuickDraft.tsx` - Quick draft widget
-- `/features/dashboard/UpcomingPosts.tsx` - Upcoming schedule
-- `/features/dashboard/AccountHealth.tsx` - Account monitor
-- `/features/dashboard/useDashboard.ts` - State hook
+- `/src/features/dashboard/DashboardStats.tsx` - Stats cards
+- `/src/features/dashboard/TrendingWidget.tsx` - AI trends
+- `/src/features/dashboard/QuickDraft.tsx` - Quick draft widget
+- `/src/features/dashboard/UpcomingPosts.tsx` - Upcoming schedule
+- `/src/features/dashboard/AccountHealth.tsx` - Account monitor
+- `/src/features/dashboard/useDashboard.ts` - State hook
 - Dashboard.tsx reduced to ~100 lines
 
 **Read:** `cat phase3_dashboard.md`
@@ -138,8 +144,8 @@ Each phase has its own detailed documentation file with:
 
 **Deliverables:**
 
-- 14 Composer sub-components
-- `/features/composer/useComposer.ts` - State hook
+- 14 Composer sub-components in `/src/features/composer/`
+- `/src/features/composer/useComposer.ts` - State hook
 - Platform selector, editor, media, polls, AI panel, modals, preview
 - Composer.tsx reduced to ~200 lines
 
@@ -161,11 +167,11 @@ Each phase has its own detailed documentation file with:
 
 **Deliverables:**
 
-- `/components/ui/Button.tsx` - Reusable button
-- `/components/ui/Input.tsx` - Reusable input
-- `/components/ui/Modal.tsx` - Reusable modal
-- `/components/ui/Card.tsx` - Reusable card
-- Feedback components moved to proper location
+- `/src/components/ui/Button.tsx` - Reusable button
+- `/src/components/ui/Input.tsx` - Reusable input
+- `/src/components/ui/Modal.tsx` - Reusable modal
+- `/src/components/ui/Card.tsx` - Reusable card
+- Feedback components organized in `/src/components/feedback/`
 - ShortcutsModal extracted from App.tsx
 
 **Read:** `cat phase5_shared_components.md`

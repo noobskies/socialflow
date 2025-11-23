@@ -22,14 +22,16 @@ Establish the foundation for the refactoring by creating the directory structure
 ## Directory Structure to Create
 
 ```bash
-mkdir -p features/dashboard features/composer features/calendar features/settings
-mkdir -p components/ui components/layout components/feedback
-mkdir -p hooks utils lib types
+mkdir -p src/features/dashboard src/features/composer src/features/calendar src/features/settings
+mkdir -p src/components/ui src/components/layout src/components/feedback
+mkdir -p src/hooks src/utils src/lib src/types
 ```
+
+**Note:** The `/services` directory will also be moved to `/src/services` to consolidate all source code under `/src`.
 
 ## Types Organization
 
-### Create `/types/index.ts`
+### Create `/src/types/index.ts`
 
 ```typescript
 export * from "./domain";
@@ -37,7 +39,7 @@ export * from "./ui";
 export * from "./features";
 ```
 
-### Create `/types/domain.ts`
+### Create `/src/types/domain.ts`
 
 Core business entities:
 
@@ -120,7 +122,7 @@ export interface Trend {
 }
 ```
 
-### Create `/types/ui.ts`
+### Create `/src/types/ui.ts`
 
 UI-specific types:
 
@@ -149,7 +151,7 @@ export interface Notification {
 }
 ```
 
-### Create `/types/features.ts`
+### Create `/src/types/features.ts`
 
 Feature-specific complex types:
 
@@ -289,7 +291,7 @@ export interface SocialMessage {
 
 ### Update `tsconfig.json`
 
-Add path aliases to compilerOptions:
+Add path aliases to compilerOptions (all paths point to `/src` subdirectories):
 
 ```json
 {
@@ -303,14 +305,14 @@ Add path aliases to compilerOptions:
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@/features/*": ["./features/*"],
-      "@/components/*": ["./components/*"],
-      "@/hooks/*": ["./hooks/*"],
-      "@/utils/*": ["./utils/*"],
-      "@/types": ["./types"],
-      "@/types/*": ["./types/*"],
-      "@/lib/*": ["./lib/*"],
-      "@/services/*": ["./services/*"]
+      "@/features/*": ["./src/features/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/utils/*": ["./src/utils/*"],
+      "@/types": ["./src/types"],
+      "@/types/*": ["./src/types/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/services/*": ["./src/services/*"]
     }
   }
 }
@@ -318,7 +320,7 @@ Add path aliases to compilerOptions:
 
 ### Update `vite.config.ts`
 
-Add path resolution:
+Add path resolution (all aliases point to `/src` subdirectories):
 
 ```typescript
 import { defineConfig } from "vite";
@@ -329,14 +331,14 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./"),
-      "@/features": path.resolve(__dirname, "./features"),
-      "@/components": path.resolve(__dirname, "./components"),
-      "@/hooks": path.resolve(__dirname, "./hooks"),
-      "@/utils": path.resolve(__dirname, "./utils"),
-      "@/types": path.resolve(__dirname, "./types"),
-      "@/lib": path.resolve(__dirname, "./lib"),
-      "@/services": path.resolve(__dirname, "./services"),
+      "@": path.resolve(__dirname, "./src"),
+      "@/features": path.resolve(__dirname, "./src/features"),
+      "@/components": path.resolve(__dirname, "./src/components"),
+      "@/hooks": path.resolve(__dirname, "./src/hooks"),
+      "@/utils": path.resolve(__dirname, "./src/utils"),
+      "@/types": path.resolve(__dirname, "./src/types"),
+      "@/lib": path.resolve(__dirname, "./src/lib"),
+      "@/services": path.resolve(__dirname, "./src/services"),
     },
   },
   server: {
@@ -348,7 +350,7 @@ export default defineConfig({
 
 ## Constants Extraction
 
-### Create `/utils/constants.ts`
+### Create `/src/utils/constants.ts`
 
 Extract from App.tsx and Composer.tsx:
 
@@ -450,39 +452,40 @@ export const MOCK_HASHTAG_GROUPS: HashtagGroup[] = [
 1. **Create directory structure**
 
    ```bash
-   mkdir -p features/dashboard features/composer features/calendar features/settings
-   mkdir -p components/ui components/layout components/feedback
-   mkdir -p hooks utils lib types
+   mkdir -p src/features/dashboard src/features/composer src/features/calendar src/features/settings
+   mkdir -p src/components/ui src/components/layout src/components/feedback
+   mkdir -p src/hooks src/utils src/lib src/types
    ```
 
-2. **Create type files**
+2. **Move services directory**
 
-   - Create `/types/domain.ts` with business types
-   - Create `/types/ui.ts` with UI types
-   - Create `/types/features.ts` with feature types
-   - Create `/types/index.ts` as re-export hub
+   ```bash
+   mv services src/services
+   ```
 
-3. **Update TypeScript configuration**
+3. **Create type files**
+   - Create `/src/types/domain.ts` with business types
+   - Create `/src/types/ui.ts` with UI types
+   - Create `/src/types/features.ts` with feature types
+   - Create `/src/types/index.ts` as re-export hub
 
+4. **Update TypeScript configuration**
    - Update `tsconfig.json` with baseUrl and paths
    - Save and verify no errors
 
-4. **Update Vite configuration**
-
+5. **Update Vite configuration**
    - Update `vite.config.ts` with path aliases
    - Add path import at top
    - Save configuration
 
-5. **Create constants file**
-
-   - Create `/utils/constants.ts`
+6. **Create constants file**
+   - Create `/src/utils/constants.ts`
    - Copy `INITIAL_POSTS` from App.tsx (lines 45-65)
    - Copy `INITIAL_ACCOUNTS` from App.tsx
    - Copy `MOCK_PRODUCTS` from Composer.tsx (lines 30-50)
    - Copy `AI_TEMPLATES`, `TIMEZONES`, `MOCK_HASHTAG_GROUPS` from Composer.tsx
 
-6. **Update imports in existing files**
-
+7. **Update imports in existing files**
    - In `App.tsx`: Replace `import { ... } from './types'` with `import { ... } from '@/types'`
    - In `App.tsx`: Add `import { INITIAL_POSTS, INITIAL_ACCOUNTS } from '@/utils/constants'`
    - In `App.tsx`: Remove inline `INITIAL_POSTS` and `INITIAL_ACCOUNTS` constants
@@ -492,7 +495,7 @@ export const MOCK_HASHTAG_GROUPS: HashtagGroup[] = [
    - In `Dashboard.tsx`: Replace `import { ... } from '../types'` with `import { ... } from '@/types'`
    - Update all other component imports to use `@/types`
 
-7. **Test the changes**
+8. **Test the changes**
    - Run `npm run dev`
    - Verify no TypeScript errors
    - Verify app loads correctly
@@ -505,9 +508,10 @@ export const MOCK_HASHTAG_GROUPS: HashtagGroup[] = [
 - [ ] All directories created successfully
 - [ ] `tsconfig.json` has path aliases configured
 - [ ] `vite.config.ts` has path resolution configured
-- [ ] All 3 type files created in `/types`
-- [ ] `/types/index.ts` re-exports all types
-- [ ] `/utils/constants.ts` contains all extracted constants
+- [ ] All 3 type files created in `/src/types`
+- [ ] `/src/types/index.ts` re-exports all types
+- [ ] `/src/utils/constants.ts` contains all extracted constants
+- [ ] `/services` moved to `/src/services`
 - [ ] App.tsx imports from `@/types` and `@/utils/constants`
 - [ ] Composer.tsx imports from `@/types` and `@/utils/constants`
 - [ ] Dashboard.tsx imports from `@/types`
@@ -538,7 +542,7 @@ export const MOCK_HASHTAG_GROUPS: HashtagGroup[] = [
 6. No TypeScript compilation errors
 7. Dev server runs without errors
 8. App functions exactly as before (no regressions)
-9. Git commit created: `git commit -m "Phase 1: Foundation setup - directory structure, types, constants"`
+9. Git commit created: `git commit -m "Phase 1: Foundation setup - /src organization, types, constants"`
 
 ## Rollback Plan
 

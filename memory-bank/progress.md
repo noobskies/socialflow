@@ -264,14 +264,12 @@
 **When Ready** (estimated 1-2 months from now):
 
 1. **Backend API Setup**
-
    - Node.js/Express server
    - PostgreSQL database
    - REST API endpoints
    - Authentication system
 
 2. **Data Persistence**
-
    - Replace mock data with API calls
    - CRUD operations
    - Loading states
@@ -743,13 +741,11 @@
 ### Immediate Next Steps
 
 1. **Complete Memory Bank**:
-
    - ✅ Created all core documentation files
    - [ ] Review and verify consistency
    - [ ] Test by simulating new session
 
 2. **Calendar Enhancements**:
-
    - Add drag-and-drop for posts
    - Implement bulk actions
    - Fix date handling edge cases
@@ -838,3 +834,68 @@
 **Confidence**: High that MVP can be delivered in 4-6 weeks with focused effort
 
 **Next Major Milestone**: Deploy demo to Vercel for stakeholder review (2 weeks)
+
+---
+
+## Recent Session Updates
+
+### November 23, 2025 - Phase 1 Foundation Documentation Alignment
+
+**Completed Work**:
+
+- ✅ Analyzed codebase structure and found existing `/src` directory with subdirectories
+- ✅ Identified architectural conflict: phase docs created root-level directories vs existing `/src`
+- ✅ Confirmed with user to use `/src` as base directory (professional structure)
+- ✅ Updated `docs/phases/phase1_foundation.md` completely:
+  - All directory commands now use `/src` prefix
+  - Added step to move `/services` to `/src/services`
+  - Updated all type file paths to `/src/types/*`
+  - Updated constants path to `/src/utils/constants.ts`
+  - TypeScript path aliases point to `/src` subdirectories
+  - Vite config aliases point to `/src` subdirectories
+  - Updated verification checklist and git commit message
+- ✅ Updated `docs/phases/implementation_plan.md`:
+  - Architecture diagram shows `/src` as base directory
+  - All phase deliverables show `/src` paths
+  - Added clarification note about path aliases
+- ✅ Updated Memory Bank (activeContext.md, progress.md)
+
+**Architectural Decision**: `/src` as Base Directory
+
+**Rationale**:
+
+- Industry-standard professional project structure
+- Clear separation: `/src` = code, `/docs` = documentation, `/components` = legacy
+- Consistent with existing `/src` subdirectories already in project
+- Better IDE navigation and file search
+- Prepared for potential monorepo structure
+
+**Target Structure**:
+
+```
+/socialflow
+├── App.tsx (root - orchestrator)
+├── /src (ALL new source code)
+│   ├── /features (dashboard, composer)
+│   ├── /types (domain, ui, features)
+│   ├── /utils (constants, utilities)
+│   ├── /hooks (custom hooks)
+│   ├── /lib (third-party wrappers)
+│   ├── /components (ui, layout, feedback)
+│   └── /services (geminiService)
+├── /components (legacy - to be migrated)
+└── /docs/phases (all phase documentation)
+```
+
+**Path Aliases** (configured in tsconfig.json & vite.config.ts):
+
+- `@/types` → `./src/types`
+- `@/hooks` → `./src/hooks`
+- `@/utils` → `./src/utils`
+- `@/features` → `./src/features`
+- `@/services` → `./src/services`
+- `@/components` → `./src/components`
+
+**Status**: Phase 1 documentation fully aligned and ready for implementation
+
+**Next Action**: User can now implement Phase 1 following `docs/phases/phase1_foundation.md` with confidence

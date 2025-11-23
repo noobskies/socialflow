@@ -653,112 +653,139 @@ AWS / Railway / Render
 ├── App.tsx              # ✅ Minimal, delegates to features
 ├── index.tsx
 │
-├── /features            # ✅ Feature-based organization
-│   ├── /dashboard
-│   │   ├── Dashboard.tsx
-│   │   ├── DashboardStats.tsx
-│   │   ├── TrendingWidget.tsx
-│   │   ├── QuickDraft.tsx
-│   │   ├── useDashboard.ts      # Custom hook
-│   │   └── types.ts              # Feature-specific types
+├── /src                 # ✅ ALL source code organized here
+│   ├── /features        # ✅ Feature-based organization
+│   │   ├── /dashboard
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── DashboardStats.tsx
+│   │   │   ├── TrendingWidget.tsx
+│   │   │   ├── QuickDraft.tsx
+│   │   │   ├── useDashboard.ts      # Custom hook
+│   │   │   └── types.ts              # Feature-specific types
+│   │   │
+│   │   ├── /composer
+│   │   │   ├── Composer.tsx
+│   │   │   ├── PlatformSelector.tsx
+│   │   │   ├── MediaUpload.tsx
+│   │   │   ├── AIAssist.tsx
+│   │   │   ├── useComposer.ts
+│   │   │   └── types.ts
+│   │   │
+│   │   ├── /calendar
+│   │   │   ├── Calendar.tsx
+│   │   │   ├── CalendarGrid.tsx
+│   │   │   ├── PostCard.tsx
+│   │   │   ├── useCalendar.ts
+│   │   │   └── types.ts
+│   │   │
+│   │   └── /settings
+│   │       ├── Settings.tsx
+│   │       ├── AccountSettings.tsx
+│   │       ├── ThemeSettings.tsx
+│   │       └── types.ts
 │   │
-│   ├── /composer
-│   │   ├── Composer.tsx
-│   │   ├── PlatformSelector.tsx
-│   │   ├── MediaUpload.tsx
-│   │   ├── AIAssist.tsx
-│   │   ├── useComposer.ts
-│   │   └── types.ts
+│   ├── /components      # ✅ Shared/reusable only
+│   │   ├── /ui          # Base UI components
+│   │   │   ├── Button.tsx
+│   │   │   ├── Input.tsx
+│   │   │   ├── Modal.tsx
+│   │   │   └── Toast.tsx
+│   │   ├── /layout
+│   │   │   ├── Sidebar.tsx
+│   │   │   ├── Header.tsx
+│   │   │   └── MobileNav.tsx
+│   │   └── /feedback
+│   │       ├── Toast.tsx
+│   │       ├── Notifications.tsx
+│   │       └── HelpModal.tsx
 │   │
-│   ├── /calendar
-│   │   ├── Calendar.tsx
-│   │   ├── CalendarGrid.tsx
-│   │   ├── PostCard.tsx
-│   │   ├── useCalendar.ts
-│   │   └── types.ts
+│   ├── /hooks           # ✅ Custom hooks
+│   │   ├── useToast.ts
+│   │   ├── useModal.ts
+│   │   ├── useTheme.ts
+│   │   ├── useKeyboard.ts
+│   │   └── useLocalStorage.ts
 │   │
-│   └── /settings
-│       ├── Settings.tsx
-│       ├── AccountSettings.tsx
-│       ├── ThemeSettings.tsx
-│       └── types.ts
+│   ├── /lib             # ✅ Third-party wrappers
+│   │   ├── gemini.ts    # Wrapper around @google/genai
+│   │   └── analytics.ts # Analytics wrapper
+│   │
+│   ├── /utils           # ✅ Pure utility functions
+│   │   ├── dates.ts
+│   │   ├── formatting.ts
+│   │   ├── validation.ts
+│   │   └── constants.ts
+│   │
+│   ├── /types           # ✅ Shared types only
+│   │   ├── index.ts     # Re-exports
+│   │   ├── domain.ts    # Post, Draft, Account
+│   │   ├── ui.ts        # ViewState, ToastType
+│   │   └── api.ts       # Future API types
+│   │
+│   └── /services        # ✅ API & backend communication
+│       ├── geminiService.ts  # AI service (current)
+│       └── api.ts       # Future API client
 │
-├── /components          # ✅ Shared/reusable only
-│   ├── /ui              # Base UI components
-│   │   ├── Button.tsx
-│   │   ├── Input.tsx
-│   │   ├── Modal.tsx
-│   │   └── Toast.tsx
-│   ├── /layout
-│   │   ├── Sidebar.tsx
-│   │   ├── Header.tsx
-│   │   └── MobileNav.tsx
-│   └── /feedback
-│       ├── Toast.tsx
-│       ├── Notifications.tsx
-│       └── HelpModal.tsx
-│
-├── /hooks               # ✅ Custom hooks
-│   ├── useToast.ts
-│   ├── useModal.ts
-│   ├── useTheme.ts
-│   ├── useKeyboard.ts
-│   └── useLocalStorage.ts
-│
-├── /lib                 # ✅ Third-party wrappers
-│   ├── gemini.ts        # Wrapper around @google/genai
-│   └── analytics.ts     # Analytics wrapper
-│
-├── /utils               # ✅ Pure utility functions
-│   ├── dates.ts
-│   ├── formatting.ts
-│   ├── validation.ts
-│   └── constants.ts
-│
-├── /types               # ✅ Shared types only
-│   ├── index.ts         # Re-exports
-│   ├── domain.ts        # Post, Draft, Account
-│   ├── ui.ts            # ViewState, ToastType
-│   └── api.ts           # Future API types
-│
-├── /services            # ✅ Backend communication (future)
-│   └── api.ts           # Future API client
-│
-└── /memory-bank         # Project documentation
+├── /components          # Legacy at root (to be migrated)
+├── /docs                # Project documentation
+└── /memory-bank         # AI context and status
+```
+
+**Path Aliases Configuration** (tsconfig.json & vite.config.ts):
+
+```typescript
+// All aliases point to /src subdirectories
+"@/features/*": ["./src/features/*"]
+"@/components/*": ["./src/components/*"]
+"@/hooks/*": ["./src/hooks/*"]
+"@/utils/*": ["./src/utils/*"]
+"@/types": ["./src/types"]
+"@/lib/*": ["./src/lib/*"]
+"@/services/*": ["./src/services/*"]
 ```
 
 **Benefits**:
 
-- ✅ Clear feature boundaries
+- ✅ Professional industry-standard structure
+- ✅ Clear separation: `/src` = code, `/docs` = documentation
+- ✅ Clear feature boundaries within `/src`
 - ✅ Co-located related code
 - ✅ Easy to find files
 - ✅ Scalable as features grow
 - ✅ Easier testing (feature isolation)
 - ✅ Prepared for backend integration
+- ✅ Better IDE navigation and tooling support
+- ✅ Ready for monorepo structure if needed
 
 ### Migration Strategy
 
-**Phase 1**: Extract hooks and utilities
+**Phase 1**: Foundation Setup (using `/src` as base)
 
-1. Create `/hooks` directory
+1. Create `/src/types` directory with 3 modules (domain, ui, features)
+2. Create `/src/utils/constants.ts` with extracted constants
+3. Move `/services` to `/src/services`
+4. Configure TypeScript and Vite path aliases to point to `/src`
+5. Update all imports to use new path aliases (`@/types`, etc.)
+
+**Phase 2**: Extract hooks and utilities
+
+1. Create `/src/hooks` directory
 2. Extract `useToast`, `useModal`, `useTheme` from App.tsx
-3. Move to shared hooks
+3. Create `/src/utils` with utility functions
+4. Move shared logic to custom hooks
 
-**Phase 2**: Reorganize components
+**Phase 3**: Reorganize components into features
 
-1. Create `/features` directory
-2. Move Dashboard → `/features/dashboard`
-3. Move Composer → `/features/composer`
-4. Continue for other features
+1. Create `/src/features` directory
+2. Move Dashboard → `/src/features/dashboard`
+3. Move Composer → `/src/features/composer`
+4. Continue for other features (calendar, settings, etc.)
 
-**Phase 3**: Separate shared components
+**Phase 4**: Separate shared components
 
 1. Identify truly reusable components
-2. Move to `/components/ui` or `/components/layout`
-3. Keep feature-specific components in features
+2. Move to `/src/components/ui` or `/src/components/layout`
+3. Keep feature-specific components in their feature folders
+4. Organize feedback components in `/src/components/feedback`
 
-**Phase 4**: Organize types
-
-1. Create `/types` directory
-2. Separate domain, UI, and API types
-3. Keep feature-specific types in feature folders
+**Current Status**: Phase 1 documentation complete and ready for implementation
