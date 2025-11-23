@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
 import Composer from "./components/Composer";
@@ -17,13 +17,16 @@ import UpgradeModal from "./components/UpgradeModal";
 import {
   ViewState,
   Draft,
-  ToastType,
   BrandingConfig,
   PlanTier,
   Post,
   SocialAccount,
 } from "@/types";
 import { INITIAL_POSTS, INITIAL_ACCOUNTS } from "@/utils/constants";
+import { useToast } from "@/hooks/useToast";
+import { useModal } from "@/hooks/useModal";
+import { useTheme } from "@/hooks/useTheme";
+import { useKeyboard } from "@/hooks/useKeyboard";
 import {
   Menu,
   LayoutDashboard,
@@ -93,6 +96,16 @@ const ShortcutsModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
 };
 
 const App: React.FC = () => {
+  // Custom Hooks
+  const { toast, showToast, hideToast } = useToast();
+  const cmdPalette = useModal();
+  const notifications = useModal();
+  const help = useModal();
+  const shortcuts = useModal();
+  const upgradeModal = useModal();
+  const { theme, setTheme } = useTheme();
+
+  // View State
   const [currentView, setCurrentView] = useState<ViewState>(
     ViewState.DASHBOARD
   );
@@ -100,11 +113,6 @@ const App: React.FC = () => {
   const [initialDraft, setInitialDraft] = useState<Draft | undefined>(
     undefined
   );
-  const [isCmdPaletteOpen, setIsCmdPaletteOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
-  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
   // Global State
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
@@ -120,94 +128,13 @@ const App: React.FC = () => {
     customDomain: "social.myagency.com",
   });
 
-  // Theme State
-  const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
-
-  // Toast State
-  const [toast, setToast] = useState<{
-    message: string;
-    type: ToastType;
-    visible: boolean;
-  }>({
-    message: "",
-    type: "info",
-    visible: false,
-  });
-
-  const showToast = (message: string, type: ToastType = "success") => {
-    setToast({ message, type, visible: true });
-  };
-
-  // Initialize Theme
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as
-      | "light"
-      | "dark"
-      | "system"
-      | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-    } else {
-      setTheme("system");
-    }
-  }, []);
-
-  // Apply Theme Logic
-  useEffect(() => {
-    const root = window.document.documentElement;
-    const applyTheme = () => {
-      root.classList.remove("light", "dark");
-      if (theme === "system") {
-        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-          .matches
-          ? "dark"
-          : "light";
-        root.classList.add(systemTheme);
-      } else {
-        root.classList.add(theme);
-      }
-    };
-    applyTheme();
-    localStorage.setItem("theme", theme);
-    if (theme === "system") {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      const handleChange = () => applyTheme();
-      if (mediaQuery.addEventListener) {
-        mediaQuery.addEventListener("change", handleChange);
-        return () => mediaQuery.removeEventListener("change", handleChange);
-      } else {
-        mediaQuery.addListener(handleChange);
-        return () => mediaQuery.removeListener(handleChange);
-      }
-    }
-  }, [theme]);
-
   // Global Keyboard Shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        ["INPUT", "TEXTAREA", "SELECT"].includes(
-          (e.target as HTMLElement).tagName
-        )
-      ) {
-        return;
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setIsCmdPaletteOpen(true);
-      }
-      if (e.key === "?") {
-        e.preventDefault();
-        setIsShortcutsOpen((prev) => !prev);
-      }
-      if (e.key === "c") {
-        e.preventDefault();
-        setCurrentView(ViewState.COMPOSER);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  useKeyboard({
+    "cmd+k": cmdPalette.openModal,
+    "ctrl+k": cmdPalette.openModal,
+    "?": shortcuts.toggleModal,
+    c: () => setCurrentView(ViewState.COMPOSER),
+  });
 
   const handleCompose = (draft?: Draft) => {
     setInitialDraft(draft);
@@ -235,7 +162,7 @@ const App: React.FC = () => {
 
   const handleUpgrade = (plan: PlanTier) => {
     setUserPlan(plan);
-    setIsUpgradeModalOpen(false);
+    upgradeModal.closeModal();
     showToast(
       `Successfully upgraded to ${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan!`,
       "success"
@@ -280,7 +207,7 @@ const App: React.FC = () => {
           <Library
             onCompose={handleCompose}
             userPlan={userPlan}
-            onOpenUpgrade={() => setIsUpgradeModalOpen(true)}
+            onOpenUpgrade={upgradeModal.openModal}
             onPostCreated={handlePostCreated}
           />
         );
@@ -293,7 +220,7 @@ const App: React.FC = () => {
           <Analytics
             showToast={showToast}
             userPlan={userPlan}
-            onOpenUpgrade={() => setIsUpgradeModalOpen(true)}
+            onOpenUpgrade={upgradeModal.openModal}
             onCompose={handleCompose}
           />
         );
@@ -304,7 +231,7 @@ const App: React.FC = () => {
             branding={branding}
             setBranding={setBranding}
             userPlan={userPlan}
-            onOpenUpgrade={() => setIsUpgradeModalOpen(true)}
+            onOpenUpgrade={upgradeModal.openModal}
             accounts={accounts}
             onToggleConnection={handleToggleAccount}
           />
@@ -328,29 +255,29 @@ const App: React.FC = () => {
         message={toast.message}
         type={toast.type}
         isVisible={toast.visible}
-        onClose={() => setToast((prev) => ({ ...prev, visible: false }))}
+        onClose={hideToast}
       />
       <Notifications
-        isOpen={isNotificationsOpen}
-        onClose={() => setIsNotificationsOpen(false)}
+        isOpen={notifications.isOpen}
+        onClose={notifications.closeModal}
       />
-      <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+      <HelpModal isOpen={help.isOpen} onClose={help.closeModal} />
       <ShortcutsModal
-        isOpen={isShortcutsOpen}
-        onClose={() => setIsShortcutsOpen(false)}
+        isOpen={shortcuts.isOpen}
+        onClose={shortcuts.closeModal}
       />
       <UpgradeModal
-        isOpen={isUpgradeModalOpen}
-        onClose={() => setIsUpgradeModalOpen(false)}
+        isOpen={upgradeModal.isOpen}
+        onClose={upgradeModal.closeModal}
         currentPlan={userPlan}
         onUpgrade={handleUpgrade}
       />
       <CommandPalette
-        isOpen={isCmdPaletteOpen}
-        onClose={() => setIsCmdPaletteOpen(false)}
+        isOpen={cmdPalette.isOpen}
+        onClose={cmdPalette.closeModal}
         setView={(view) => {
           setCurrentView(view);
-          setIsCmdPaletteOpen(false);
+          cmdPalette.closeModal();
         }}
       />
 
@@ -374,9 +301,9 @@ const App: React.FC = () => {
           setTheme={setTheme}
           branding={branding}
           userPlan={userPlan}
-          onOpenNotifications={() => setIsNotificationsOpen(true)}
-          onOpenHelp={() => setIsHelpOpen(true)}
-          onOpenUpgrade={() => setIsUpgradeModalOpen(true)}
+          onOpenNotifications={notifications.openModal}
+          onOpenHelp={help.openModal}
+          onOpenUpgrade={upgradeModal.openModal}
         />
       </div>
 
@@ -394,10 +321,7 @@ const App: React.FC = () => {
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsNotificationsOpen(true)}
-              className="relative p-1"
-            >
+            <button onClick={notifications.openModal} className="relative p-1">
               <div className="w-2 h-2 bg-red-500 rounded-full absolute top-0 right-0 border border-white dark:border-slate-900"></div>
               <img
                 src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&fit=crop"
