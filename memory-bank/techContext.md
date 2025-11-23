@@ -345,38 +345,83 @@ VITE_GEMINI_API_KEY=your_api_key_here
 }
 ```
 
-### ESLint (Planned)
+### ESLint ✅ (Phase 0a - Configured)
 
-**Not yet configured** - Future addition for:
+**Status**: Fully configured with React/TypeScript recommended rules
 
-- Code style consistency
-- Best practice enforcement
-- Unused variable detection
+**Configuration**: `eslint.config.js` (ESM format)
 
-**Planned Config**:
+**Key Features**:
+- React Hooks rules (enforces dependencies, prevents common mistakes)
+- TypeScript type safety (no explicit `any`, unused variables)
+- Fast Refresh support for Vite
+- Browser globals configured
 
-```bash
-npm install -D eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
+**Rules Enforced**:
+```javascript
+{
+  "react-hooks/exhaustive-deps": "warn",
+  "react-hooks/rules-of-hooks": "error",
+  "@typescript-eslint/no-unused-vars": "error", // except ^_
+  "@typescript-eslint/no-explicit-any": "error"
+}
 ```
 
-### Prettier (Planned)
+**npm Scripts**:
+- `npm run lint` - Check for linting errors (fails on warnings)
+- `npm run lint:fix` - Auto-fix linting errors where possible
 
-**Not yet configured** - Future addition for:
+**Current Status**: 77 errors, 2 warnings identified (will fix during refactoring)
 
-- Consistent code formatting
-- Auto-format on save
-- Team alignment
+### Prettier ✅ (Phase 0a - Configured)
 
-**Planned Config**:
+**Status**: Fully configured for consistent code formatting
 
+**Configuration**: `.prettierrc`
+
+**Formatting Rules**:
 ```json
 {
   "semi": true,
   "singleQuote": false,
   "tabWidth": 2,
-  "trailingComma": "es5"
+  "trailingComma": "es5",
+  "printWidth": 80,
+  "arrowParens": "always",
+  "endOfLine": "lf"
 }
 ```
+
+**npm Scripts**:
+- `npm run format` - Format all files
+- `npm run format:check` - Check formatting (CI use)
+
+**Files Formatted**: 25 files across entire codebase
+
+**Ignored Files**: `.prettierignore` excludes build outputs, node_modules, lock files, markdown
+
+### Vitest ✅ (Phase 0a - Configured)
+
+**Status**: Testing infrastructure configured (no tests written yet)
+
+**Configuration**: `vitest.config.ts`
+
+**Key Features**:
+- jsdom environment for React component testing
+- @testing-library/react integration
+- jest-dom matchers for better assertions
+- Coverage reporting with v8
+- UI mode for interactive test running
+
+**npm Scripts**:
+- `npm run test` - Run tests in watch mode (TDD)
+- `npm run test:ui` - Open Vitest UI in browser
+- `npm run test:run` - Run tests once (CI use)
+- `npm run test:coverage` - Generate coverage report
+
+**Test Setup**: `src/test/setup.ts` configures testing-library matchers
+
+**Note**: Infrastructure ready, actual tests will be written in Phase 7
 
 ## Development Constraints
 
