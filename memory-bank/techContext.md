@@ -53,8 +53,8 @@
 **Build Configuration** (`vite.config.ts`):
 
 ```typescript
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
@@ -166,10 +166,10 @@ export default defineConfig({
 
 ```typescript
 // services/geminiService.ts
-import { GoogleGenerativeAI } from "@google/genai";
+import { GoogleGenerativeAI } from '@google/genai';
 
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
+const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 ```
 
 **Why Gemini**:
@@ -420,7 +420,7 @@ Frontend (Vite) → Backend (Node.js/Express) → Database (PostgreSQL)
 try {
   const result = await geminiService.generate(prompt);
 } catch (error) {
-  console.error("AI request failed:", error);
+  console.error('AI request failed:', error);
   // Fallback to manual content creation
 }
 ```
@@ -546,7 +546,6 @@ test: Add unit tests for geminiService
 **Recommended Platforms**:
 
 1. **Vercel** (Primary choice)
-
    - Zero-config React deployment
    - Automatic HTTPS
    - Preview deployments for PRs
@@ -554,7 +553,6 @@ test: Add unit tests for geminiService
    - Free tier sufficient for MVP
 
 2. **Netlify** (Alternative)
-
    - Similar features to Vercel
    - Drag-and-drop deployment
    - Form handling built-in
@@ -647,19 +645,16 @@ npm install web-vitals
 ### Future Security Measures
 
 1. **Backend API Proxy**:
-
    - Move Gemini API key to server
    - Client calls backend, backend calls AI
    - Prevents key exposure
 
 2. **Input Validation**:
-
    - Sanitize user content
    - Validate file uploads
    - Prevent XSS attacks
 
 3. **Authentication**:
-
    - JWT tokens or session cookies
    - OAuth for social logins
    - Role-based access control

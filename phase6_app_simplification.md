@@ -364,13 +364,11 @@ export default App;
 ## Implementation Steps
 
 1. **Extract ShortcutsModal component**
-
    - Create `/components/feedback/ShortcutsModal.tsx`
    - Copy inline ShortcutsModal from App.tsx (lines 18-43)
    - Export as default component
 
 2. **Update all imports**
-
    - Replace `./components/` with `@/components/`
    - Replace `./types` with `@/types`
    - Add hook imports from `@/hooks`
@@ -379,20 +377,17 @@ export default App;
    - Add Composer import from `@/features/composer`
 
 3. **Replace inline state with hooks**
-
    - Remove toast state, use `useToast()`
    - Remove modal states, use `useModal()` x5
    - Remove theme logic, use `useTheme()`
    - Remove keyboard handler, use `useKeyboard()`
 
 4. **Update modal prop syntax**
-
    - Change `isOpen={isCmdPaletteOpen}` to `isOpen={cmdPalette.isOpen}`
    - Change `onClose={() => setIsCmdPaletteOpen(false)}` to `onClose={cmdPalette.closeModal}`
    - Repeat for all modals
 
 5. **Clean up deleted code**
-
    - Remove inline ShortcutsModal component
    - Remove INITIAL_POSTS constant
    - Remove INITIAL_ACCOUNTS constant
@@ -400,7 +395,6 @@ export default App;
    - Remove showToast function definition
 
 6. **Verify imports throughout app**
-
    - Search for any remaining `../` imports
    - Replace with `@/` path aliases
    - Update all components to use new import paths
@@ -456,9 +450,9 @@ const upgradeModal = useModal();
 
 // Keyboard - 5 lines
 useKeyboard({
-  "cmd+k": cmdPalette.openModal,
-  "ctrl+k": cmdPalette.openModal,
-  "?": shortcuts.toggleModal,
+  'cmd+k': cmdPalette.openModal,
+  'ctrl+k': cmdPalette.openModal,
+  '?': shortcuts.toggleModal,
   c: () => setCurrentView(ViewState.COMPOSER),
 });
 
@@ -486,20 +480,17 @@ const { toast, showToast, hideToast } = useToast();
 ### Manual Testing
 
 1. **Application Loads:**
-
    - Start dev server
    - Dashboard renders
    - No console errors
 
 2. **Navigation:**
-
    - Click all sidebar links
    - All views load correctly
    - Mobile menu works
    - Bottom nav works
 
 3. **Modals:**
-
    - Cmd+K opens command palette
    - ? opens shortcuts modal
    - Notifications panel opens
@@ -508,14 +499,12 @@ const { toast, showToast, hideToast } = useToast();
    - All modals close correctly
 
 4. **Theme:**
-
    - Switch to light mode
    - Switch to dark mode
    - Switch to system mode
    - Verify persistence after refresh
 
 5. **Toast:**
-
    - Schedule post → success toast
    - Test error toast
    - Toast auto-dismisses

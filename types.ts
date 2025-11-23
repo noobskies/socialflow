@@ -1,5 +1,11 @@
-
-export type Platform = 'twitter' | 'linkedin' | 'instagram' | 'facebook' | 'tiktok' | 'youtube' | 'pinterest';
+export type Platform =
+  | 'twitter'
+  | 'linkedin'
+  | 'instagram'
+  | 'facebook'
+  | 'tiktok'
+  | 'youtube'
+  | 'pinterest';
 export type PlanTier = 'free' | 'pro' | 'agency';
 
 export interface SocialAccount {
@@ -106,7 +112,7 @@ export enum ViewState {
   LIBRARY = 'LIBRARY',
   SETTINGS = 'SETTINGS',
   LINKS = 'LINKS',
-  AUTOMATIONS = 'AUTOMATIONS'
+  AUTOMATIONS = 'AUTOMATIONS',
 }
 
 export interface User {

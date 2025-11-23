@@ -22,7 +22,7 @@ Establish the foundation for the refactoring by creating the directory structure
 ## Directory Structure to Create
 
 ```bash
-mkdir -p features/dashboard features/composer features/calendar features/settings
+mkdir -p features/dashboard features/composer features/calendar features/settings features/inbox features/library features/links features/automations features/analytics
 mkdir -p components/ui components/layout components/feedback
 mkdir -p hooks utils lib types
 ```
@@ -32,9 +32,9 @@ mkdir -p hooks utils lib types
 ### Create `/types/index.ts`
 
 ```typescript
-export * from "./domain";
-export * from "./ui";
-export * from "./features";
+export * from './domain';
+export * from './ui';
+export * from './features';
 ```
 
 ### Create `/types/domain.ts`
@@ -43,15 +43,15 @@ Core business entities:
 
 ```typescript
 export type Platform =
-  | "twitter"
-  | "linkedin"
-  | "instagram"
-  | "facebook"
-  | "tiktok"
-  | "youtube"
-  | "pinterest";
+  | 'twitter'
+  | 'linkedin'
+  | 'instagram'
+  | 'facebook'
+  | 'tiktok'
+  | 'youtube'
+  | 'pinterest';
 
-export type PlanTier = "free" | "pro" | "agency";
+export type PlanTier = 'free' | 'pro' | 'agency';
 
 export interface SocialAccount {
   id: string;
@@ -66,15 +66,9 @@ export interface Post {
   content: string;
   platforms: Platform[];
   scheduledDate: string;
-  status:
-    | "scheduled"
-    | "published"
-    | "draft"
-    | "pending_review"
-    | "approved"
-    | "rejected";
+  status: 'scheduled' | 'published' | 'draft' | 'pending_review' | 'approved' | 'rejected';
   mediaUrl?: string;
-  mediaType?: "image" | "video";
+  mediaType?: 'image' | 'video';
   time?: string;
   timezone?: string;
   comments?: PostComment[];
@@ -85,10 +79,10 @@ export interface Post {
 export interface Draft {
   content?: string;
   mediaUrl?: string;
-  mediaType?: "image" | "video";
+  mediaType?: 'image' | 'video';
   scheduledDate?: string;
   platforms?: Platform[];
-  status?: "draft" | "pending_review" | "approved" | "rejected";
+  status?: 'draft' | 'pending_review' | 'approved' | 'rejected';
   comments?: PostComment[];
   platformOptions?: PlatformOptions;
   poll?: PollConfig;
@@ -102,7 +96,7 @@ export interface User {
 
 export interface MediaAsset {
   id: string;
-  type: "image" | "video" | "template";
+  type: 'image' | 'video' | 'template';
   url?: string;
   content?: string;
   name: string;
@@ -115,7 +109,7 @@ export interface Trend {
   id: string;
   topic: string;
   volume: string;
-  difficulty: "Easy" | "Medium" | "Hard";
+  difficulty: 'Easy' | 'Medium' | 'Hard';
   context: string;
 }
 ```
@@ -126,22 +120,22 @@ UI-specific types:
 
 ```typescript
 export enum ViewState {
-  DASHBOARD = "DASHBOARD",
-  COMPOSER = "COMPOSER",
-  CALENDAR = "CALENDAR",
-  ANALYTICS = "ANALYTICS",
-  INBOX = "INBOX",
-  LIBRARY = "LIBRARY",
-  SETTINGS = "SETTINGS",
-  LINKS = "LINKS",
-  AUTOMATIONS = "AUTOMATIONS",
+  DASHBOARD = 'DASHBOARD',
+  COMPOSER = 'COMPOSER',
+  CALENDAR = 'CALENDAR',
+  ANALYTICS = 'ANALYTICS',
+  INBOX = 'INBOX',
+  LIBRARY = 'LIBRARY',
+  SETTINGS = 'SETTINGS',
+  LINKS = 'LINKS',
+  AUTOMATIONS = 'AUTOMATIONS',
 }
 
-export type ToastType = "success" | "error" | "info";
+export type ToastType = 'success' | 'error' | 'info';
 
 export interface Notification {
   id: string;
-  type: "info" | "success" | "warning" | "mention";
+  type: 'info' | 'success' | 'warning' | 'mention';
   title: string;
   message: string;
   timestamp: string;
@@ -162,14 +156,14 @@ export interface PlatformOptions {
   };
   twitter?: {
     isThread?: boolean;
-    replySettings?: "everyone" | "mentioned" | "followers";
+    replySettings?: 'everyone' | 'mentioned' | 'followers';
   };
   pinterest?: {
     destinationLink?: string;
     boardId?: string;
   };
   youtube?: {
-    visibility?: "public" | "private" | "unlisted";
+    visibility?: 'public' | 'private' | 'unlisted';
     tags?: string[];
   };
 }
@@ -245,9 +239,9 @@ export interface TeamMember {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "editor" | "viewer";
+  role: 'admin' | 'editor' | 'viewer';
   avatar: string;
-  status: "active" | "invited";
+  status: 'active' | 'invited';
 }
 
 export interface ShortLink {
@@ -265,7 +259,7 @@ export interface BioPageConfig {
   displayName: string;
   bio: string;
   avatar: string;
-  theme: "light" | "dark" | "colorful";
+  theme: 'light' | 'dark' | 'colorful';
   links: { id: string; title: string; url: string; active: boolean }[];
   enableLeadCapture?: boolean;
   leadCaptureText?: string;
@@ -279,7 +273,7 @@ export interface SocialMessage {
   authorAvatar: string;
   content: string;
   timestamp: string;
-  type: "comment" | "dm" | "mention";
+  type: 'comment' | 'dm' | 'mention';
   unread: boolean;
   replied?: boolean;
 }
@@ -321,22 +315,22 @@ Add path aliases to compilerOptions:
 Add path resolution:
 
 ```typescript
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import path from "path";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./"),
-      "@/features": path.resolve(__dirname, "./features"),
-      "@/components": path.resolve(__dirname, "./components"),
-      "@/hooks": path.resolve(__dirname, "./hooks"),
-      "@/utils": path.resolve(__dirname, "./utils"),
-      "@/types": path.resolve(__dirname, "./types"),
-      "@/lib": path.resolve(__dirname, "./lib"),
-      "@/services": path.resolve(__dirname, "./services"),
+      '@': path.resolve(__dirname, './'),
+      '@/features': path.resolve(__dirname, './features'),
+      '@/components': path.resolve(__dirname, './components'),
+      '@/hooks': path.resolve(__dirname, './hooks'),
+      '@/utils': path.resolve(__dirname, './utils'),
+      '@/types': path.resolve(__dirname, './types'),
+      '@/lib': path.resolve(__dirname, './lib'),
+      '@/services': path.resolve(__dirname, './services'),
     },
   },
   server: {
@@ -353,41 +347,41 @@ export default defineConfig({
 Extract from App.tsx and Composer.tsx:
 
 ```typescript
-import { Post, SocialAccount, Product, HashtagGroup } from "@/types";
+import { Post, SocialAccount, Product, HashtagGroup } from '@/types';
 
 export const INITIAL_POSTS: Post[] = [
   {
-    id: "1",
-    scheduledDate: "2023-10-03",
-    platforms: ["twitter"],
-    content: "Launching our new feature... 🚀",
-    status: "published",
-    time: "09:00",
+    id: '1',
+    scheduledDate: '2023-10-03',
+    platforms: ['twitter'],
+    content: 'Launching our new feature... 🚀',
+    status: 'published',
+    time: '09:00',
   },
   {
-    id: "2",
-    scheduledDate: "2023-10-03",
-    platforms: ["linkedin"],
-    content: "Company growth update: We reached 10k users!",
-    status: "published",
-    time: "11:30",
+    id: '2',
+    scheduledDate: '2023-10-03',
+    platforms: ['linkedin'],
+    content: 'Company growth update: We reached 10k users!',
+    status: 'published',
+    time: '11:30',
   },
   // ... rest of posts from App.tsx lines 45-65
 ];
 
 export const INITIAL_ACCOUNTS: SocialAccount[] = [
   {
-    id: "1",
-    platform: "twitter",
-    username: "@socialflow",
-    avatar: "",
+    id: '1',
+    platform: 'twitter',
+    username: '@socialflow',
+    avatar: '',
     connected: true,
   },
   {
-    id: "2",
-    platform: "linkedin",
-    username: "SocialFlow Inc.",
-    avatar: "",
+    id: '2',
+    platform: 'linkedin',
+    username: 'SocialFlow Inc.',
+    avatar: '',
     connected: true,
   },
   // ... rest of accounts from App.tsx
@@ -395,52 +389,51 @@ export const INITIAL_ACCOUNTS: SocialAccount[] = [
 
 export const MOCK_PRODUCTS: Product[] = [
   {
-    id: "1",
-    name: "Premium Leather Bag",
-    price: "$129.00",
-    description:
-      "Handcrafted Italian leather messenger bag. Perfect for the modern professional.",
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400",
+    id: '1',
+    name: 'Premium Leather Bag',
+    price: '$129.00',
+    description: 'Handcrafted Italian leather messenger bag. Perfect for the modern professional.',
+    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400',
     inventory: 12,
   },
   // ... rest from Composer.tsx lines 30-50
 ];
 
 export const AI_TEMPLATES = [
-  { id: "pas", name: "Problem-Agitate-Solve", label: "PAS Framework" },
+  { id: 'pas', name: 'Problem-Agitate-Solve', label: 'PAS Framework' },
   {
-    id: "aida",
-    name: "Attention-Interest-Desire-Action",
-    label: "AIDA Framework",
+    id: 'aida',
+    name: 'Attention-Interest-Desire-Action',
+    label: 'AIDA Framework',
   },
-  { id: "story", name: "Storytelling", label: "Hero's Journey" },
-  { id: "viral", name: "Viral Hook", label: "Controversial/Viral" },
+  { id: 'story', name: 'Storytelling', label: "Hero's Journey" },
+  { id: 'viral', name: 'Viral Hook', label: 'Controversial/Viral' },
 ];
 
 export const TIMEZONES = [
-  { value: "UTC", label: "UTC" },
-  { value: "America/New_York", label: "New York (EST)" },
-  { value: "America/Los_Angeles", label: "Los Angeles (PST)" },
-  { value: "Europe/London", label: "London (GMT)" },
-  { value: "Europe/Paris", label: "Paris (CET)" },
-  { value: "Asia/Tokyo", label: "Tokyo (JST)" },
+  { value: 'UTC', label: 'UTC' },
+  { value: 'America/New_York', label: 'New York (EST)' },
+  { value: 'America/Los_Angeles', label: 'Los Angeles (PST)' },
+  { value: 'Europe/London', label: 'London (GMT)' },
+  { value: 'Europe/Paris', label: 'Paris (CET)' },
+  { value: 'Asia/Tokyo', label: 'Tokyo (JST)' },
 ];
 
 export const MOCK_HASHTAG_GROUPS: HashtagGroup[] = [
   {
-    id: "1",
-    name: "Tech Startups",
-    tags: ["#startup", "#tech", "#innovation", "#saas", "#growth"],
+    id: '1',
+    name: 'Tech Startups',
+    tags: ['#startup', '#tech', '#innovation', '#saas', '#growth'],
   },
   {
-    id: "2",
-    name: "Summer Vibes",
-    tags: ["#summer", "#summervibes", "#sunshine", "#fun"],
+    id: '2',
+    name: 'Summer Vibes',
+    tags: ['#summer', '#summervibes', '#sunshine', '#fun'],
   },
   {
-    id: "3",
-    name: "Monday Motivation",
-    tags: ["#mondaymotivation", "#grind", "#success", "#goals"],
+    id: '3',
+    name: 'Monday Motivation',
+    tags: ['#mondaymotivation', '#grind', '#success', '#goals'],
   },
 ];
 ```
@@ -450,31 +443,27 @@ export const MOCK_HASHTAG_GROUPS: HashtagGroup[] = [
 1. **Create directory structure**
 
    ```bash
-   mkdir -p features/dashboard features/composer features/calendar features/settings
+   mkdir -p features/dashboard features/composer features/calendar features/settings features/inbox features/library features/links features/automations features/analytics
    mkdir -p components/ui components/layout components/feedback
    mkdir -p hooks utils lib types
    ```
 
 2. **Create type files**
-
    - Create `/types/domain.ts` with business types
    - Create `/types/ui.ts` with UI types
    - Create `/types/features.ts` with feature types
    - Create `/types/index.ts` as re-export hub
 
 3. **Update TypeScript configuration**
-
    - Update `tsconfig.json` with baseUrl and paths
    - Save and verify no errors
 
 4. **Update Vite configuration**
-
    - Update `vite.config.ts` with path aliases
    - Add path import at top
    - Save configuration
 
 5. **Create constants file**
-
    - Create `/utils/constants.ts`
    - Copy `INITIAL_POSTS` from App.tsx (lines 45-65)
    - Copy `INITIAL_ACCOUNTS` from App.tsx
@@ -482,7 +471,6 @@ export const MOCK_HASHTAG_GROUPS: HashtagGroup[] = [
    - Copy `AI_TEMPLATES`, `TIMEZONES`, `MOCK_HASHTAG_GROUPS` from Composer.tsx
 
 6. **Update imports in existing files**
-
    - In `App.tsx`: Replace `import { ... } from './types'` with `import { ... } from '@/types'`
    - In `App.tsx`: Add `import { INITIAL_POSTS, INITIAL_ACCOUNTS } from '@/utils/constants'`
    - In `App.tsx`: Remove inline `INITIAL_POSTS` and `INITIAL_ACCOUNTS` constants
@@ -492,7 +480,21 @@ export const MOCK_HASHTAG_GROUPS: HashtagGroup[] = [
    - In `Dashboard.tsx`: Replace `import { ... } from '../types'` with `import { ... } from '@/types'`
    - Update all other component imports to use `@/types`
 
-7. **Test the changes**
+7. **Move Feature Components**
+   - Move `Dashboard.tsx` to `features/dashboard/Dashboard.tsx`
+   - Move `Composer.tsx` to `features/composer/Composer.tsx`
+   - Move `Calendar.tsx` to `features/calendar/Calendar.tsx`
+   - Move `Settings.tsx` to `features/settings/Settings.tsx`
+   - Move `Inbox.tsx` to `features/inbox/Inbox.tsx`
+   - Move `Library.tsx` to `features/library/Library.tsx`
+   - Move `LinkManager.tsx` to `features/links/LinkManager.tsx`
+   - Move `Automations.tsx` to `features/automations/Automations.tsx`
+   - Move `Analytics.tsx` to `features/analytics/Analytics.tsx`
+
+8. **Update App.tsx Imports**
+   - Update imports to point to new feature locations (e.g., `import Dashboard from '@/features/dashboard/Dashboard'`)
+
+9. **Test the changes**
    - Run `npm run dev`
    - Verify no TypeScript errors
    - Verify app loads correctly
@@ -509,6 +511,8 @@ export const MOCK_HASHTAG_GROUPS: HashtagGroup[] = [
 - [ ] `/types/index.ts` re-exports all types
 - [ ] `/utils/constants.ts` contains all extracted constants
 - [ ] App.tsx imports from `@/types` and `@/utils/constants`
+- [ ] Feature components moved to `features/` directories
+- [ ] App.tsx imports features from new locations
 - [ ] Composer.tsx imports from `@/types` and `@/utils/constants`
 - [ ] Dashboard.tsx imports from `@/types`
 - [ ] No TypeScript errors in terminal
@@ -534,11 +538,12 @@ export const MOCK_HASHTAG_GROUPS: HashtagGroup[] = [
 2. TypeScript path aliases configured and working
 3. Types split into 3 organized files
 4. Constants extracted to utils
-5. All imports updated to use new paths
-6. No TypeScript compilation errors
-7. Dev server runs without errors
-8. App functions exactly as before (no regressions)
-9. Git commit created: `git commit -m "Phase 1: Foundation setup - directory structure, types, constants"`
+5. Feature components moved to `features/` directories
+6. All imports updated to use new paths
+7. No TypeScript compilation errors
+8. Dev server runs without errors
+9. App functions exactly as before (no regressions)
+10. Git commit created: `git commit -m "Phase 1: Foundation setup - directory structure, types, constants, component moves"`
 
 ## Rollback Plan
 

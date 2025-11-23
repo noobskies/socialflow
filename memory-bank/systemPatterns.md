@@ -61,15 +61,15 @@
 
 ```typescript
 enum ViewState {
-  DASHBOARD = "DASHBOARD",
-  COMPOSER = "COMPOSER",
-  CALENDAR = "CALENDAR",
-  ANALYTICS = "ANALYTICS",
-  INBOX = "INBOX",
-  LIBRARY = "LIBRARY",
-  SETTINGS = "SETTINGS",
-  LINKS = "LINKS",
-  AUTOMATIONS = "AUTOMATIONS",
+  DASHBOARD = 'DASHBOARD',
+  COMPOSER = 'COMPOSER',
+  CALENDAR = 'CALENDAR',
+  ANALYTICS = 'ANALYTICS',
+  INBOX = 'INBOX',
+  LIBRARY = 'LIBRARY',
+  SETTINGS = 'SETTINGS',
+  LINKS = 'LINKS',
+  AUTOMATIONS = 'AUTOMATIONS',
 }
 ```
 
@@ -197,7 +197,7 @@ try {
   const result = await geminiService.generate(prompt);
   return result;
 } catch (error) {
-  console.error("AI generation failed:", error);
+  console.error('AI generation failed:', error);
   return fallbackContent;
 }
 ```
@@ -302,7 +302,7 @@ const handlePublish = async () => {
     content,
     platforms: selectedPlatforms,
     scheduledDate,
-    status: "scheduled",
+    status: 'scheduled',
     time: selectedTime,
   };
 
@@ -313,7 +313,7 @@ const handlePublish = async () => {
   resetForm();
 
   // 5. Show feedback
-  showToast("Post scheduled successfully");
+  showToast('Post scheduled successfully');
 };
 ```
 
@@ -357,19 +357,18 @@ const handleDraftFromTrend = (trend: Trend) => {
 useEffect(() => {
   const root = window.document.documentElement;
   const applyTheme = () => {
-    root.classList.remove("light", "dark");
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
+    root.classList.remove('light', 'dark');
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
       root.classList.add(systemTheme);
     } else {
       root.classList.add(theme);
     }
   };
   applyTheme();
-  localStorage.setItem("theme", theme);
+  localStorage.setItem('theme', theme);
 }, [theme]);
 ```
 
@@ -389,35 +388,31 @@ useEffect(() => {
 useEffect(() => {
   const handleKeyDown = (e: KeyboardEvent) => {
     // Skip if typing in input
-    if (
-      ["INPUT", "TEXTAREA", "SELECT"].includes(
-        (e.target as HTMLElement).tagName
-      )
-    ) {
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName)) {
       return;
     }
 
     // Cmd/Ctrl + K → Command Palette
-    if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault();
       setIsCmdPaletteOpen(true);
     }
 
     // ? → Help Modal
-    if (e.key === "?") {
+    if (e.key === '?') {
       e.preventDefault();
       setIsShortcutsOpen((prev) => !prev);
     }
 
     // c → Composer
-    if (e.key === "c") {
+    if (e.key === 'c') {
       e.preventDefault();
       setCurrentView(ViewState.COMPOSER);
     }
   };
 
-  window.addEventListener("keydown", handleKeyDown);
-  return () => window.removeEventListener("keydown", handleKeyDown);
+  window.addEventListener('keydown', handleKeyDown);
+  return () => window.removeEventListener('keydown', handleKeyDown);
 }, []);
 ```
 

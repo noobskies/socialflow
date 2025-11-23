@@ -189,7 +189,7 @@ const trends = await getTrendingTopics(niche);
 
 // Service handles provider details
 export const getTrendingTopics = async (niche: string) => {
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+  const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
   // ... Gemini-specific logic
 };
 ```
@@ -262,8 +262,8 @@ try {
   const result = await riskyOperation();
   return result;
 } catch (error) {
-  console.error("Operation failed:", error);
-  showToast("Something went wrong. Please try again.", "error");
+  console.error('Operation failed:', error);
+  showToast('Something went wrong. Please try again.', 'error');
   return fallbackValue;
 }
 ```

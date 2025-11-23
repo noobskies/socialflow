@@ -264,14 +264,12 @@
 **When Ready** (estimated 1-2 months from now):
 
 1. **Backend API Setup**
-
    - Node.js/Express server
    - PostgreSQL database
    - REST API endpoints
    - Authentication system
 
 2. **Data Persistence**
-
    - Replace mock data with API calls
    - CRUD operations
    - Loading states
@@ -743,13 +741,11 @@
 ### Immediate Next Steps
 
 1. **Complete Memory Bank**:
-
    - ✅ Created all core documentation files
    - [ ] Review and verify consistency
    - [ ] Test by simulating new session
 
 2. **Calendar Enhancements**:
-
    - Add drag-and-drop for posts
    - Implement bulk actions
    - Fix date handling edge cases

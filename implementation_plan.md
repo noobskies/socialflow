@@ -45,12 +45,36 @@ Complete frontend refactoring to transform SocialFlow AI from a flat, monolithic
 └── /services (geminiService)
 ```
 
-## Phase Documentation
+### Project Restructuring
 
-Each phase has its own detailed documentation file with:
+Move root-level application files to `src/` directory to follow standard conventions.
 
-- Complete code examples
-- Step-by-step implementation guide
+#### [MOVE] Root files to `src/`
+
+- `App.tsx` -> `src/App.tsx`
+- `index.tsx` -> `src/index.tsx`
+- `components/` -> `src/components/`
+- `features/` -> `src/features/`
+- `hooks/` -> `src/hooks/`
+- `lib/` -> `src/lib/`
+- `services/` -> `src/services/`
+- `types/` -> `src/types/`
+- `utils/` -> `src/utils/`
+
+#### [MODIFY] [tsconfig.json](file:///home/noobskie/workspace/socialflow/tsconfig.json)
+
+- Update paths to point to `src/*`
+
+#### [MODIFY] [vite.config.ts](file:///home/noobskie/workspace/socialflow/vite.config.ts)
+
+- Update aliases to point to `src/*`
+
+#### [MODIFY] [index.html](file:///home/noobskie/workspace/socialflow/index.html)
+
+- Add script tag pointing to `/src/index.tsx`
+
+## Verification Planguide
+
 - Testing checklist
 - Completion criteria
 - Rollback plan

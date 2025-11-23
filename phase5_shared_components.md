@@ -273,7 +273,6 @@ Currently defined inline in App.tsx - extract to separate file.
    ```
 
 2. **Implement UI components**
-
    - Copy Button implementation
    - Copy Input implementation
    - Copy Modal implementation
@@ -286,7 +285,6 @@ Currently defined inline in App.tsx - extract to separate file.
    ```
 
 4. **Move and update feedback components**
-
    - Move `components/Toast.tsx` to `components/feedback/Toast.tsx`
    - Move `components/Notifications.tsx` to `components/feedback/`
    - Move `components/HelpModal.tsx` to `components/feedback/`
@@ -294,7 +292,6 @@ Currently defined inline in App.tsx - extract to separate file.
    - Update all imports in moved files to use path aliases
 
 5. **Update component imports**
-
    - In App.tsx: Update Toast, Notifications, HelpModal imports
    - In App.tsx: Import ShortcutsModal instead of defining inline
 
@@ -325,7 +322,6 @@ Currently defined inline in App.tsx - extract to separate file.
 ### Manual Testing
 
 1. **Button Component:**
-
    - Test primary variant
    - Test outline variant
    - Test loading state
@@ -333,14 +329,12 @@ Currently defined inline in App.tsx - extract to separate file.
    - Test with icons
 
 2. **Input Component:**
-
    - Test with label
    - Test with error message
    - Test with helper text
    - Test dark mode styling
 
 3. **Modal Component:**
-
    - Test different sizes
    - Test close button
    - Test backdrop click

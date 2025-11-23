@@ -31,8 +31,8 @@ Extract reusable logic from App.tsx into custom hooks and utility functions. Thi
 Toast notification management hook:
 
 ```typescript
-import { useState } from "react";
-import { ToastType } from "@/types";
+import { useState } from 'react';
+import { ToastType } from '@/types';
 
 interface ToastState {
   message: string;
@@ -42,12 +42,12 @@ interface ToastState {
 
 export function useToast() {
   const [toast, setToast] = useState<ToastState>({
-    message: "",
-    type: "info",
+    message: '',
+    type: 'info',
     visible: false,
   });
 
-  const showToast = (message: string, type: ToastType = "success") => {
+  const showToast = (message: string, type: ToastType = 'success') => {
     setToast({ message, type, visible: true });
   };
 
@@ -66,7 +66,7 @@ export function useToast() {
 Modal state management hook:
 
 ```typescript
-import { useState } from "react";
+import { useState } from 'react';
 
 export function useModal(initialState = false) {
   const [isOpen, setIsOpen] = useState(initialState);
@@ -86,16 +86,16 @@ export function useModal(initialState = false) {
 Theme management with localStorage persistence:
 
 ```typescript
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
-type Theme = "light" | "dark" | "system";
+type Theme = 'light' | 'dark' | 'system';
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>("system");
+  const [theme, setTheme] = useState<Theme>('system');
 
   // Load theme from localStorage on mount
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as Theme | null;
+    const savedTheme = localStorage.getItem('theme') as Theme | null;
     if (savedTheme) {
       setTheme(savedTheme);
     }
@@ -106,13 +106,12 @@ export function useTheme() {
     const root = window.document.documentElement;
 
     const applyTheme = () => {
-      root.classList.remove("light", "dark");
+      root.classList.remove('light', 'dark');
 
-      if (theme === "system") {
-        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-          .matches
-          ? "dark"
-          : "light";
+      if (theme === 'system') {
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light';
         root.classList.add(systemTheme);
       } else {
         root.classList.add(theme);
@@ -120,17 +119,17 @@ export function useTheme() {
     };
 
     applyTheme();
-    localStorage.setItem("theme", theme);
+    localStorage.setItem('theme', theme);
 
     // Listen for system theme changes if theme is 'system'
-    if (theme === "system") {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    if (theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handleChange = () => applyTheme();
 
       // Modern browsers
       if (mediaQuery.addEventListener) {
-        mediaQuery.addEventListener("change", handleChange);
-        return () => mediaQuery.removeEventListener("change", handleChange);
+        mediaQuery.addEventListener('change', handleChange);
+        return () => mediaQuery.removeEventListener('change', handleChange);
       }
       // Legacy browsers
       else {
@@ -151,7 +150,7 @@ export function useTheme() {
 Global keyboard shortcuts handler:
 
 ```typescript
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 type KeyboardHandlers = Record<string, () => void>;
 
@@ -160,15 +159,12 @@ export function useKeyboard(handlers: KeyboardHandlers) {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Skip if user is typing in an input field
       const target = e.target as HTMLElement;
-      if (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) {
         return;
       }
 
       // Build key string (e.g., "cmd+k" or "?")
-      const key =
-        e.metaKey || e.ctrlKey
-          ? `${e.metaKey ? "cmd" : "ctrl"}+${e.key}`
-          : e.key;
+      const key = e.metaKey || e.ctrlKey ? `${e.metaKey ? 'cmd' : 'ctrl'}+${e.key}` : e.key;
 
       const handler = handlers[key];
 
@@ -178,8 +174,8 @@ export function useKeyboard(handlers: KeyboardHandlers) {
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handlers]);
 }
 ```
@@ -190,9 +186,9 @@ export function useKeyboard(handlers: KeyboardHandlers) {
 
 ```typescript
 useKeyboard({
-  "cmd+k": () => setIsCmdPaletteOpen(true),
-  "ctrl+k": () => setIsCmdPaletteOpen(true),
-  "?": () => setIsShortcutsOpen(true),
+  'cmd+k': () => setIsCmdPaletteOpen(true),
+  'ctrl+k': () => setIsCmdPaletteOpen(true),
+  '?': () => setIsShortcutsOpen(true),
   c: () => setCurrentView(ViewState.COMPOSER),
 });
 ```
@@ -202,13 +198,9 @@ useKeyboard({
 LocalStorage persistence with debounce:
 
 ```typescript
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
-export function useLocalStorage<T>(
-  key: string,
-  initialValue: T,
-  debounceMs = 1000
-) {
+export function useLocalStorage<T>(key: string, initialValue: T, debounceMs = 1000) {
   // Initialize from localStorage
   const [value, setValue] = useState<T>(() => {
     try {
@@ -225,7 +217,7 @@ export function useLocalStorage<T>(
       try {
         localStorage.setItem(key, JSON.stringify(value));
       } catch (error) {
-        console.error("Failed to save to localStorage:", error);
+        console.error('Failed to save to localStorage:', error);
       }
     }, debounceMs);
 
@@ -246,17 +238,17 @@ Date formatting utilities:
 
 ```typescript
 export function formatDate(date: string): string {
-  return new Date(date).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
+  return new Date(date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
   });
 }
 
 export function formatTime(time: string): string {
-  return new Date(`2000-01-01T${time}`).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
+  return new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
     hour12: true,
   });
 }
@@ -267,12 +259,12 @@ export function formatDateTime(date: string, time?: string): string {
 }
 
 export function isToday(date: string): boolean {
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toISOString().split('T')[0];
   return date === today;
 }
 
 export function isFuture(date: string, time?: string): boolean {
-  const checkDate = new Date(`${date}T${time || "00:00"}`);
+  const checkDate = new Date(`${date}T${time || '00:00'}`);
   return checkDate > new Date();
 }
 ```
@@ -284,7 +276,7 @@ Text formatting utilities:
 ```typescript
 export function truncate(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength) + "...";
+  return text.substring(0, maxLength) + '...';
 }
 
 export function splitTweetThread(text: string, maxLength = 280): string[] {
@@ -300,7 +292,7 @@ export function splitTweetThread(text: string, maxLength = 280): string[] {
     }
 
     // Try to split at a word boundary
-    let splitIndex = remaining.lastIndexOf(" ", maxLength);
+    let splitIndex = remaining.lastIndexOf(' ', maxLength);
     if (splitIndex === -1) {
       // No space found, force split
       splitIndex = maxLength;
@@ -319,13 +311,13 @@ export function capitalizeFirst(text: string): string {
 
 export function formatPlatformName(platform: string): string {
   const names: Record<string, string> = {
-    twitter: "Twitter",
-    linkedin: "LinkedIn",
-    facebook: "Facebook",
-    instagram: "Instagram",
-    tiktok: "TikTok",
-    youtube: "YouTube",
-    pinterest: "Pinterest",
+    twitter: 'Twitter',
+    linkedin: 'LinkedIn',
+    facebook: 'Facebook',
+    instagram: 'Instagram',
+    tiktok: 'TikTok',
+    youtube: 'YouTube',
+    pinterest: 'Pinterest',
   };
   return names[platform] || capitalizeFirst(platform);
 }
@@ -419,10 +411,10 @@ touch utils/validation.ts
 Replace inline state and logic with hook calls:
 
 ```typescript
-import { useToast } from "@/hooks/useToast";
-import { useModal } from "@/hooks/useModal";
-import { useTheme } from "@/hooks/useTheme";
-import { useKeyboard } from "@/hooks/useKeyboard";
+import { useToast } from '@/hooks/useToast';
+import { useModal } from '@/hooks/useModal';
+import { useTheme } from '@/hooks/useTheme';
+import { useKeyboard } from '@/hooks/useKeyboard';
 
 function App() {
   // Replace inline toast state
@@ -440,9 +432,9 @@ function App() {
 
   // Replace inline keyboard handling
   useKeyboard({
-    "cmd+k": cmdPalette.openModal,
-    "ctrl+k": cmdPalette.openModal,
-    "?": shortcuts.toggleModal,
+    'cmd+k': cmdPalette.openModal,
+    'ctrl+k': cmdPalette.openModal,
+    '?': shortcuts.toggleModal,
     c: () => setCurrentView(ViewState.COMPOSER),
   });
 
@@ -512,13 +504,11 @@ Test hooks individually before moving on:
 ### Manual Testing
 
 1. **Toast Notifications:**
-
    - Trigger success toast (schedule a post)
    - Trigger error toast (try invalid action)
    - Verify toast auto-dismisses after 3 seconds
 
 2. **Modal Management:**
-
    - Open Command Palette (Cmd+K)
    - Open Notifications panel
    - Open Help modal
@@ -527,7 +517,6 @@ Test hooks individually before moving on:
    - Verify ESC key closes modals
 
 3. **Theme Switching:**
-
    - Switch to Light mode
    - Switch to Dark mode
    - Switch to System mode
@@ -535,7 +524,6 @@ Test hooks individually before moving on:
    - Change system preference, verify System mode updates
 
 4. **Keyboard Shortcuts:**
-
    - Press Cmd+K (Command Palette should open)
    - Press ? (Shortcuts modal should open)
    - Press c (Should navigate to Composer)

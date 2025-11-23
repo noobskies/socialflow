@@ -390,13 +390,11 @@ Test in production mode:
    ```
 
 2. **Clean up console.logs**
-
    - Search for `console.log` in codebase
    - Remove debugging logs
    - Keep error logs (console.error)
 
 3. **Remove unused imports**
-
    - Check for unused imports in all files
    - TypeScript will warn about these
 

@@ -76,23 +76,17 @@ Due to the size, implement in 4 sub-phases:
 
 ```typescript
 // /features/composer/useComposer.ts
-import { useState, useEffect } from "react";
-import { Platform, Draft, Post, PlatformOptions } from "@/types";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useState, useEffect } from 'react';
+import { Platform, Draft, Post, PlatformOptions } from '@/types';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 export function useComposer(initialDraft?: Draft) {
-  const [content, setContent] = useLocalStorage(
-    "draft_content",
-    initialDraft?.content || "",
-    1000
-  );
+  const [content, setContent] = useLocalStorage('draft_content', initialDraft?.content || '', 1000);
   const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(
-    initialDraft?.platforms || ["twitter"]
+    initialDraft?.platforms || ['twitter']
   );
-  const [mediaUrl, setMediaUrl] = useState<string | null>(
-    initialDraft?.mediaUrl || null
-  );
-  const [mediaType, setMediaType] = useState<"image" | "video" | null>(
+  const [mediaUrl, setMediaUrl] = useState<string | null>(initialDraft?.mediaUrl || null);
+  const [mediaType, setMediaType] = useState<'image' | 'video' | null>(
     initialDraft?.mediaType || null
   );
   const [platformOptions, setPlatformOptions] = useState<PlatformOptions>(
@@ -100,18 +94,16 @@ export function useComposer(initialDraft?: Draft) {
   );
 
   const [isPollActive, setIsPollActive] = useState(false);
-  const [pollOptions, setPollOptions] = useState(["", ""]);
+  const [pollOptions, setPollOptions] = useState(['', '']);
   const [pollDuration, setPollDuration] = useState(1);
 
   const togglePlatform = (platform: Platform) => {
     setSelectedPlatforms((prev) =>
-      prev.includes(platform)
-        ? prev.filter((p) => p !== platform)
-        : [...prev, platform]
+      prev.includes(platform) ? prev.filter((p) => p !== platform) : [...prev, platform]
     );
   };
 
-  const handleMediaUpload = (url: string, type: "image" | "video") => {
+  const handleMediaUpload = (url: string, type: 'image' | 'video') => {
     setMediaUrl(url);
     setMediaType(type);
     setIsPollActive(false); // Disable poll if media attached
@@ -128,12 +120,12 @@ export function useComposer(initialDraft?: Draft) {
   };
 
   const clearDraft = () => {
-    setContent("");
+    setContent('');
     setMediaUrl(null);
     setMediaType(null);
     setIsPollActive(false);
-    setPollOptions(["", ""]);
-    localStorage.removeItem("draft_content");
+    setPollOptions(['', '']);
+    localStorage.removeItem('draft_content');
   };
 
   return {
@@ -421,21 +413,18 @@ export default Composer;
 ### Critical Test Scenarios
 
 1. **Basic Flow:**
-
    - Select platforms
    - Write content
    - Schedule post
    - Verify creation
 
 2. **AI Integration:**
-
    - Generate content
    - Generate variations
    - Repurpose content
    - Generate image
 
 3. **Media Handling:**
-
    - Drag & drop image
    - Edit image filters
    - Upload video

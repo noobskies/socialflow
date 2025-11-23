@@ -1,10 +1,10 @@
+import { GoogleGenAI } from '@google/genai';
+import { Workflow, Trend, DraftAnalysis } from '@/types';
 
-import { GoogleGenAI } from "@google/genai";
+const TEXT_MODEL = 'gemini-3-pro-preview';
+const IMAGE_MODEL = 'gemini-3-pro-image-preview';
 
-const TEXT_MODEL = "gemini-3-pro-preview";
-const IMAGE_MODEL = "gemini-3-pro-image-preview";
-
-// Helper to get a fresh client instance. 
+// Helper to get a fresh client instance.
 // This is crucial for flows where the API key might be selected/updated during the session.
 const getAiClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -12,7 +12,7 @@ export const generatePostContent = async (
   topic: string,
   platform: string,
   tone: string,
-  type: string = "general"
+  type: string = 'general'
 ): Promise<string> => {
   try {
     const ai = getAiClient();
@@ -32,10 +32,10 @@ export const generatePostContent = async (
       contents: prompt,
     });
 
-    return response.text || "Failed to generate content.";
-  } catch (error) {
-    console.error("Error generating post content:", error);
-    return "Error: Could not contact AI service. Please check your API key.";
+    return response.text || 'Failed to generate content.';
+  } catch (_error) {
+    console.error('Error generating post content:', _error);
+    return 'Error: Could not contact AI service. Please check your API key.';
   }
 };
 
@@ -61,13 +61,13 @@ export const generateVariations = async (
     const response = await ai.models.generateContent({
       model: TEXT_MODEL,
       contents: prompt,
-      config: { responseMimeType: 'application/json' }
+      config: { responseMimeType: 'application/json' },
     });
 
-    const text = response.text || "[]";
+    const text = response.text || '[]';
     return JSON.parse(text);
-  } catch (error) {
-    console.error("Error generating variations:", error);
+  } catch (_error) {
+    console.error('Error generating variations:', _error);
     return [];
   }
 };
@@ -82,19 +82,23 @@ export const generateAltText = async (imageBase64: string): Promise<string> => {
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/png', data: imageBase64.split(',')[1] } },
-          { text: "Write a concise, descriptive alt text for this image for accessibility purposes. Max 1 sentence." }
-        ]
-      }
+          {
+            text: 'Write a concise, descriptive alt text for this image for accessibility purposes. Max 1 sentence.',
+          },
+        ],
+      },
     });
 
-    return response.text || "Image description unavailable.";
-  } catch (error) {
-    console.error("Error generating alt text:", error);
-    return "Error generating description.";
+    return response.text || 'Image description unavailable.';
+  } catch (_error) {
+    console.error('Error generating alt text:', _error);
+    return 'Error generating description.';
   }
 };
 
-export const repurposeContent = async (sourceText: string): Promise<{ twitter: string[]; linkedin: string; instagram: string }> => {
+export const repurposeContent = async (
+  sourceText: string
+): Promise<{ twitter: string[]; linkedin: string; instagram: string }> => {
   try {
     const ai = getAiClient();
     const prompt = `
@@ -113,17 +117,17 @@ export const repurposeContent = async (sourceText: string): Promise<{ twitter: s
     const response = await ai.models.generateContent({
       model: TEXT_MODEL,
       contents: prompt,
-      config: { responseMimeType: 'application/json' }
+      config: { responseMimeType: 'application/json' },
     });
 
-    const text = response.text || "{}";
+    const text = response.text || '{}';
     return JSON.parse(text);
-  } catch (error) {
-    console.error("Error repurposing content:", error);
-    return { 
-      twitter: ["Error generating thread."], 
-      linkedin: "Error generating post.", 
-      instagram: "Error generating caption." 
+  } catch (_error) {
+    console.error('Error repurposing content:', _error);
+    return {
+      twitter: ['Error generating thread.'],
+      linkedin: 'Error generating post.',
+      instagram: 'Error generating caption.',
     };
   }
 };
@@ -157,10 +161,10 @@ export const generateProductPost = async (
       contents: prompt,
     });
 
-    return response.text || "Failed to generate product post.";
-  } catch (error) {
-    console.error("Error generating product post:", error);
-    return "Error: Could not contact AI service.";
+    return response.text || 'Failed to generate product post.';
+  } catch (_error) {
+    console.error('Error generating product post:', _error);
+    return 'Error: Could not contact AI service.';
   }
 };
 
@@ -185,8 +189,8 @@ export const refineContent = async (
     });
 
     return response.text || currentContent;
-  } catch (error) {
-    console.error("Error refining content:", error);
+  } catch (_error) {
+    console.error('Error refining content:', _error);
     return currentContent;
   }
 };
@@ -204,9 +208,9 @@ export const generateHashtags = async (content: string): Promise<string[]> => {
       contents: prompt,
     });
 
-    const text = response.text || "";
-    return text.split(/\s+/).filter(t => t.startsWith('#'));
-  } catch (error) {
+    const text = response.text || '';
+    return text.split(/\s+/).filter((t) => t.startsWith('#'));
+  } catch {
     return [];
   }
 };
@@ -217,14 +221,14 @@ export const generateSocialImage = async (prompt: string): Promise<string | null
     const response = await ai.models.generateContent({
       model: IMAGE_MODEL,
       contents: {
-        parts: [{ text: prompt }]
+        parts: [{ text: prompt }],
       },
       config: {
         imageConfig: {
-          aspectRatio: "1:1",
-          imageSize: "1K"
-        }
-      }
+          aspectRatio: '1:1',
+          imageSize: '1K',
+        },
+      },
     });
 
     for (const part of response.candidates?.[0]?.content?.parts || []) {
@@ -233,9 +237,9 @@ export const generateSocialImage = async (prompt: string): Promise<string | null
       }
     }
     return null;
-  } catch (error) {
-    console.error("Image generation error:", error);
-    throw error;
+  } catch (_error) {
+    console.error('Image generation error:', _error);
+    throw _error;
   }
 };
 
@@ -261,10 +265,10 @@ export const generateReply = async (
       contents: prompt,
     });
 
-    return response.text || "";
-  } catch (error) {
-    console.error("Error generating reply:", error);
-    return "";
+    return response.text || '';
+  } catch (_error) {
+    console.error('Error generating reply:', _error);
+    return '';
   }
 };
 
@@ -293,17 +297,17 @@ export const generateBio = async (
       contents: prompt,
     });
 
-    return response.text || "";
-  } catch (error) {
-    console.error("Error generating bio:", error);
-    return "";
+    return response.text || '';
+  } catch (_error) {
+    console.error('Error generating bio:', _error);
+    return '';
   }
 };
 
-export const suggestWorkflows = async (businessType: string): Promise<any[]> => {
-    try {
-      const ai = getAiClient();
-      const prompt = `
+export const suggestWorkflows = async (businessType: string): Promise<Workflow[]> => {
+  try {
+    const ai = getAiClient();
+    const prompt = `
         Suggest 3 automation workflows for a social media manager working for a "${businessType}".
         Return a JSON array where each object has:
         - name: Title of the workflow
@@ -314,21 +318,21 @@ export const suggestWorkflows = async (businessType: string): Promise<any[]> => 
         Example:
         [{"name": "Auto-Reply", "description": "Reply to DMs", "trigger": "New DM", "action": "Send Welcome Msg"}]
       `;
-  
-      const response = await ai.models.generateContent({
-        model: TEXT_MODEL,
-        contents: prompt,
-      });
-  
-      const text = response.text || "[]";
-      // Basic cleanup to ensure we get array content
-      const jsonStr = text.substring(text.indexOf('['), text.lastIndexOf(']') + 1);
-      return JSON.parse(jsonStr);
-    } catch (error) {
-      console.error("Error generating workflows:", error);
-      return [];
-    }
-  };
+
+    const response = await ai.models.generateContent({
+      model: TEXT_MODEL,
+      contents: prompt,
+    });
+
+    const text = response.text || '[]';
+    // Basic cleanup to ensure we get array content
+    const jsonStr = text.substring(text.indexOf('['), text.lastIndexOf(']') + 1);
+    return JSON.parse(jsonStr);
+  } catch (_error) {
+    console.error('Error generating workflows:', _error);
+    return [];
+  }
+};
 
 export const generateVideoCaptions = async (description: string): Promise<string> => {
   try {
@@ -346,14 +350,14 @@ export const generateVideoCaptions = async (description: string): Promise<string
       contents: prompt,
     });
 
-    return response.text || "00:00 - [Music Playing]";
-  } catch (error) {
-    console.error("Error generating captions:", error);
-    return "00:00 - [Error generating captions]";
+    return response.text || '00:00 - [Music Playing]';
+  } catch (_error) {
+    console.error('Error generating captions:', _error);
+    return '00:00 - [Error generating captions]';
   }
 };
 
-export const analyzeDraft = async (content: string, platform: string): Promise<any> => {
+export const analyzeDraft = async (content: string, platform: string): Promise<DraftAnalysis> => {
   try {
     const ai = getAiClient();
     const prompt = `
@@ -373,23 +377,27 @@ export const analyzeDraft = async (content: string, platform: string): Promise<a
     const response = await ai.models.generateContent({
       model: TEXT_MODEL,
       contents: prompt,
-      config: { responseMimeType: 'application/json' }
+      config: { responseMimeType: 'application/json' },
     });
 
-    const text = response.text || "{}";
+    const text = response.text || '{}';
     return JSON.parse(text);
-  } catch (error) {
-    console.error("Error analyzing draft:", error);
+  } catch (_error) {
+    console.error('Error analyzing draft:', _error);
     return {
       score: 0,
-      sentiment: "Unknown",
-      engagementPrediction: "Unknown",
-      suggestions: ["Could not analyze content."]
+      sentiment: 'Unknown',
+      engagementPrediction: 'Unknown',
+      suggestions: ['Could not analyze content.'],
     };
   }
 };
 
-export const generatePostFromRSS = async (title: string, snippet: string, source: string): Promise<string> => {
+export const generatePostFromRSS = async (
+  title: string,
+  snippet: string,
+  source: string
+): Promise<string> => {
   try {
     const ai = getAiClient();
     const prompt = `
@@ -411,14 +419,14 @@ export const generatePostFromRSS = async (title: string, snippet: string, source
       contents: prompt,
     });
 
-    return response.text || "";
-  } catch (error) {
-    console.error("Error generating RSS post:", error);
+    return response.text || '';
+  } catch (_error) {
+    console.error('Error generating RSS post:', _error);
     return `${title}\n\n${snippet}`;
   }
 };
 
-export const getTrendingTopics = async (niche: string): Promise<any[]> => {
+export const getTrendingTopics = async (niche: string): Promise<Trend[]> => {
   try {
     const ai = getAiClient();
     const prompt = `
@@ -437,18 +445,36 @@ export const getTrendingTopics = async (niche: string): Promise<any[]> => {
     const response = await ai.models.generateContent({
       model: TEXT_MODEL,
       contents: prompt,
-      config: { responseMimeType: 'application/json' }
+      config: { responseMimeType: 'application/json' },
     });
 
-    const text = response.text || "[]";
+    const text = response.text || '[]';
     const jsonStr = text.substring(text.indexOf('['), text.lastIndexOf(']') + 1);
     return JSON.parse(jsonStr);
-  } catch (error) {
-    console.error("Error fetching trends:", error);
+  } catch (_error) {
+    console.error('Error fetching trends:', _error);
     return [
-      { id: '1', topic: 'Sustainable Tech', volume: 'High', difficulty: 'Medium', context: 'Growing interest in eco-friendly gadgets' },
-      { id: '2', topic: 'Remote Work Tips', volume: 'Medium', difficulty: 'Easy', context: 'Always relevant for professionals' },
-      { id: '3', topic: 'AI Ethics', volume: 'High', difficulty: 'Hard', context: 'Hot debate topic currently' }
+      {
+        id: '1',
+        topic: 'Sustainable Tech',
+        volume: 'High',
+        difficulty: 'Medium',
+        context: 'Growing interest in eco-friendly gadgets',
+      },
+      {
+        id: '2',
+        topic: 'Remote Work Tips',
+        volume: 'Medium',
+        difficulty: 'Easy',
+        context: 'Always relevant for professionals',
+      },
+      {
+        id: '3',
+        topic: 'AI Ethics',
+        volume: 'High',
+        difficulty: 'Hard',
+        context: 'Hot debate topic currently',
+      },
     ];
   }
 };

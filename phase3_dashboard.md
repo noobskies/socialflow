@@ -471,11 +471,11 @@ export const AccountHealth: React.FC<AccountHealthProps> = ({ accounts }) => {
 Dashboard state management hook:
 
 ```typescript
-import { useState, useEffect } from "react";
-import { Trend } from "@/types";
-import { getTrendingTopics } from "@/services/geminiService";
+import { useState, useEffect } from 'react';
+import { Trend } from '@/types';
+import { getTrendingTopics } from '@/services/geminiService';
 
-export function useDashboard(niche: string = "Tech & Marketing") {
+export function useDashboard(niche: string = 'Tech & Marketing') {
   const [trends, setTrends] = useState<Trend[]>([]);
   const [loadingTrends, setLoadingTrends] = useState(false);
 
@@ -485,7 +485,7 @@ export function useDashboard(niche: string = "Tech & Marketing") {
       const newTrends = await getTrendingTopics(niche);
       setTrends(newTrends);
     } catch (error) {
-      console.error("Failed to load trends:", error);
+      console.error('Failed to load trends:', error);
     } finally {
       setLoadingTrends(false);
     }
@@ -519,12 +519,10 @@ export function useDashboard(niche: string = "Tech & Marketing") {
    ```
 
 2. **Implement widget components**
-
    - Copy each widget implementation from above
    - Ensure proper imports from `@/types`
 
 3. **Implement useDashboard hook**
-
    - Copy hook implementation
    - Test trend loading independently
 
@@ -602,7 +600,7 @@ export default Dashboard;
 5. **Update imports in App.tsx**
 
 ```typescript
-import Dashboard from "@/features/dashboard/Dashboard";
+import Dashboard from '@/features/dashboard/Dashboard';
 ```
 
 ## Testing
