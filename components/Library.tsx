@@ -19,18 +19,18 @@ const MOCK_FOLDERS: Folder[] = [
 ];
 
 const MOCK_ASSETS_INIT: MediaAsset[] = [
-  { id: '1', type: 'image', url: 'https://picsum.photos/id/101/400/400', name: 'Summer Campaign Hero', createdAt: '2 days ago', tags: ['summer', 'hero'], folderId: 'campaign-a' },
-  { id: '2', type: 'image', url: 'https://picsum.photos/id/103/400/400', name: 'Product Teaser v2', createdAt: '3 days ago', tags: ['product', 'teaser'] },
+  { id: '1', type: 'image', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=80', name: 'Summer Campaign Hero', createdAt: '2 days ago', tags: ['summer', 'hero'], folderId: 'campaign-a' },
+  { id: '2', type: 'image', url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80', name: 'Product Teaser v2', createdAt: '3 days ago', tags: ['product', 'teaser'] },
   { id: '3', type: 'template', content: 'Exciting news! 🚀 We are thrilled to announce [Product Name]...', name: 'Product Launch Template', createdAt: '1 week ago', tags: ['launch', 'announcement'], folderId: 'evergreen' },
-  { id: '4', type: 'video', url: 'https://picsum.photos/id/104/400/400', name: 'Behind the Scenes', createdAt: '1 week ago', tags: ['bts', 'video'], folderId: 'videos' },
-  { id: '5', type: 'image', url: 'https://picsum.photos/id/106/400/400', name: 'Team Offsite', createdAt: '2 weeks ago', tags: ['team', 'culture'] },
+  { id: '4', type: 'video', url: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=400&q=80', name: 'Behind the Scenes', createdAt: '1 week ago', tags: ['bts', 'video'], folderId: 'videos' },
+  { id: '5', type: 'image', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&q=80', name: 'Team Offsite', createdAt: '2 weeks ago', tags: ['team', 'culture'] },
   { id: '6', type: 'template', content: 'Join us for our upcoming webinar on [Topic] this [Day]! 📅 Register here: [Link]', name: 'Webinar Invite', createdAt: '2 weeks ago', tags: ['webinar', 'event'] },
 ];
 
 const MOCK_RSS: RSSArticle[] = [
-  { id: '1', title: 'The Future of AI in Marketing', source: 'TechCrunch', url: 'https://techcrunch.com', publishedAt: '2 hours ago', snippet: 'How generative AI is reshaping the landscape of digital marketing agencies...', imageUrl: 'https://picsum.photos/id/20/400/200' },
-  { id: '2', title: 'Social Media Trends for 2025', source: 'Social Media Today', url: 'https://socialmediatoday.com', publishedAt: '4 hours ago', snippet: 'Video content continues to dominate as platforms shift prioritization...', imageUrl: 'https://picsum.photos/id/24/400/200' },
-  { id: '3', title: '5 Tips for Better Engagement', source: 'The Verge', url: 'https://theverge.com', publishedAt: '1 day ago', snippet: 'Stop chasing algorithms and start building community with these simple steps...', imageUrl: 'https://picsum.photos/id/26/400/200' },
+  { id: '1', title: 'The Future of AI in Marketing', source: 'TechCrunch', url: 'https://techcrunch.com', publishedAt: '2 hours ago', snippet: 'How generative AI is reshaping the landscape of digital marketing agencies...', imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&q=80' },
+  { id: '2', title: 'Social Media Trends for 2025', source: 'Social Media Today', url: 'https://socialmediatoday.com', publishedAt: '4 hours ago', snippet: 'Video content continues to dominate as platforms shift prioritization...', imageUrl: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&q=80' },
+  { id: '3', title: '5 Tips for Better Engagement', source: 'The Verge', url: 'https://theverge.com', publishedAt: '1 day ago', snippet: 'Stop chasing algorithms and start building community with these simple steps...', imageUrl: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&q=80' },
 ];
 
 const MOCK_BUCKETS: Bucket[] = [
