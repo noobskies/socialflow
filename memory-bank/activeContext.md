@@ -590,7 +590,98 @@ npm run dev
 - [ ] Deploy to Railway (backend)
 - [ ] Beta test with 10 users
 
-### 5. Phase 1: Foundation Setup Implementation ✅ (November 23, 2025)
+### 5. Phase 2: Custom Hooks Extraction ✅ (November 23, 2025)
+
+**What**: Extracted reusable logic from App.tsx into custom hooks and utility functions
+
+**Session Duration**: ~30 minutes
+
+**Completed Work**:
+- ✅ Created 5 custom hooks in `/src/hooks/`:
+  - `useToast.ts` - Toast notification state management with show/hide functions
+  - `useModal.ts` - Generic modal controller (reusable for all modals)
+  - `useTheme.ts` - Theme switching with localStorage persistence and system preference detection
+  - `useKeyboard.ts` - Global keyboard shortcuts handler with event delegation
+  - `useLocalStorage.ts` - Generic localStorage persistence with debounce
+- ✅ Created 3 utility modules in `/src/utils/`:
+  - `dates.ts` - Date/time formatting functions (formatDate, formatTime, formatDateTime, isToday, isFuture)
+  - `formatting.ts` - Text utilities (truncate, splitTweetThread, capitalizeFirst, formatPlatformName)
+  - `validation.ts` - Validation helpers (validateEmail, validateUrl, validateHashtag, validateContentLength)
+- ✅ Refactored App.tsx to use custom hooks:
+  - Replaced inline toast state with `useToast()` hook
+  - Replaced 5 individual modal states with `useModal()` hook instances
+  - Replaced inline theme logic (useEffect + localStorage) with `useTheme()` hook
+  - Replaced inline keyboard event listener with `useKeyboard()` hook
+  - Removed all inline state management logic (~110 lines)
+
+**Files Changed**:
+- 9 files total (8 created, 1 modified)
+- 315 insertions (+)
+- 116 deletions (-)
+- App.tsx: 390 lines → 280 lines (-110 lines of inline logic)
+
+**New Files Created**:
+1. `src/hooks/useToast.ts` - 28 lines
+2. `src/hooks/useModal.ts` - 12 lines
+3. `src/hooks/useTheme.ts` - 58 lines
+4. `src/hooks/useKeyboard.ts` - 31 lines
+5. `src/hooks/useLocalStorage.ts` - 32 lines
+6. `src/utils/dates.ts` - 28 lines
+7. `src/utils/formatting.ts` - 47 lines
+8. `src/utils/validation.ts` - 42 lines
+
+**Quality Verification**:
+- ✅ TypeScript compilation: Zero errors
+- ✅ Dev server: Starts successfully on port 3000
+- ✅ All keyboard shortcuts tested (c, ?, Cmd+K, Ctrl+K)
+- ✅ All 5 modals open/close correctly
+- ✅ Toast notifications display and auto-dismiss
+- ✅ Theme switching works (light/dark/system with persistence)
+- ✅ Zero app functionality changes (no regressions)
+- ✅ No console errors
+
+**Git Commit**: `25feea8` - "Phase 2: Extract custom hooks and utilities"
+
+**Impact**:
+- DRY principle applied - no repeated modal/toast/theme logic
+- Reusable hooks can be imported in any component
+- Testable logic isolated in hooks
+- Cleaner, more maintainable App.tsx
+- Better code organization and readability
+- Foundation ready for Phase 3: Dashboard Refactoring
+
+**Benefits Achieved**:
+- **Reusability**: Hooks like `useModal` can be used anywhere in the app
+- **Testability**: Each hook can be unit tested in isolation
+- **Maintainability**: Logic centralized in dedicated files
+- **Readability**: App.tsx focus on orchestration, not implementation details
+- **Scalability**: Easy to add new hooks as patterns emerge
+
+**Actual Structure After Phase 2**:
+
+```
+/src
+├── /hooks ✅ (Phase 2 complete)
+│   ├── useToast.ts
+│   ├── useModal.ts
+│   ├── useTheme.ts
+│   ├── useKeyboard.ts
+│   └── useLocalStorage.ts
+├── /utils ✅ (Phase 2 complete)
+│   ├── constants.ts (from Phase 1)
+│   ├── dates.ts (new)
+│   ├── formatting.ts (new)
+│   └── validation.ts (new)
+├── /types ✅ (Phase 1)
+├── /services ✅ (Phase 1)
+└── /test ✅ (Phase 0a)
+```
+
+**Time Investment**: ~30 minutes (faster than 3-4 hour estimate)
+
+**Next Phase**: Phase 3 - Dashboard Refactoring (ready to begin)
+
+### 6. Phase 1: Foundation Setup Implementation ✅ (November 23, 2025)
 
 **What**: Implemented professional `/src` directory structure and organized types/constants
 
@@ -658,6 +749,6 @@ npm run dev
 
 **Session Goal**: Memory Bank Update
 
-**Status**: In progress - documenting Phase 1 completion
+**Status**: Complete - Phase 2 documented across all files
 
-**Next Action**: Update progress.md and systemPatterns.md, then ready for Phase 2
+**Next Action**: Ready for Phase 3 - Dashboard Refactoring

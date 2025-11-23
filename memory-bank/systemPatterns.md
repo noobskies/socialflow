@@ -220,24 +220,52 @@ try {
 - Prevents type duplication
 - Clear contract between components
 
-### 4. Modal Management Pattern
+### 4. Modal Management Pattern (Implemented in Phase 2 ✅)
 
-**Controlled at Root Level**:
+**Controlled at Root Level using `useModal` hook**:
 
 ```typescript
-// App.tsx manages all modal visibility
-const [isCmdPaletteOpen, setIsCmdPaletteOpen] = useState(false);
-const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-const [isHelpOpen, setIsHelpOpen] = useState(false);
-const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+// App.tsx uses custom hook for each modal
+import { useModal } from "@/hooks/useModal";
+
+const cmdPalette = useModal();
+const notifications = useModal();
+const help = useModal();
+const shortcuts = useModal();
+const upgradeModal = useModal();
+```
+
+**Hook Implementation** (`src/hooks/useModal.ts`):
+
+```typescript
+export function useModal(initialState = false) {
+  const [isOpen, setIsOpen] = useState(initialState);
+  
+  const openModal = () => setIsOpen(true);
+  const closeModal = () => setIsOpen(false);
+  const toggleModal = () => setIsOpen((prev) => !prev);
+  
+  return { isOpen, openModal, closeModal, toggleModal };
+}
+```
+
+**Usage in Components**:
+
+```typescript
+<CommandPalette 
+  isOpen={cmdPalette.isOpen} 
+  onClose={cmdPalette.closeModal}
+/>
 ```
 
 **Benefits**:
 
+- Reusable hook pattern (DRY principle)
 - Prevents multiple modals overlapping
 - Centralized z-index management
 - Easy keyboard shortcuts (ESC to close)
 - Consistent backdrop behavior
+- Can be used in any component
 
 ## Component Communication Patterns
 
@@ -346,32 +374,26 @@ const handleDraftFromTrend = (trend: Trend) => {
 };
 ```
 
-### 3. Theme Switching
+### 3. Theme Switching (Implemented with useTheme hook ✅)
 
-**Flow**: User Toggle → State Update → DOM Class → CSS Variables
+**Flow**: User Toggle → useTheme Hook → DOM Class → CSS Variables
 
 **Implementation**:
 
 ```typescript
-// App.tsx useEffect
-useEffect(() => {
-  const root = window.document.documentElement;
-  const applyTheme = () => {
-    root.classList.remove("light", "dark");
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
-      root.classList.add(systemTheme);
-    } else {
-      root.classList.add(theme);
-    }
-  };
-  applyTheme();
-  localStorage.setItem("theme", theme);
-}, [theme]);
+// App.tsx uses custom hook
+import { useTheme } from "@/hooks/useTheme";
+
+const { theme, setTheme } = useTheme();
 ```
+
+**Hook handles all logic internally**:
+- Loads theme from localStorage on mount
+- Applies theme to document root element
+- Handles system preference detection
+- Listens for system theme changes
+- Persists theme selection to localStorage
+- Cleans up event listeners properly
 
 **CSS Pattern**:
 
@@ -381,45 +403,29 @@ useEffect(() => {
 .text-slate-900 dark:text-white
 ```
 
-### 4. Keyboard Shortcuts
+### 4. Keyboard Shortcuts (Implemented with useKeyboard hook ✅)
 
-**Pattern**: Global event listener in App.tsx
+**Pattern**: Global event listener managed by custom hook
 
 ```typescript
-useEffect(() => {
-  const handleKeyDown = (e: KeyboardEvent) => {
-    // Skip if typing in input
-    if (
-      ["INPUT", "TEXTAREA", "SELECT"].includes(
-        (e.target as HTMLElement).tagName
-      )
-    ) {
-      return;
-    }
+// App.tsx uses custom hook with handler object
+import { useKeyboard } from "@/hooks/useKeyboard";
 
-    // Cmd/Ctrl + K → Command Palette
-    if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-      e.preventDefault();
-      setIsCmdPaletteOpen(true);
-    }
-
-    // ? → Help Modal
-    if (e.key === "?") {
-      e.preventDefault();
-      setIsShortcutsOpen((prev) => !prev);
-    }
-
-    // c → Composer
-    if (e.key === "c") {
-      e.preventDefault();
-      setCurrentView(ViewState.COMPOSER);
-    }
-  };
-
-  window.addEventListener("keydown", handleKeyDown);
-  return () => window.removeEventListener("keydown", handleKeyDown);
-}, []);
+useKeyboard({
+  "cmd+k": cmdPalette.openModal,
+  "ctrl+k": cmdPalette.openModal,
+  "?": shortcuts.toggleModal,
+  "c": () => setCurrentView(ViewState.COMPOSER),
+});
 ```
+
+**Hook handles**:
+- Event listener registration and cleanup
+- Input field detection (skips shortcuts when typing)
+- Modifier key detection (cmd/ctrl)
+- Key string normalization
+- Event prevention
+- Handler lookup and execution
 
 ## Design Patterns Used
 
@@ -467,15 +473,30 @@ Self-contained with internal animation/positioning logic.
 />
 ```
 
-### 4. Custom Hooks (Future Pattern)
+### 4. Custom Hooks (Implemented in Phase 2 ✅)
 
-**Not yet implemented, but planned**:
+**Current implementation**:
 
 ```typescript
-// Future refactor
-const { posts, addPost, updatePost, deletePost } = usePosts();
+// Implemented hooks from Phase 2
+const { toast, showToast, hideToast } = useToast();
 const { theme, setTheme } = useTheme();
-const { showToast } = useToast();
+const cmdPalette = useModal();
+useKeyboard({ "cmd+k": cmdPalette.openModal });
+```
+
+**Available Hooks** (`/src/hooks/`):
+- `useToast` - Toast notification management
+- `useModal` - Modal state controller
+- `useTheme` - Theme switching with persistence
+- `useKeyboard` - Global keyboard shortcuts
+- `useLocalStorage` - LocalStorage with debounce
+
+**Future hooks to implement**:
+```typescript
+// Phase 3+ planned hooks
+const { posts, addPost, updatePost, deletePost } = usePosts();
+const { accounts, connectAccount, disconnectAccount } = useAccounts();
 ```
 
 ## Component Relationships
@@ -820,4 +841,4 @@ AWS / Railway / Render
 3. Keep feature-specific components in their feature folders
 4. Organize feedback components in `/src/components/feedback`
 
-**Current Status**: Phase 1 documentation complete and ready for implementation
+**Current Status**: Phase 2 complete and committed. Ready for Phase 3: Dashboard Refactoring
