@@ -702,14 +702,18 @@ AWS / Railway / Render
 - ✅ Phase 6a: Analytics refactored (677 → 60 lines, 15 components created)
 - ✅ Phase 6b: Settings refactored (813 → 150 lines, 19 components created)
 - ✅ Phase 6c: Calendar refactored (697 → 130 lines, 16 components created)
+- ✅ Phase 6d: Inbox refactored (475 → 80 lines, 12 components created)
 - ✅ FeatureGateOverlay moved to `/src/components/ui/` for app-wide reuse (successfully reused in Settings!)
 - ✅ PostCard component created as reusable across all calendar views
+- ✅ Platform icons utility shared between Calendar and Inbox features
 
 **Remaining Work**:
 
-- Phase 6d: App.tsx simplification (from 235 lines)
+- Phase 6e: Library refactoring (713 lines - LARGEST!)
+- Phase 6f: LinkManager refactoring (454 lines)
+- Phase 6g: Automations refactoring (381 lines)
+- Phase 6h: App.tsx simplification (from 235 lines)
 - Phase 7: Add basic tests
-- Consider: Additional component refactoring (Inbox, Library, LinkManager, Automations)
 
 **Phase 6a-c Documentation Created** ✅:
 - **Analytics** (677 → ~120 lines, 15 files) - 3 tabs, 4 charts, 6 widgets + FeatureGateOverlay

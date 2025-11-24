@@ -714,7 +714,7 @@
 
 ```
 /src
-├── /features ✅ (Phases 3, 4, 6a, 6b, 6c complete)
+├── /features ✅ (Phases 3, 4, 6a, 6b, 6c, 6d complete)
 │   ├── /dashboard (12 files) ✅
 │   │   ├── Dashboard.tsx (100-line orchestrator)
 │   │   ├── useDashboard.ts, DashboardStats.tsx
@@ -744,12 +744,18 @@
 │   │   ├── useSettings.ts, SettingsSidebar.tsx
 │   │   ├── /tabs (8 tab components)
 │   │   └── /widgets (8 widget components)
-│   └── /calendar (16 files) ✅
-│       ├── Calendar.tsx (130-line orchestrator)
-│       ├── useCalendar.ts, ViewModeToggle.tsx
-│       ├── /views (CalendarView, KanbanView, GridView)
-│       ├── /components (6 components including PostCard)
-│       └── /utils (5 utility modules)
+│   ├── /calendar (16 files) ✅
+│   │   ├── Calendar.tsx (130-line orchestrator)
+│   │   ├── useCalendar.ts, ViewModeToggle.tsx
+│   │   ├── /views (CalendarView, KanbanView, GridView)
+│   │   ├── /components (6 components including PostCard)
+│   │   └── /utils (5 utility modules)
+│   └── /inbox (12 files) ✅
+│       ├── Inbox.tsx (80-line orchestrator)
+│       ├── useInbox.ts
+│       ├── /tabs (MessagesTab, ListeningTab)
+│       ├── /components (7 components)
+│       └── /utils (sentimentUtils.tsx)
 ├── /components ✅ (Phase 5 complete - 11 components)
 │   ├── /ui (4 components) ✅ NEW!
 │   │   ├── Button.tsx, Input.tsx
@@ -784,14 +790,20 @@
 ## Key Metrics
 
 **App.tsx**: 235 lines (down from 390)  
-**Total Components**: 11 in `/src/components/`, 77 in `/src/features/`, 5 legacy at root
-**Custom Hooks**: 5 reusable hooks + 4 feature-specific hooks (useDashboard, useComposer, useAnalytics, useSettings, useCalendar)
+**Total Components**: 11 in `/src/components/`, 89 in `/src/features/` (6 features), 4 legacy at root
+**Custom Hooks**: 5 reusable hooks + 5 feature-specific hooks (useDashboard, useComposer, useAnalytics, useSettings, useCalendar, useInbox)
 **UI Library**: 4 reusable components (Button, Input, Modal, Card)
 **Utility Functions**: 3 modules with date, format, validation helpers  
 **Linting Issues**: 77 errors (non-blocking, fix during refactoring)  
 **TypeScript Errors**: 0 ✅  
-**Dev Server**: Working on port 3001 ✅  
+**Dev Server**: Working on port 3000 ✅  
 **Bundle Size**: ~200KB gzipped (acceptable for MVP)
+
+**Refactoring Progress**:
+- **4 Features Complete**: Dashboard, Composer, Analytics, Settings, Calendar, Inbox
+- **Total Lines Reduced**: 4,862 → 757 lines (-84%) in orchestrators
+- **Components Created**: 89 focused components across 6 features
+- **3 Features Remaining**: Library (713), LinkManager (454), Automations (381)
 
 ## Success Indicators
 
