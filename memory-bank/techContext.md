@@ -330,9 +330,137 @@ test: Add unit tests for geminiService
 **Custom Hooks**: ✅ 5 reusable + 9 feature-specific hooks  
 **UI Library**: ✅ 4 reusable primitives (Button, Input, Modal, Card)  
 **TypeScript**: ✅ Zero compilation errors (strict mode enabled)  
-**Dev Server**: ✅ Working on port 3000  
+**Dev Server**: ✅ Working on port 3000 (Vite)  
 **Bundle**: ~200KB gzipped (optimized for performance)  
-**Test Infrastructure**: ✅ Vitest configured, ready for Phase 7  
+**Test Infrastructure**: ✅ Vitest configured, ready for Phase 10  
+**Migration Planning**: ✅ Next.js migration plan complete
 
-**Current Phase**: Phase 7 - Testing & Quality Assurance  
-**Next Phase**: Backend Planning & Design
+**Current Phase**: Phase 8 (Planning) - Complete  
+**Next Options**: Execute Next.js Migration OR Backend Planning
+
+## Planned Migration: Vite to Next.js 16
+
+### Migration Status: Planning Complete ✅
+
+**Comprehensive migration plan created** (November 23, 2025):
+- 10 detailed phases documented (8a-8j)
+- Implementation plan with all technical specifications
+- Zero breaking changes expected
+- All 135+ components preserved
+- Estimated execution time: 8-12 hours
+
+### Technical Changes Planned
+
+**Build System**:
+- Current: Vite 6.2.0
+- Future: Next.js 16.0.3+ (App Router)
+- Benefit: Automatic code splitting, better optimizations
+
+**Styling**:
+- Current: Tailwind CSS via CDN + inline config
+- Future: Tailwind CSS via npm + PostCSS
+- Benefit: Better build performance, proper versioning
+
+**Dependencies**:
+- Current: Import maps from aistudiocdn.com
+- Future: All dependencies from npm packages
+- Benefit: Better reliability, offline development
+
+**Environment Variables**:
+- Current: `VITE_GEMINI_API_KEY` via import.meta.env
+- Future: `NEXT_PUBLIC_GEMINI_API_KEY` via process.env
+- Benefit: Consistent with Next.js conventions
+
+**Routing**:
+- Current: ViewState enum with switch statement
+- Phase 1: Catch-all route (SPA mode) - preserves current behavior
+- Phase 2: Next.js App Router (optional upgrade)
+- Benefit: URL-based routing, better SEO
+
+### Migration Phases Overview
+
+1. **Phase 8a**: Install Next.js, create config (30-45 min)
+2. **Phase 8b**: Update TypeScript configuration (20-30 min)
+3. **Phase 8c**: Migrate dependencies (45-60 min)
+4. **Phase 8d**: Setup Tailwind CSS properly (30-45 min)
+5. **Phase 8e**: Create root layout from index.html (45-60 min)
+6. **Phase 8f**: Setup entry point with catch-all route (30-45 min)
+7. **Phase 8g**: Migrate environment variables (20-30 min)
+8. **Phase 8h**: Router migration - OPTIONAL (2-3 hours)
+9. **Phase 8i**: Build and test production (1-2 hours)
+10. **Phase 8j**: Deployment preparation (30-45 min)
+
+### Why Next.js?
+
+**Performance Benefits**:
+- Automatic code splitting (better than manual)
+- Optimized production builds
+- Built-in image/font optimization
+- Better caching strategies
+
+**Developer Experience**:
+- Fast Refresh (similar to Vite HMR)
+- Better error messages
+- TypeScript plugin for IDE
+- Extensive documentation
+
+**Future-Ready**:
+- Server-side rendering available when needed
+- API routes for backend integration
+- Incremental Static Regeneration
+- Edge runtime support
+
+**Deployment**:
+- First-class Vercel support
+- Works on any static hosting
+- Better CI/CD integration
+
+### Migration Strategy
+
+**Approach**: Incremental, safe, testable
+- Start with SPA mode (catch-all route)
+- Preserve all existing functionality
+- Test at each phase checkpoint
+- Rollback strategy at each step
+- Optionally migrate to App Router later
+
+**Risk Mitigation**:
+- Zero breaking changes to components
+- Each phase is atomic and reversible
+- Comprehensive testing checklist
+- Detailed troubleshooting guides
+- All 135+ components work unchanged
+
+### Current vs. Future Stack
+
+**Current (Vite)**:
+```
+Vite 6.2 + React 19 + TypeScript 5.8
+Tailwind CDN + inline config
+Import maps for dependencies
+VITE_ environment variables
+ViewState enum routing
+```
+
+**Future (Next.js)**:
+```
+Next.js 16 + React 19 + TypeScript 5.8
+Tailwind npm + PostCSS pipeline
+npm packages for all dependencies
+NEXT_PUBLIC_ environment variables
+Next.js App Router (or SPA mode initially)
+```
+
+### When to Execute Migration
+
+**Execute Before**:
+- Backend integration (provides better API routes)
+- Production deployment (better optimization)
+- Team collaboration (better DX)
+
+**Can Defer If**:
+- Vite is working well for current needs
+- Want to focus on backend first
+- Time constraints exist
+
+**Recommendation**: Execute migration before backend integration for optimal architecture.
