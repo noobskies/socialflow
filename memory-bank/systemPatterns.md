@@ -407,6 +407,11 @@ Self-contained with internal animation/positioning logic.
 **Feature Hooks** (`/src/features/*/`):
 - `useDashboard` - Dashboard-specific state (trends loading)
 - `useComposer` - Composer state orchestration (content, platforms, media, polls)
+- `useAnalytics` - Analytics tab state and report management
+- `useSettings` - Settings tab navigation and form state
+- `useCalendar` - Calendar view mode, drag-drop, and post selection
+- `useInbox` - Inbox tab state and message handling
+- `useLibrary` - Library tab state, folder/asset management, and filters
 
 **Usage**: Import from `@/hooks/*` and use in components. All hooks follow React best practices with proper cleanup.
 
@@ -646,12 +651,23 @@ AWS / Railway / Render
 │   │   │   ├── useSettings.ts, SettingsSidebar.tsx
 │   │   │   ├── /tabs (8 tab components)
 │   │   │   └── /widgets (8 widgets)
-│   │   └── /calendar    # ✅ COMPLETE (16 files)
-│   │       ├── Calendar.tsx (130-line orchestrator)
-│   │       ├── useCalendar.ts, ViewModeToggle.tsx
-│   │       ├── /views (CalendarView, KanbanView, GridView)
-│   │       ├── /components (6 components)
-│   │       └── /utils (5 utility modules)
+│   │   ├── /calendar    # ✅ COMPLETE (16 files)
+│   │   │   ├── Calendar.tsx (130-line orchestrator)
+│   │   │   ├── useCalendar.ts, ViewModeToggle.tsx
+│   │   │   ├── /views (CalendarView, KanbanView, GridView)
+│   │   │   ├── /components (6 components)
+│   │   │   └── /utils (5 utility modules)
+│   │   ├── /inbox       # ✅ COMPLETE (12 files)
+│   │   │   ├── Inbox.tsx (80-line orchestrator)
+│   │   │   ├── useInbox.ts
+│   │   │   ├── /tabs (MessagesTab, ListeningTab)
+│   │   │   ├── /components (7 components)
+│   │   │   └── /utils (sentimentUtils.tsx)
+│   │   └── /library     # ✅ COMPLETE (18 files)
+│   │       ├── Library.tsx (165-line orchestrator)
+│   │       ├── useLibrary.ts
+│   │       ├── /tabs (5 tab components)
+│   │       └── /components (10 components)
 │   │
 │   ├── /components      # ✅ Dirs ready for Phase 5
 │   │   ├── /ui
@@ -703,13 +719,13 @@ AWS / Railway / Render
 - ✅ Phase 6b: Settings refactored (813 → 150 lines, 19 components created)
 - ✅ Phase 6c: Calendar refactored (697 → 130 lines, 16 components created)
 - ✅ Phase 6d: Inbox refactored (475 → 80 lines, 12 components created)
+- ✅ Phase 6e: Library refactored (713 → 165 lines, 18 components created)
 - ✅ FeatureGateOverlay moved to `/src/components/ui/` for app-wide reuse (successfully reused in Settings!)
 - ✅ PostCard component created as reusable across all calendar views
 - ✅ Platform icons utility shared between Calendar and Inbox features
 
 **Remaining Work**:
 
-- Phase 6e: Library refactoring (713 lines - LARGEST!)
 - Phase 6f: LinkManager refactoring (454 lines)
 - Phase 6g: Automations refactoring (381 lines)
 - Phase 6h: App.tsx simplification (from 235 lines)

@@ -45,6 +45,129 @@
 
 ## Recent Refactoring Sessions
 
+### Phase 6e: Library Refactoring ✅ (Nov 23, 2025)
+
+**Duration**: ~2.5 hours (including Stock tab fix)
+**Result**: Library.tsx reduced from 713 to 165 lines (-77%)
+
+**Created** (18 files in `/src/features/library/`):
+
+**Core Structure (2 files)**:
+- **Library.tsx** - 165-line orchestrator component with 5-tab navigation
+- **useLibrary.ts** - State management hook (activeTab, folders, assets, filters, search)
+
+**Library Tab (5 files)**:
+- **components/FolderSidebar.tsx** - Folder navigation with dynamic counts
+- **components/AssetFilters.tsx** - Filter buttons (all/image/video/template) and search
+- **components/AssetCard.tsx** - Media/template preview cards with hover actions
+- **components/AssetGrid.tsx** - Responsive grid layout for assets
+- **tabs/LibraryTab.tsx** - Library tab container orchestrating folder + assets
+
+**RSS Tab (3 files)**:
+- **components/RSSFeedInput.tsx** - RSS feed URL input form
+- **components/ArticleCard.tsx** - Article preview with AI post generation button
+- **tabs/RSSTab.tsx** - RSS tab container with AI integration
+
+**Buckets Tab (3 files)**:
+- **components/BucketCard.tsx** - Content queue cards with schedule display
+- **components/BucketModal.tsx** - Scheduling configuration modal
+- **tabs/BucketsTab.tsx** - Buckets tab container with auto-schedule feature
+
+**Hashtags Tab (3 files)**:
+- **components/HashtagCreateForm.tsx** - Create new hashtag groups form
+- **components/HashtagGroupCard.tsx** - Group display with delete/use actions
+- **tabs/HashtagsTab.tsx** - Hashtags tab container
+
+**Stock Tab (1 file)**:
+- **tabs/StockTab.tsx** - Unsplash photo grid with search (fixed overlapping issue)
+
+**Type Updates**:
+- Updated `Folder` type: added `type` field ("system" | "user")
+- Updated `RSSArticle` type: added `imageUrl` field
+- Updated `Bucket` type: added `color` and `schedule` fields
+
+**Mock Data Added to constants.ts**:
+- MOCK_FOLDERS (4 folders including "All Uploads" system folder)
+- MOCK_ASSETS_INIT (5 sample assets: images, videos, templates)
+- MOCK_RSS (3 RSS articles with images)
+- MOCK_BUCKETS (3 content buckets with schedules)
+- MOCK_HASHTAGS (alias for MOCK_HASHTAG_GROUPS)
+- MOCK_STOCK_PHOTOS (12 Unsplash URLs)
+
+**Impact**:
+- LARGEST refactoring: 713-line monolith reduced to 165-line orchestrator (-77%)
+- Created 18 focused, single-responsibility components
+- Applied orchestrator pattern successfully (7th feature completed!)
+- All 5 tabs fully functional (library, rss, buckets, hashtags, stock)
+- Folder management with dynamic counts
+- AI RSS-to-post generation working
+- File upload handling with useRef
+- TypeScript: 0 compilation errors ✅
+- Dev server: Verified working on port 3000 ✅
+
+**Challenges & Fixes**:
+
+1. **Stock Tab Image Overlapping**
+   - Problem: Images overlapping vertically in stock photo grid
+   - Root Cause: Grid container not properly constrained in flex layout
+   - Fix: Added wrapper div with `flex-1 overflow-y-auto` around grid, allowing proper aspect-ratio rendering
+
+**File Organization**:
+```
+/src/features/library/
+├── Library.tsx (165-line orchestrator)
+├── useLibrary.ts (state hook)
+├── /tabs
+│   ├── LibraryTab.tsx
+│   ├── RSSTab.tsx
+│   ├── BucketsTab.tsx
+│   ├── HashtagsTab.tsx
+│   └── StockTab.tsx
+└── /components
+    ├── FolderSidebar.tsx
+    ├── AssetFilters.tsx
+    ├── AssetCard.tsx
+    ├── AssetGrid.tsx
+    ├── RSSFeedInput.tsx
+    ├── ArticleCard.tsx
+    ├── BucketCard.tsx
+    ├── BucketModal.tsx
+    ├── HashtagCreateForm.tsx
+    └── HashtagGroupCard.tsx
+```
+
+**Integration**:
+- Updated App.tsx import from `./components/Library` to `@/features/library/Library`
+- Added `showToast` prop to Library component call
+- All components use path aliases consistently
+- Zero breaking changes - component API unchanged
+
+**Verification Steps Completed**:
+1. ✅ TypeScript compilation (0 errors)
+2. ✅ Dev server starts successfully
+3. ✅ All 5 tabs render correctly
+4. ✅ Tab switching works smoothly
+5. ✅ Library tab (folders + assets + filters) works
+6. ✅ Folder creation and selection works
+7. ✅ Asset filtering (all/image/video/template) works
+8. ✅ File upload functionality works
+9. ✅ RSS tab with AI post generation works
+10. ✅ Buckets tab with auto-schedule works
+11. ✅ Bucket configuration modal opens/closes
+12. ✅ Hashtags tab create/delete/use works
+13. ✅ Stock tab grid displays correctly (no overlapping)
+14. ✅ Stock photo "Use Image" action works
+15. ✅ Dark mode fully supported across all tabs
+16. ✅ Mobile responsive layouts work
+
+**Key Achievements**:
+- Completed the LARGEST refactoring yet (713 → 165 lines, -77%)
+- Successfully managed 5 distinct tabs in one feature
+- Handled complex folder/asset management system
+- Integrated AI RSS generation seamlessly
+- Created reusable modal system (BucketModal)
+- Fixed layout bug proactively during implementation
+
 ### Phase 6d: Inbox Refactoring ✅ (Nov 23, 2025)
 
 **Duration**: ~2 hours (including bug fixes)
@@ -790,8 +913,8 @@
 ## Key Metrics
 
 **App.tsx**: 235 lines (down from 390)  
-**Total Components**: 11 in `/src/components/`, 89 in `/src/features/` (6 features), 4 legacy at root
-**Custom Hooks**: 5 reusable hooks + 5 feature-specific hooks (useDashboard, useComposer, useAnalytics, useSettings, useCalendar, useInbox)
+**Total Components**: 11 in `/src/components/`, 107 in `/src/features/` (7 features), 3 legacy at root
+**Custom Hooks**: 5 reusable hooks + 7 feature-specific hooks (useDashboard, useComposer, useAnalytics, useSettings, useCalendar, useInbox, useLibrary)
 **UI Library**: 4 reusable components (Button, Input, Modal, Card)
 **Utility Functions**: 3 modules with date, format, validation helpers  
 **Linting Issues**: 77 errors (non-blocking, fix during refactoring)  
@@ -800,10 +923,10 @@
 **Bundle Size**: ~200KB gzipped (acceptable for MVP)
 
 **Refactoring Progress**:
-- **4 Features Complete**: Dashboard, Composer, Analytics, Settings, Calendar, Inbox
-- **Total Lines Reduced**: 4,862 → 757 lines (-84%) in orchestrators
-- **Components Created**: 89 focused components across 6 features
-- **3 Features Remaining**: Library (713), LinkManager (454), Automations (381)
+- **7 Features Complete**: Dashboard, Composer, Analytics, Settings, Calendar, Inbox, Library
+- **Total Lines Reduced**: 5,575 → 922 lines (-83%) in orchestrators
+- **Components Created**: 107 focused components across 7 features
+- **2 Features Remaining**: LinkManager (454), Automations (381)
 
 ## Success Indicators
 
