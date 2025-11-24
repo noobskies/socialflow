@@ -115,8 +115,10 @@ export interface Workspace {
 export interface Report {
   id: string;
   name: string;
-  period: string;
-  generated: string;
+  dateRange: string;
+  createdAt: string;
+  status: "ready" | "generating";
+  format: "pdf" | "csv";
 }
 
 export interface Lead {

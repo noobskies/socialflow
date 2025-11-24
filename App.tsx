@@ -3,7 +3,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import Dashboard from "@/features/dashboard/Dashboard";
 import Composer from "@/features/composer/Composer";
 import Calendar from "./components/Calendar";
-import Analytics from "./components/Analytics";
+import Analytics from "@/features/analytics/Analytics";
 import Settings from "./components/Settings";
 import Inbox from "./components/Inbox";
 import Library from "./components/Library";
