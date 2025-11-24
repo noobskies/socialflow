@@ -45,6 +45,94 @@
 
 ## Recent Refactoring Sessions
 
+### Phase 6a-c: Documentation Planning ✅ (Nov 23, 2025)
+
+**Duration**: ~45 minutes  
+**Result**: Created comprehensive refactoring plans for 3 remaining major components
+
+**Created Documentation** (3 phase plans):
+
+1. **phase6a_analytics.md** - Analytics refactoring plan
+   - Current: 677 lines → Target: ~120 lines (-82%)
+   - 15 files to create (3 tabs, 4 charts, 6 widgets, orchestrator + hook)
+   - Key innovation: FeatureGateOverlay (reusable component)
+   - Sub-phases: A (Foundation), B (Overview Tab), C (Competitors & Reports), D (Integration)
+
+2. **phase6b_settings.md** - Settings refactoring plan  
+   - Current: 813 lines (LARGEST!) → Target: ~150 lines (-82%)
+   - 19 files to create (8 tabs, 8 widgets, sidebar, orchestrator + hook)
+   - Reuses FeatureGateOverlay from Analytics
+   - Sub-phases: A (Foundation), B (Profile/Accounts/Billing), C (Notifications/Security), D (Agency Features), E (Integration)
+
+3. **phase6c_calendar.md** - Calendar refactoring plan
+   - Current: 697 lines → Target: ~140 lines (-80%)
+   - 16 files to create (3 views, 5 components, 5 utilities, orchestrator + hook)
+   - Extracts drag-drop, import/export utilities
+   - Sub-phases: A (Foundation & Utilities), B (View Components), C (Calendar Components), D (Kanban/Modal/Import), E (Integration)
+
+**Total Planning Impact**:
+- **Before**: 2,187 lines in 3 monolithic files
+- **After**: ~410 lines in 3 orchestrators + ~50 new focused component files
+- **Reduction**: 81% line reduction in main files
+
+**Execution Strategy Documented**:
+1. Phase 6a: Analytics (easiest, establishes patterns)
+2. Phase 6b: Settings (medium, reuses components)
+3. Phase 6c: Calendar (hardest, complex views)
+4. Phase 6d: App.tsx Simplification (after all components refactored)
+
+**Documentation Quality**:
+- Each phase follows Dashboard/Composer documentation pattern
+- Detailed sub-phases with step-by-step implementation
+- Code examples showing orchestrator patterns
+- Verification steps for each sub-phase
+- Success metrics and quality gates
+- Migration notes for backwards compatibility
+
+**Key Patterns Established**:
+- Orchestrator pattern (main component ~100-200 lines)
+- Custom hooks for state management (useAnalytics, useSettings, useCalendar)
+- Feature-based organization in `/src/features/`
+- Reusable components (FeatureGateOverlay, NotificationToggle, PostCard)
+- Utility extraction (drag-drop, export/import, platform icons)
+
+**Next Action**: Ready to execute Phase 6a (Analytics refactoring)
+
+### Phase 5: Shared Components Migration ✅ (Nov 23, 2025)
+
+**Duration**: ~1.5 hours  
+**Result**: Created UI library and organized shared components into `/src/components/`
+
+**Created/Moved** (11 components total):
+
+**Phase 5A - UI Library (4 new components)**:
+- **Button.tsx** - Reusable button with 5 variants (primary, secondary, outline, ghost, danger), loading state, icon support
+- **Input.tsx** - Input component with label, error handling, helper text
+- **Modal.tsx** - Generic modal with 4 sizes (sm, md, lg, xl), optional footer
+- **Card.tsx** - Card container with 4 padding options, hover effect support
+
+**Phase 5B - Feedback Components (5 moved)**:
+- **Toast.tsx** - Moved from `/components/`, updated imports to use `@/types`
+- **Notifications.tsx** - Moved from `/components/`, updated imports
+- **HelpModal.tsx** - Moved from `/components/`, updated imports
+- **UpgradeModal.tsx** - Moved from `/components/`, updated imports
+- **ShortcutsModal.tsx** - Extracted from App.tsx inline definition (45 lines removed)
+
+**Phase 5C - Layout Components (2 moved)**:
+- **Sidebar.tsx** - Moved from `/components/` to `/src/components/layout/`, fixed Workspace type issues
+- **CommandPalette.tsx** - Moved from `/components/` to `/src/components/feedback/`
+
+**Impact**:
+- Professional UI library established with 4 reusable primitives
+- 11 components now properly organized in `/src/components/`
+- App.tsx reduced from 280 to 235 lines (-16%)
+- All components use path aliases (`@/components/*`)
+- Consistent organization: ui/, layout/, feedback/ subdirectories
+- TypeScript: 0 compilation errors ✅
+- Dev server verified on port 3001 ✅
+
+**Verification**: Type-check passed, dev server running successfully, all imports resolved
+
 ### Phase 4: Composer Refactoring ✅ (Nov 23, 2025)
 
 **Duration**: ~2 hours (split across 4 sub-phases)  
@@ -175,13 +263,14 @@
 ### This Week
 - [x] Phase 3: Dashboard Refactoring (break into smaller components)
 - [x] Phase 4: Composer Refactoring (15 components extracted)
-- [ ] Commit Phase 4 completion
+- [x] Phase 5: Shared Components Migration (11 components organized)
+- [ ] Commit Phase 5 completion
 - [ ] Fix linting issues gradually
 
 ### Next 2 Weeks
-- [ ] Phase 5: Migrate shared components to `/src/components/`
-- [ ] Phase 6: Simplify App.tsx further
+- [ ] Phase 6: Simplify App.tsx further (from 235 lines)
 - [ ] Phase 7: Add basic tests
+- [ ] Calendar Refactoring: Apply orchestrator pattern
 
 ### Month 1 (Future)
 - [ ] Design API schema
@@ -216,7 +305,7 @@
 │   │   ├── CrisisAlert.tsx, OnboardingProgress.tsx
 │   │   ├── EngagementChart.tsx, TopLinks.tsx
 │   │   └── RecentGenerations.tsx
-│   └── /composer (15 files) ✅ NEW!
+│   └── /composer (15 files) ✅
 │       ├── Composer.tsx (217-line orchestrator)
 │       ├── useComposer.ts
 │       ├── PlatformSelector.tsx, PlatformOptions.tsx
@@ -226,6 +315,16 @@
 │       ├── TeamCollaboration.tsx
 │       ├── SchedulingModal.tsx, ProductPickerModal.tsx
 │       └── AnalysisModal.tsx
+├── /components ✅ (Phase 5 complete - 11 components)
+│   ├── /ui (4 components) ✅ NEW!
+│   │   ├── Button.tsx, Input.tsx
+│   │   ├── Modal.tsx, Card.tsx
+│   ├── /layout (1 component) ✅
+│   │   └── Sidebar.tsx
+│   └── /feedback (6 components) ✅
+│       ├── Toast.tsx, Notifications.tsx
+│       ├── HelpModal.tsx, UpgradeModal.tsx
+│       ├── ShortcutsModal.tsx, CommandPalette.tsx
 ├── /hooks ✅ (5 custom hooks)
 │   ├── useToast.ts, useModal.ts, useTheme.ts
 │   ├── useKeyboard.ts, useLocalStorage.ts
@@ -239,21 +338,24 @@
 └── /test ✅
     └── setup.ts
 
-/components (legacy - to be migrated in Phase 5)
+/components (legacy - to be migrated)
 ├── Dashboard.tsx (🔴 LEGACY - replaced by /src/features/dashboard/)
 ├── Composer.tsx (🔴 LEGACY - replaced by /src/features/composer/)
-├── Calendar.tsx, Analytics.tsx, etc. (13 components remaining)
+├── Sidebar.tsx (🔴 LEGACY - replaced by /src/components/layout/)
+├── Toast.tsx, Notifications.tsx, etc. (🔴 LEGACY - replaced by /src/components/feedback/)
+├── Calendar.tsx, Analytics.tsx, Settings.tsx, etc. (8 components remaining)
 ```
 
 ## Key Metrics
 
-**App.tsx**: 280 lines (down from 390)  
-**Total Components**: 15 at root, will migrate to `/src/features/`  
-**Custom Hooks**: 5 reusable hooks extracted  
+**App.tsx**: 235 lines (down from 390)  
+**Total Components**: 11 in `/src/components/`, 27 in `/src/features/`, 8 legacy at root
+**Custom Hooks**: 5 reusable hooks + 2 feature-specific hooks
+**UI Library**: 4 reusable components (Button, Input, Modal, Card)
 **Utility Functions**: 3 modules with date, format, validation helpers  
 **Linting Issues**: 77 errors (non-blocking, fix during refactoring)  
 **TypeScript Errors**: 0 ✅  
-**Dev Server**: Working ✅  
+**Dev Server**: Working on port 3001 ✅  
 **Bundle Size**: ~200KB gzipped (acceptable for MVP)
 
 ## Success Indicators

@@ -1,4 +1,4 @@
-# Phase 6: App.tsx Simplification
+# Phase 6d: App.tsx Simplification
 
 **Estimated Time:** 2-3 hours
 
@@ -13,6 +13,9 @@ Simplify App.tsx to its final clean state using all the hooks and components cre
 ✅ Phase 3: Dashboard refactored
 ✅ Phase 4: Composer refactored
 ✅ Phase 5: UI library created
+✅ Phase 6a: Analytics refactored
+✅ Phase 6b: Settings refactored
+✅ Phase 6c: Calendar refactored
 
 ## Goals
 
@@ -528,7 +531,7 @@ const { toast, showToast, hideToast } = useToast();
 
 ## Completion Criteria
 
-✅ **Phase 6 is complete when:**
+✅ **Phase 6d is complete when:**
 
 1. App.tsx reduced to ~150 lines
 2. All inline logic removed
@@ -538,17 +541,17 @@ const { toast, showToast, hideToast } = useToast();
 6. No TypeScript errors
 7. Zero functionality regressions
 8. Clean, readable code
-9. Git commit: `git commit -m "Phase 6: Simplify App.tsx using hooks"`
+9. Git commit: `git commit -m "Phase 6d: Simplify App.tsx using hooks"`
 
 ## Code Metrics
 
-**Before Phase 6:**
+**Before Phase 6d:**
 
 - App.tsx: 430 lines
 - Inline components: ShortcutsModal (25 lines)
 - Inline logic: ~120 lines
 
-**After Phase 6:**
+**After Phase 6d:**
 
 - App.tsx: ~150 lines
 - Extracted: ShortcutsModal to feedback/

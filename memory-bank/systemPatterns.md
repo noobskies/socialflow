@@ -617,7 +617,7 @@ AWS / Railway / Render
 
 ## File Organization
 
-### Current Structure (Phase 3 Complete ✅)
+### Current Structure (Phase 5 Complete ✅)
 
 ```
 /socialflow
@@ -687,15 +687,25 @@ AWS / Railway / Render
 - ✅ Phase 2: 3 utility modules (dates, formatting, validation)
 - ✅ Phase 3: Dashboard refactored (550 → 100 lines, 10 widgets created)
 - ✅ Phase 4: Composer refactored (1,850 → 217 lines, 14 sub-components + 1 hook)
+- ✅ Phase 5: UI library created (4 components: Button, Input, Modal, Card)
+- ✅ Phase 5: Shared components organized (11 total in `/src/components/`)
+- ✅ Phase 5: App.tsx simplified (280 → 235 lines, ShortcutsModal extracted)
 
 **Remaining Work**:
 
-- Phase 5: Separate shared components to `/src/components/`
-- Phase 6: Simplify App.tsx further
+- Phase 6a-c: Analytics, Settings, Calendar refactoring (orchestrator pattern documented)
+- Phase 6d: Simplify App.tsx further (from 235 lines)
 - Phase 7: Add basic tests
 
-### Current Structure (Phase 4 Complete ✅)
-**Current Status**: Phase 4 complete and ready to commit. Ready for Phase 5: Shared Components Migration
+**Phase 6a-c Documentation Created** ✅:
+- **Analytics** (677 → ~120 lines, 15 files) - 3 tabs, 4 charts, 6 widgets + FeatureGateOverlay
+- **Settings** (813 → ~150 lines, 19 files) - 8 tabs, 8 widgets, sidebar (reuses FeatureGateOverlay)
+- **Calendar** (697 → ~140 lines, 16 files) - 3 views, 5 components, 5 utilities
+
+All three will follow the same orchestrator pattern established in Dashboard and Composer.
+
+### Current Structure (Phase 5 Complete ✅)
+**Current Status**: Phase 5 complete and ready to commit. Ready for Phase 6: App.tsx Simplification
 
 ### Target Structure (Phase 5+)
 
@@ -839,4 +849,4 @@ AWS / Railway / Render
 3. Keep feature-specific components in their feature folders
 4. Organize feedback components in `/src/components/feedback`
 
-**Current Status**: Phase 3 complete and committed. Ready for Phase 4: Composer Refactoring
+**Current Status**: Phase 5 complete. UI library established, shared components organized into proper structure.

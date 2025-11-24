@@ -2,7 +2,7 @@
 
 ## 🚨 CRITICAL CONTEXT: Frontend Refactoring Phase
 
-**Last Updated**: November 23, 2025 (6:36 PM)
+**Last Updated**: November 23, 2025 (7:00 PM)
 
 **What This Project Is**: Frontend MVP exported from Google AI Studio that needs professional refactoring
 
@@ -30,8 +30,9 @@ Refactoring an AI Studio-generated MVP to establish professional code architectu
 - ✅ Phase 2: Custom Hooks (5 hooks + 3 utility modules extracted from App.tsx)
 - ✅ Phase 3: Dashboard Refactoring (550-line monolith → 100-line orchestrator + 10 widgets)
 - ✅ Phase 4: Composer Refactoring (1,850-line monolith → 217-line orchestrator + 14 sub-components)
+- ✅ Phase 5: Shared Components Migration (11 components organized into /src/components/)
 
-**Latest**: Composer.tsx reduced from 1,850 to 217 lines (-88%). Created `/src/features/composer/` with 15 files: 14 specialized components, 1 custom hook (useComposer), 1 orchestrator. All components independently testable. Includes bug fix for PreviewPanel scrolling.
+**Latest**: Phase 5 complete - Created UI library (4 components) and organized 7 shared components into `/src/components/` with proper structure (ui/, layout/, feedback/). Extracted ShortcutsModal from App.tsx. App.tsx reduced from 280 to 235 lines (-16%). All components now use path aliases. TypeScript: 0 errors. Dev server verified working.
 
 **Details**: See `progress.md` for complete session history with metrics and verification.
 
@@ -39,19 +40,28 @@ Refactoring an AI Studio-generated MVP to establish professional code architectu
 
 ### Immediate Focus (This Week)
 
-**Phase 5: Shared Components Migration**
-- Move truly reusable components to `/src/components/`
-- Organize into ui/, layout/, feedback/ subdirectories
-- Keep feature-specific components in their feature folders
+**Phase 6a-c Documentation Complete**: Created comprehensive refactoring plans for Analytics, Settings, and Calendar
 
-**Documentation**: See `docs/phases/phase5_shared_components.md` for detailed plan.
+**Three Major Components Documented**:
+1. **Phase 6a: Analytics** (677 → ~120 lines, 15 files) - `docs/phases/phase6a_analytics.md`
+2. **Phase 6b: Settings** (813 → ~150 lines, 19 files) - `docs/phases/phase6b_settings.md`
+3. **Phase 6c: Calendar** (697 → ~140 lines, 16 files) - `docs/phases/phase6c_calendar.md`
+
+**Execution Order Recommended**:
+1. Phase 6a: Analytics (easiest - clear tab structure)
+2. Phase 6b: Settings (medium - reuses FeatureGateOverlay from Analytics)
+3. Phase 6c: Calendar (hardest - complex views, drag-drop)
+4. Phase 6d: App.tsx Simplification (rename phase6_app_simplification.md)
+
+**Total Impact**: 2,187 lines → ~410 lines (-81%) + ~50 new focused components
 
 ### Upcoming (Next 2 Weeks)
 
-1. **Phase 6**: Simplify App.tsx further (reduce from 280 lines)
-2. **Phase 7**: Add basic tests (Vitest infrastructure already configured)
-3. **Fix Linting**: Address 77 ESLint issues gradually during refactoring
-4. **Commit & Document**: Commit Phase 4 completion
+1. **Execute Phase 6a**: Start Analytics refactoring (first component)
+2. **Execute Phase 6b**: Settings refactoring (second component)
+3. **Execute Phase 6c**: Calendar refactoring (third component)
+4. **Phase 7**: Add basic tests (Vitest infrastructure already configured)
+5. **Fix Linting**: Address 77 ESLint issues gradually during refactoring
 
 ## Active Design Decisions
 
