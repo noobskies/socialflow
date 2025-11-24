@@ -9,14 +9,12 @@ declare global {
   }
 }
 
-// Vite environment variable types
-interface ImportMetaEnv {
-  readonly VITE_GEMINI_API_KEY: string;
-}
-
+// Next.js environment variable types
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
+declare namespace NodeJS {
+  interface ProcessEnv {
+    readonly NEXT_PUBLIC_GEMINI_API_KEY: string;
+  }
 }
 
 export {};
