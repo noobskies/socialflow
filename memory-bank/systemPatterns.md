@@ -140,12 +140,10 @@ src/app/
 
 - Each page.tsx is a Client Component (`"use client"`)
 - Uses `useAppContext()` hook to access global state
-- Sidebar/MobileNav will use Next.js `<Link>` components (to be updated)
+- Sidebar/MobileNav use Next.js `<Link>` components ✅
 - URLs work properly: /, /composer, /calendar, etc.
 - Browser navigation (back/forward) works correctly
 - Route groups organize features without affecting URLs
-
-**ViewState Enum**: Still exists temporarily for Sidebar/MobileNav, will be removed after navigation components updated to use Next.js Link.
 
 ### 2. State Management Pattern
 
@@ -160,102 +158,123 @@ src/app/
 - accounts: SocialAccount[]        // Connected social accounts
 - userPlan: PlanTier              // User's subscription level
 - branding: BrandingConfig        // Agency white-label settings
-- theme: 'light' | 'dark' | 'system' (managed by useTheme hook)
 
 // CONTEXT HANDLERS (AppContext.tsx) - Actions available to all components
 - showToast: (message, type) => void
 - onPostCreated: (post) => void
 - onUpdatePost: (post) => void
+- onDeletePost: (postId) => void
 - onCompose: (draft?) => void
 - onToggleAccount: (id) => void
 - onOpenUpgrade: () => void
+- refetchPosts: () => Promise<void>
+- refetchAccounts: () => Promise<void>
 
 // LOCAL STATE (Individual Components) - Scoped to component
 - form inputs, UI toggles, temporary data
 ```
 
-**Context Pattern** (Phase 8h):
+**Context Pattern** (Established):
 
 ```typescript
 // AppContext.tsx - Provider wraps page content
 export function AppContextProvider({ children, showToast, onOpenUpgrade }) {
-  const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
-  const value = { posts, setPosts, showToast, onPostCreated, ... };
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [postsLoading, setPostsLoading] = useState(true);
+  
+  // Fetch from API on mount
+  useEffect(() => {
+    api.get('/api/posts').then(data => setPosts(data.posts));
+  }, []);
+  
+  const value = { posts, postsLoading, setPosts, showToast, onPostCreated, ... };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 
 // Page components consume context
 export default function DashboardPage() {
-  const { posts, accounts, showToast, onPostCreated } = useAppContext();
+  const { posts, postsLoading, showToast, onPostCreated } = useAppContext();
+  
+  if (postsLoading) return <LoadingSpinner />;
   return <Dashboard posts={posts} ... />;
 }
 ```
 
-**Why React Context Now**:
-
-- Needed for Next.js App Router architecture
-- Cleaner than prop drilling through AppShell
-- Still simple and performant for MVP size
+**Benefits**:
+- Clean separation: AppShell (layout) vs AppContext (state)
+- Simple and performant for MVP size
 - Easy to debug with explicit context values
-- Proper separation: AppShell (layout) vs AppContext (state)
+- Prepared for API integration (loading states built-in)
 
 ### 3. Data Flow Patterns
 
-#### Creating a Post (Composer → Calendar)
+#### Creating a Post (Composer → Backend → Calendar)
 
 ```
 User Action → Composer Component
     ↓
 Form State (local)
     ↓
-onPostCreated(newPost) callback
+onPostCreated(newPost) callback → API call
     ↓
-App.tsx setPosts([...posts, newPost])
+POST /api/posts → Database
+    ↓
+AppContext.setPosts([...posts, newPost])
     ↓
 Calendar Component (receives updated posts prop)
     ↓
 Re-renders with new post
+    ↓
+Real-time notification via WebSocket (Phase 9G)
 ```
 
-#### Updating User Settings
+#### Backend API Pattern
 
 ```
-User Action → Settings Component
+Client Request → API Route
     ↓
-onChange handler (local state)
+requireAuth() middleware → Verify JWT
     ↓
-onSave → callback to App.tsx
+Validate input with Zod
     ↓
-App.tsx updates state + localStorage
+Prisma database query
     ↓
-Settings Component receives confirmation
+Return JSON response
     ↓
-showToast('Settings saved')
+Client updates local state
+    ↓
+Optional: Emit WebSocket event
 ```
 
 ## Key Technical Decisions
 
-### 1. Mock Data Strategy
+### 1. API Integration Pattern
 
-**Current Pattern**: Static data in component files
-**Location**: `INITIAL_POSTS`, `INITIAL_ACCOUNTS` constants in App.tsx
+**Current Status**: Ready for backend integration (Phase 9F)
 
-**Why Mock Data?**
-
-- Rapid prototyping without backend dependency
-- Demonstrates full UI flow
-- Easy to replace with API calls later
-
-**Migration Path**:
+**API Client Pattern** (`src/lib/api-client.ts`):
 
 ```typescript
-// Current (Mock)
-const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
+// Unified API client with error handling
+export const api = {
+  get: <T>(endpoint: string) => apiRequest<T>(endpoint, { method: 'GET' }),
+  post: <T>(endpoint: string, body?: any) => apiRequest<T>(endpoint, { method: 'POST', body }),
+  patch: <T>(endpoint: string, body?: any) => apiRequest<T>(endpoint, { method: 'PATCH', body }),
+  delete: <T>(endpoint: string) => apiRequest<T>(endpoint, { method: 'DELETE' }),
+};
+```
 
-// Future (API)
+**Usage Pattern**:
+
+```typescript
+// In AppContext or hooks
 const [posts, setPosts] = useState<Post[]>([]);
+const [loading, setLoading] = useState(true);
+
 useEffect(() => {
-  fetchPosts().then(setPosts);
+  api.get<{ posts: Post[] }>('/api/posts')
+    .then(data => setPosts(data.posts))
+    .finally(() => setLoading(false));
 }, []);
 ```
 
@@ -691,23 +710,37 @@ export const Composer: React.FC<ComposerProps> = (props) => {
 5. **CORS**: Restrict allowed origins
 6. **Secrets Management**: Move API keys to backend
 
-## Deployment Architecture (Planned)
+## Deployment Architecture
 
 ```
-Frontend (Vite Build)
+Next.js Application (Frontend + Backend)
     ↓
-Vercel / Netlify
+Vercel (Serverless Functions)
     ↓
+    ├─→ Next.js API Routes (/api/*)
+    │   ├─→ Authentication (NextAuth.js)
+    │   ├─→ CRUD Operations (Prisma)
+    │   └─→ OAuth Callbacks
+    │
+    ├─→ PostgreSQL Database
+    │   └─→ Vercel Postgres (managed)
+    │
+    ├─→ Vercel Blob Storage
+    │   └─→ Media files (images/videos)
+    │
+    └─→ WebSocket Server
+        └─→ Socket.io or Pusher (real-time)
+
 CDN (Static Assets)
-
-Backend API (Future)
-    ↓
-Node.js / Express
-    ↓
-PostgreSQL + Redis
-    ↓
-AWS / Railway / Render
+    └─→ Next.js built assets
 ```
+
+**Benefits**:
+- Single deployment (frontend + backend)
+- Zero-config serverless functions
+- Automatic HTTPS and CDN
+- Built-in environment variables
+- Preview deployments for PRs
 
 ## File Organization
 

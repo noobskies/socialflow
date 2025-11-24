@@ -96,15 +96,39 @@ npm start            # Preview production build
 
 ### Environment Variables
 
-**Required**: `.env.local` file in project root
+**Current** (`.env.local`):
 
 ```bash
+# AI Service
 NEXT_PUBLIC_GEMINI_API_KEY=your_api_key_here
 ```
 
-**Important**: Prefix with `NEXT_PUBLIC_` for client-side access, restart server after changes
+**Phase 9 Will Add**:
 
-**Get API Key**: https://ai.google.dev/ → Sign in → Create key
+```bash
+# Database (Phase 9A)
+DATABASE_URL=postgresql://...
+POSTGRES_PRISMA_URL=postgres://...
+POSTGRES_URL_NON_POOLING=postgres://...
+
+# Authentication (Phase 9B)
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=generate-with-openssl-rand
+
+# OAuth Platforms (Phase 9D)
+TWITTER_CLIENT_ID=...
+TWITTER_CLIENT_SECRET=...
+LINKEDIN_CLIENT_ID=...
+# ... (7 platforms total)
+
+# File Storage (Phase 9E)
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...
+
+# Real-time (Phase 9G)
+CRON_SECRET=for-vercel-cron-jobs
+```
+
+**Security**: Never commit `.env.local` - use Vercel environment variables for production
 
 ## Dependencies
 
@@ -141,13 +165,13 @@ NEXT_PUBLIC_GEMINI_API_KEY=your_api_key_here
 
 ### Deliberately Avoided
 
-- ❌ React Router (using ViewState enum with Next.js catch-all route)
-- ❌ Redux/MobX (using local state)
-- ❌ Axios (using fetch)
+- ❌ Redux/MobX (using React Context)
+- ❌ Axios (using native fetch with api-client wrapper)
 - ❌ Moment.js (using native Date)
 - ❌ Lodash (using native JS)
+- ❌ Separate backend server (using Next.js API routes)
 
-**Why**: Smaller bundle, fewer vulnerabilities, less maintenance, faster install
+**Why**: Smaller bundle, fewer vulnerabilities, less maintenance, unified deployment
 
 ## Browser Support
 
@@ -218,16 +242,45 @@ NEXT_PUBLIC_GEMINI_API_KEY=your_api_key_here
 - Typed routes enabled (via `typedRoutes: true` in next.config.ts)
 - Typed environment variables (via `experimental.typedEnv: true`)
 - Next.js TypeScript plugin active
+- Prisma Client auto-generates types (will be added in Phase 9A)
 
 **Verification**: `npm run type-check` passes with 0 errors
 
-## Development Constraints
+## Backend Stack (Phase 9 - Documented, Ready for Implementation)
 
-### No Backend (Yet)
+**Architecture**: Next.js API routes (serverless functions on Vercel)
 
-**Current**: Pure frontend - no auth, no API, no database, state in memory (lost on refresh)
+**Database**: 
+- **PostgreSQL** - Relational database (Vercel Postgres recommended)
+- **Prisma ORM** v6.x - Type-safe database client with migrations
+- 15+ models: User, Session, SocialAccount, Post, MediaAsset, Analytics, etc.
 
-**Future**: Frontend (Next.js) → Backend (Node.js/Express or Next.js API routes) → Database (PostgreSQL) + AI/Social APIs
+**Authentication**:
+- **NextAuth.js v5** - JWT sessions, credentials provider
+- **bcryptjs** - Password hashing
+- Protected API routes with `requireAuth()` middleware
+
+**File Storage**:
+- **Vercel Blob Storage** - 5GB free tier
+- Image/video uploads with progress tracking
+- Automatic URL generation and CDN
+
+**OAuth Integrations**:
+- Twitter/X, LinkedIn, Instagram, Facebook, TikTok, YouTube, Pinterest
+- PKCE security flow with token refresh
+- Encrypted token storage
+
+**Real-time**:
+- **Socket.io** - WebSocket server for notifications
+- Alternative: **Pusher** (managed service)
+- Live post status updates, instant notifications
+
+**Validation & Security**:
+- **Zod** - Runtime schema validation
+- Input sanitization and error handling
+- Rate limiting and CORS protection
+
+**Documentation**: See `docs/phases/phase9a-9g_*.md` for implementation details
 
 ### API Rate Limits
 
@@ -320,188 +373,77 @@ test: Add unit tests for geminiService
 
 ## Known Technical Limitations
 
-1. **Client-Side Only** - No SSR currently (using dynamic import with ssr: false)
-2. **No Offline Support** - Requires internet
-3. **Memory Constraints** - Large datasets may cause issues
-4. **ViewState Routing** - Using catch-all route, not Next.js App Router yet
-5. **Modern Browsers Only** - No IE11 support
-6. **API Dependencies** - Relies on external services
-7. **No Real-Time** - No WebSockets
-8. **No File Storage** - Client-side only
+**Current (Frontend-Only)**:
+1. **No Data Persistence** - Changes lost on refresh (will be fixed in Phase 9F)
+2. **No Authentication** - No user accounts yet (Phase 9B)
+3. **Mock Data** - Using INITIAL_* constants (Phase 9F migration)
+4. **Client-Side AI Key** - Exposed in bundle (Phase 9B will move to backend)
+
+**After Backend (Phase 9)**:
+5. **Modern Browsers Only** - No IE11 support (by design)
+6. **Internet Required** - No offline mode (acceptable)
+7. **Gemini Dependency** - Rate limits apply (60 req/min, 1,500/day)
 
 ## Path to Production
 
-### Phase 1: Backend Setup (Next)
-- Next.js API routes or Node.js/Express server
-- PostgreSQL database
-- NextAuth.js authentication
-- Redis caching
+### Phase 9: Backend Implementation (Current)
 
-### Phase 2: API Integration
-- Social platform OAuth
-- Real posting capabilities
-- Analytics aggregation
-- Webhook handling
+**Week 1 - Foundation**:
+1. Phase 9A: Prisma + PostgreSQL setup
+2. Phase 9B: NextAuth.js authentication
+3. Phase 9C: Core CRUD API routes
 
-### Phase 3: Scale & Optimize
-- CDN for static assets
-- Database indexing
-- Caching strategies
-- Load balancing
+**Week 2 - Integration**:
+4. Phase 9D: OAuth for 7 platforms
+5. Phase 9E: Vercel Blob file storage
+6. Phase 9F: Replace mock data with APIs
+7. Phase 9G: WebSocket real-time features
+
+### Phase 10: Testing & Deployment
+
+1. Write comprehensive test suite
+2. Production deployment to Vercel
+3. Performance optimization
+4. Security audit
 
 ---
 
 ## Current Development Status
 
-**Architecture**: ✅ Production-ready with feature-based organization  
-**Tooling**: ✅ ESLint, Prettier, Vitest configured  
-**Components**: ✅ 135+ focused components across 9 features  
-**Custom Hooks**: ✅ 5 reusable + 9 feature-specific hooks  
-**UI Library**: ✅ 4 reusable primitives (Button, Input, Modal, Card)  
-**TypeScript**: ✅ Zero compilation errors (strict mode enabled)  
-**Dev Server**: ✅ Working on port 3001 (Next.js 16.0.3 with Turbopack)  
-**Bundle**: ~200KB gzipped (optimized for performance)  
-**Test Infrastructure**: ✅ Vitest configured, ready for Phase 10  
-**Migration Status**: ✅ Next.js migration COMPLETE
+**Frontend**: ✅ Production-ready
+- 135+ components across 9 features
+- Zero TypeScript/ESLint errors
+- Next.js 16.0.3 with Turbopack
+- Bundle: ~200KB gzipped
 
-**Current Phase**: Phase 8 COMPLETE → Phase 9 Next (Backend Planning)
+**Backend**: ✅ Documented, ready for implementation
+- 7 implementation phases (24-32 hours)
+- Complete API architecture
+- Database schema designed
+- OAuth flows documented
 
-## Completed Migration: Vite to Next.js 16
+**Current Phase**: Phase 9A execution next (Database setup)
 
-### Migration Status: COMPLETE ✅ (November 24, 2025)
+## Deployment
 
-**Successfully migrated from Vite to Next.js:**
-- All 10 phases executed (8a-8j, with 8h skipped)
-- Zero breaking changes to all 135+ components
-- Application running successfully
-- Actual time: ~6-8 hours
+**Platform**: Vercel (all-in-one solution)
 
-### Technical Changes Completed
+**Frontend Deployment** (Working Now):
+1. Push code: `git push origin main`
+2. Vercel auto-deploys from GitHub
+3. Add `NEXT_PUBLIC_GEMINI_API_KEY` in Vercel dashboard
+4. Preview at `*.vercel.app`
 
-**Build System**:
-- ✅ Migrated: Vite 6.2.0 → Next.js 16.0.3
-- ✅ Benefit: Automatic code splitting, Turbopack HMR
+**Backend Deployment** (Phase 9):
+1. Create Vercel Postgres database
+2. Add all environment variables (DATABASE_URL, NEXTAUTH_SECRET, OAuth keys, etc.)
+3. Run `npx prisma migrate deploy`
+4. API routes deploy automatically with frontend
+5. One unified deployment
 
-**Styling**:
-- ✅ Migrated: Tailwind CDN → Tailwind CSS v4.1.17 via npm
-- ✅ New syntax: `@import "tailwindcss"` (v4 requirement)
-- ✅ Benefit: Better build performance, proper versioning
-
-**Dependencies**:
-- ✅ Migrated: All dependencies now from npm (no import maps)
-- ✅ Added: `@tailwindcss/postcss` for v4 compatibility
-- ✅ Benefit: Better reliability, offline development
-
-**Environment Variables**:
-- ✅ Migrated: `VITE_GEMINI_API_KEY` → `NEXT_PUBLIC_GEMINI_API_KEY`
-- ✅ Updated: `import.meta.env` → `process.env`
-- ✅ Benefit: Consistent with Next.js conventions
-
-**Routing**:
-- ✅ Implemented: Proper Next.js App Router with route groups
-- ✅ Architecture: Server/Client Component pattern with React Context
-- ✅ Route groups: (content), (insights), (tools) for organization
-- ✅ URLs: /, /composer, /calendar, /analytics, /inbox, /library, /links, /automations, /settings
-- ✅ Benefits: Bookmarkable URLs, browser navigation, automatic code splitting
-
-### Key Files Created
-
-**Initial Migration (6 files):**
-1. `next.config.ts` - Next.js configuration (TypeScript)
-2. `src/app/layout.tsx` - Root layout with metadata
-3. `src/app/globals.css` - Tailwind v4 + custom styles
-4. `postcss.config.cjs` - PostCSS with Tailwind plugin
-5. `tailwind.config.cjs` - Tailwind configuration
-
-**Phase 8h App Router (11 files):**
-6. `src/app/AppShell.tsx` - Client Component wrapper with state management
-7. `src/app/AppContext.tsx` - React Context provider for global state
-8-16. Nine `page.tsx` files with route groups:
-   - `src/app/page.tsx` (Dashboard at /)
-   - `src/app/(content)/composer/page.tsx`
-   - `src/app/(content)/calendar/page.tsx`
-   - `src/app/(content)/library/page.tsx`
-   - `src/app/(insights)/analytics/page.tsx`
-   - `src/app/(insights)/inbox/page.tsx`
-   - `src/app/(tools)/links/page.tsx`
-   - `src/app/(tools)/automations/page.tsx`
-   - `src/app/settings/page.tsx`
-
-### Key Files Modified
-
-1. `package.json` - Updated scripts and dependencies (removed deprecated --ext flag)
-2. `tsconfig.json` - Next.js TypeScript configuration with strict mode
-3. `.gitignore` - Added `.next/` and `next-env.d.ts`
-4. `.env.local` - Renamed environment variable
-5. `src/services/geminiService.ts` - Updated env access
-6. `src/global.d.ts` - Next.js type declarations
-7. `eslint.config.mjs` - Complete rewrite for Next.js
-8. `vitest.config.ts` - Removed Vite-specific plugin
-
-### Key Files Deleted
-
-**Vite Cleanup (3 files):**
-1. `index.html` - Converted to layout.tsx
-2. `index.tsx` - Logic moved to AppShell.tsx
-3. `vite.config.ts` - Replaced by next.config.ts
-
-**App Router Migration (2 files):**
-4. `App.tsx` (root) - Logic moved to src/app/AppShell.tsx
-5. `src/app/[[...slug]]/` folder - Replaced with proper route pages
-
-**Configuration Cleanup (2 files):**
-6. `eslint.config.js` - Replaced by eslint.config.mjs
-7. `next.config.mjs` - Replaced by next.config.ts
-
-### Critical Fixes During Migration
-
-**Initial Migration:**
-1. **Tailwind v4 Syntax**: Changed from `@tailwind` directives to `@import "tailwindcss"`
-2. **Static Export**: Removed `output: 'export'` (incompatible with development server)
-3. **Config Format**: Renamed `.js` to `.cjs` for CommonJS compatibility
-4. **PostCSS Plugin**: Installed `@tailwindcss/postcss` for v4 compatibility
-5. **Webpack Config**: Removed (unnecessary with Next.js)
-
-**Phase 8h App Router:**
-6. **Server/Client Components**: Added `"use client"` to AppShell.tsx and all page files
-7. **React Context**: Created AppContext.tsx for global state management
-8. **Route Groups**: Used (content), (insights), (tools) for logical organization
-9. **Import Paths**: Used relative paths in route group pages (../../AppContext)
-10. **Catch-all Removal**: Deleted [[...slug]] to prevent route conflicts
-
-### Performance
-
-**Dev Server**:
-- Startup time: ~280ms (Turbopack)
-- Hot reload: Near instant
-- First compile: ~2s (normal)
-
-## Deployment (Ready)
-
-**Platform**: Vercel (recommended)
-
-**Steps**:
-1. Push code: `git push origin nextjs-migrate`
-2. Import project to Vercel
-3. Add environment variable: `NEXT_PUBLIC_GEMINI_API_KEY`
-4. Deploy automatically
-
-**Alternative**: Can deploy to Netlify, Cloudflare Pages, or any Node.js host
-
-## Path Forward
-
-### Next Phase: Backend Integration (Phase 9)
-
-With Next.js in place, backend options include:
-
-**Option 1: Next.js API Routes** (Recommended)
-- Built-in API routes in `src/app/api/`
-- Serverless functions on Vercel
-- Easy integration with frontend
-
-**Option 2: Separate Backend**
-- Node.js/Express server
-- Deploy separately (Railway, Render, etc.)
-- More control but more complexity
-
-**Recommendation**: Use Next.js API routes for simpler architecture
+**Benefits**:
+- Zero-config deployment
+- Automatic HTTPS and CDN
+- Environment variables per environment
+- Preview deployments for PRs
+- Serverless auto-scaling
