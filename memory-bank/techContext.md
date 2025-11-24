@@ -379,20 +379,34 @@ test: Add unit tests for geminiService
 - ✅ Benefit: Consistent with Next.js conventions
 
 **Routing**:
-- ✅ Implemented: Catch-all route `[[...slug]]` (SPA mode)
-- ✅ Current: ViewState enum preserved (works identically)
-- ⏭️ Optional: Can migrate to App Router later (Phase 8h)
-- ✅ Benefit: Ready for URL-based routing when needed
+- ✅ Implemented: Proper Next.js App Router with route groups
+- ✅ Architecture: Server/Client Component pattern with React Context
+- ✅ Route groups: (content), (insights), (tools) for organization
+- ✅ URLs: /, /composer, /calendar, /analytics, /inbox, /library, /links, /automations, /settings
+- ✅ Benefits: Bookmarkable URLs, browser navigation, automatic code splitting
 
 ### Key Files Created
 
+**Initial Migration (7 files):**
 1. `next.config.mjs` - Next.js configuration
 2. `src/app/layout.tsx` - Root layout with metadata
 3. `src/app/globals.css` - Tailwind v4 + custom styles
-4. `src/app/[[...slug]]/page.tsx` - Catch-all route
-5. `src/app/[[...slug]]/client.tsx` - Client-side wrapper
-6. `postcss.config.cjs` - PostCSS with Tailwind plugin
-7. `tailwind.config.cjs` - Tailwind configuration
+4. `postcss.config.cjs` - PostCSS with Tailwind plugin
+5. `tailwind.config.cjs` - Tailwind configuration
+
+**Phase 8h App Router (11 files):**
+6. `src/app/AppShell.tsx` - Client Component wrapper with state management
+7. `src/app/AppContext.tsx` - React Context provider for global state
+8-16. Nine `page.tsx` files with route groups:
+   - `src/app/page.tsx` (Dashboard at /)
+   - `src/app/(content)/composer/page.tsx`
+   - `src/app/(content)/calendar/page.tsx`
+   - `src/app/(content)/library/page.tsx`
+   - `src/app/(insights)/analytics/page.tsx`
+   - `src/app/(insights)/inbox/page.tsx`
+   - `src/app/(tools)/links/page.tsx`
+   - `src/app/(tools)/automations/page.tsx`
+   - `src/app/settings/page.tsx`
 
 ### Key Files Modified
 
@@ -405,18 +419,30 @@ test: Add unit tests for geminiService
 
 ### Key Files Deleted
 
+**Vite Cleanup (3 files):**
 1. `index.html` - Converted to layout.tsx
-2. `index.tsx` - Logic moved to client.tsx
+2. `index.tsx` - Logic moved to AppShell.tsx
 3. `vite.config.ts` - Replaced by next.config.mjs
+
+**App Router Migration (2 files):**
+4. `App.tsx` (root) - Logic moved to src/app/AppShell.tsx
+5. `src/app/[[...slug]]/` folder - Replaced with proper route pages
 
 ### Critical Fixes During Migration
 
+**Initial Migration:**
 1. **Tailwind v4 Syntax**: Changed from `@tailwind` directives to `@import "tailwindcss"`
 2. **Static Export**: Removed `output: 'export'` (incompatible with development server)
 3. **Config Format**: Renamed `.js` to `.cjs` for CommonJS compatibility
 4. **PostCSS Plugin**: Installed `@tailwindcss/postcss` for v4 compatibility
-5. **Import Paths**: Fixed App.tsx import in catch-all route
-6. **Webpack Config**: Removed (unnecessary with Next.js)
+5. **Webpack Config**: Removed (unnecessary with Next.js)
+
+**Phase 8h App Router:**
+6. **Server/Client Components**: Added `"use client"` to AppShell.tsx and all page files
+7. **React Context**: Created AppContext.tsx for global state management
+8. **Route Groups**: Used (content), (insights), (tools) for logical organization
+9. **Import Paths**: Used relative paths in route group pages (../../AppContext)
+10. **Catch-all Removal**: Deleted [[...slug]] to prevent route conflicts
 
 ### Performance
 

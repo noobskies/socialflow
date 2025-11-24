@@ -209,18 +209,20 @@
 - [x] Phase 8e: Root Layout Creation
 - [x] Phase 8f: Entry Point Setup
 - [x] Phase 8g: Environment Variables Migration
-- [ ] Phase 8h: Router Migration (Optional - SKIPPED)
+- [x] Phase 8h: Router Migration (COMPLETE - App Router with route groups)
 - [x] Phase 8i: Build & Test
 - [x] Phase 8j: Deployment Preparation
 
 **Migration Results:**
 - ✅ Successfully migrated from Vite 6.2 to Next.js 16.0.3
+- ✅ Proper Next.js 16 App Router with route groups implemented
 - ✅ Zero breaking changes to all 135+ components
 - ✅ Tailwind CSS v4.1.17 properly configured with PostCSS
 - ✅ Environment variables migrated (`VITE_` → `NEXT_PUBLIC_` prefix)
 - ✅ Application running successfully on http://localhost:3001
 - ✅ Dev server startup: ~280ms with Turbopack
 - ✅ All 9 features working identically
+- ✅ URLs now work: /, /composer, /calendar, /analytics, /inbox, /library, /links, /automations, /settings
 
 **Key Technical Fixes:**
 1. Removed `output: 'export'` from next.config.mjs (incompatible with catch-all routes)
@@ -230,11 +232,64 @@
 5. Fixed App.tsx import path in catch-all route
 6. Removed unnecessary webpack configuration
 
-**Files Created:** 7 new files (next.config.mjs, layout.tsx, globals.css, page.tsx, client.tsx, postcss.config.cjs, tailwind.config.cjs)  
-**Files Modified:** 6 files (package.json, tsconfig.json, .gitignore, .env.local, geminiService.ts, global.d.ts)  
-**Files Deleted:** 3 old Vite files (index.html, index.tsx, vite.config.ts)
+**Files Created:** 14 new files
+- Initial migration: next.config.mjs, layout.tsx, globals.css, postcss.config.cjs, tailwind.config.cjs (5 files)
+- App Router: AppShell.tsx, AppContext.tsx (2 files)
+- Route pages: 9 page.tsx files with route groups (9 files)
 
-**Actual Time**: ~6-8 hours (faster than estimated due to detailed planning)
+**Files Modified:** 6 files (package.json, tsconfig.json, .gitignore, .env.local, geminiService.ts, global.d.ts)  
+**Files Deleted:** 5 old files
+- Vite files: index.html, index.tsx, vite.config.ts (3 files)
+- Old routing: App.tsx (root), AppProvider.tsx (2 files)
+
+**Actual Time**: ~6-8 hours initial migration + ~2-3 hours App Router = ~9-11 hours total
+
+### Phase 8h Implementation Details (COMPLETE ✅)
+
+**Approach**: Followed Next.js 16 Server/Client Component best practices
+
+**Architecture Created:**
+1. **AppShell.tsx** - Client Component (`"use client"`)
+   - Manages all global state (theme, modals, toasts, keyboard shortcuts)
+   - Wraps children with AppContextProvider
+   - Contains Sidebar, MobileHeader, MobileNav, and all feedback components
+   
+2. **AppContext.tsx** - React Context provider
+   - Provides global state: posts, accounts, userPlan, branding
+   - Handlers: showToast, onPostCreated, onUpdatePost, onCompose, onToggleAccount, onOpenUpgrade
+   - Used by all page components via `useAppContext()` hook
+
+3. **Route Structure with Route Groups:**
+```
+src/app/
+├── layout.tsx                    # Server Component - wraps with AppShell
+├── page.tsx                      # Dashboard (/)
+├── (content)/                    # Route group: Content creation
+│   ├── composer/page.tsx         # /composer
+│   ├── calendar/page.tsx         # /calendar
+│   └── library/page.tsx          # /library
+├── (insights)/                   # Route group: Analytics & monitoring
+│   ├── analytics/page.tsx        # /analytics
+│   └── inbox/page.tsx            # /inbox
+├── (tools)/                      # Route group: Management tools
+│   ├── links/page.tsx            # /links
+│   └── automations/page.tsx      # /automations
+└── settings/page.tsx             # /settings
+```
+
+**Key Benefits Achieved:**
+- ✅ Proper URL routing - each route bookmarkable and shareable
+- ✅ Browser navigation works (back/forward buttons)
+- ✅ Route groups organize features logically without affecting URLs
+- ✅ Server/Client Component pattern follows Next.js 16 conventions
+- ✅ All 135+ feature components unchanged (zero refactoring needed)
+- ✅ React Context for clean state management
+- ✅ Automatic code splitting per route
+
+**Next Steps:**
+- Update Sidebar.tsx to use Next.js `<Link>` component
+- Update MobileNav.tsx to use Next.js `<Link>` component  
+- Remove ViewState enum (no longer needed)
 
 ### Next Session: Phase 9 - Backend Planning
 
