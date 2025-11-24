@@ -1,4 +1,10 @@
-import { Post, SocialAccount, Product, HashtagGroup } from "@/types";
+import {
+  Post,
+  SocialAccount,
+  Product,
+  HashtagGroup,
+  TeamMember,
+} from "@/types";
 
 export const INITIAL_POSTS: Post[] = [
   {
@@ -239,5 +245,70 @@ export const MOCK_HASHTAG_GROUPS: HashtagGroup[] = [
     id: "3",
     name: "Monday Motivation",
     tags: ["#mondaymotivation", "#grind", "#success", "#goals"],
+  },
+];
+
+export const MOCK_TEAM: TeamMember[] = [
+  {
+    id: "1",
+    name: "Alex Creator",
+    email: "alex@socialflow.ai",
+    role: "admin",
+    avatar:
+      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&fit=crop",
+    status: "active",
+  },
+  {
+    id: "2",
+    name: "Sarah Design",
+    email: "sarah@socialflow.ai",
+    role: "editor",
+    avatar:
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&fit=crop",
+    status: "active",
+  },
+  {
+    id: "3",
+    name: "Mike Analyst",
+    email: "mike@socialflow.ai",
+    role: "viewer",
+    avatar:
+      "https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=100&fit=crop",
+    status: "invited",
+  },
+];
+
+export const MOCK_AUDIT_LOG = [
+  {
+    id: 1,
+    action: "Login Success",
+    user: "Alex Creator",
+    ip: "192.168.1.42",
+    location: "San Francisco, US",
+    date: "Just now",
+  },
+  {
+    id: 2,
+    action: "Updated Billing Plan",
+    user: "Alex Creator",
+    ip: "192.168.1.42",
+    location: "San Francisco, US",
+    date: "2 days ago",
+  },
+  {
+    id: 3,
+    action: "Invited Team Member",
+    user: "Alex Creator",
+    ip: "192.168.1.42",
+    location: "San Francisco, US",
+    date: "1 week ago",
+  },
+  {
+    id: 4,
+    action: "Connected Twitter",
+    user: "Sarah Design",
+    ip: "10.0.0.15",
+    location: "New York, US",
+    date: "1 week ago",
   },
 ];

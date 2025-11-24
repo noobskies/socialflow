@@ -4,7 +4,7 @@ import Dashboard from "@/features/dashboard/Dashboard";
 import Composer from "@/features/composer/Composer";
 import Calendar from "./components/Calendar";
 import Analytics from "@/features/analytics/Analytics";
-import Settings from "./components/Settings";
+import Settings from "@/features/settings/Settings";
 import Inbox from "./components/Inbox";
 import Library from "./components/Library";
 import LinkManager from "./components/LinkManager";
