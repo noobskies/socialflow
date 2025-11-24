@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { Trash2 } from "lucide-react";
 import { TeamMember } from "@/types";
 
@@ -17,10 +18,13 @@ export const TeamMemberRow: React.FC<TeamMemberRowProps> = ({
     <tr className="group">
       <td className="py-4 pl-2">
         <div className="flex items-center space-x-3">
-          <img
+          <Image
             src={member.avatar}
-            className="w-10 h-10 rounded-full object-cover"
             alt={member.name}
+            width={40}
+            height={40}
+            className="rounded-full object-cover"
+            unoptimized
           />
           <div>
             <p className="font-bold text-slate-900 dark:text-white text-sm">

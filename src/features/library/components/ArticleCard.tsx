@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { Zap, ExternalLink, Loader2 } from "lucide-react";
 import { RSSArticle } from "@/types";
 
@@ -16,10 +17,12 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col sm:flex-row hover:shadow-md transition-shadow">
       <div className="w-full sm:w-48 h-48 sm:h-auto shrink-0">
-        <img
+        <Image
           src={article.imageUrl}
           alt={article.title}
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
+          unoptimized
         />
       </div>
       <div className="p-6 flex flex-col flex-1">

@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { CheckCircle2, MoreHorizontal } from "lucide-react";
 import { SocialMessage } from "@/types";
 import { getPlatformColor } from "@/features/calendar/utils/platformIcons";
@@ -15,10 +16,13 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
   return (
     <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 flex justify-between items-center shrink-0 shadow-sm z-10">
       <div className="flex items-center gap-3">
-        <img
+        <Image
           src={message.authorAvatar}
-          className="w-10 h-10 rounded-full"
           alt={message.author}
+          width={40}
+          height={40}
+          className="rounded-full"
+          unoptimized
         />
         <div>
           <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">

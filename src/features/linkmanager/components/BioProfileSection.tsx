@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { Sparkles, Loader2 } from "lucide-react";
 import { BioPageConfig } from "@/types";
 
@@ -22,10 +23,13 @@ export const BioProfileSection: React.FC<BioProfileSectionProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center space-x-4">
-        <img
+        <Image
           src={config.avatar}
           alt="Avatar"
-          className="w-16 h-16 rounded-full border-2 border-slate-100 dark:border-slate-800 object-cover"
+          width={64}
+          height={64}
+          className="rounded-full border-2 border-slate-100 dark:border-slate-800 object-cover"
+          unoptimized
         />
         <button className="text-sm text-indigo-600 dark:text-indigo-400 font-medium hover:underline">
           Change Image

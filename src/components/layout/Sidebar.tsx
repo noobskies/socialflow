@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -116,10 +117,13 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="flex items-center space-x-3 overflow-hidden">
             {hasCustomLogo ? (
               <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-white flex items-center justify-center">
-                <img
+                <Image
                   src={branding.logoUrl}
                   alt="Logo"
-                  className="w-full h-full object-contain"
+                  width={32}
+                  height={32}
+                  className="object-contain"
+                  unoptimized
                 />
               </div>
             ) : (
@@ -293,10 +297,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700 flex items-center space-x-3">
           <div className="relative shrink-0">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&fit=crop"
               alt="User"
-              className="w-9 h-9 rounded-full border-2 border-indigo-500"
+              width={36}
+              height={36}
+              className="rounded-full border-2 border-indigo-500"
+              unoptimized
             />
             <div className="absolute -top-1 -right-1 bg-emerald-500 w-2.5 h-2.5 rounded-full border-2 border-slate-800"></div>
           </div>

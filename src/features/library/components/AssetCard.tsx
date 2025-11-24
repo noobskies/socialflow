@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import {
   MoreHorizontal,
   PenSquare,
@@ -21,10 +22,12 @@ export const AssetCard: React.FC<AssetCardProps> = ({ asset, onUse }) => {
       <div className="relative h-40 bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
         {asset.type === "image" || asset.type === "video" ? (
           <>
-            <img
+            <Image
               src={asset.url}
               alt={asset.name}
-              className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
+              fill
+              className="object-cover transition-transform group-hover:scale-105 duration-300"
+              unoptimized
             />
             {asset.type === "video" && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/20">

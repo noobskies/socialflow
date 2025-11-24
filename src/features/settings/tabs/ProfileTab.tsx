@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { ToastType } from "@/types";
 
 interface ProfileTabProps {
@@ -14,10 +15,13 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ onSave }) => {
           Profile Settings
         </h2>
         <div className="flex items-center space-x-6 mb-8">
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&fit=crop"
             alt="Profile"
-            className="w-24 h-24 rounded-full border-4 border-slate-100 dark:border-slate-800 object-cover"
+            width={96}
+            height={96}
+            className="rounded-full border-4 border-slate-100 dark:border-slate-800 object-cover"
+            unoptimized
           />
           <div>
             <button className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
