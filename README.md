@@ -115,8 +115,8 @@ Result:  -81% reduction while adding features
 ### Frontend
 - **Framework**: React 19.2.0 (with concurrent features)
 - **Language**: TypeScript 5.8.2 (strict mode, 100% type coverage)
-- **Build Tool**: Vite 6.2.0 (lightning-fast HMR, optimized builds)
-- **Styling**: Tailwind CSS (utility-first, dark mode support)
+- **Build Tool**: Next.js 16.0.3 with Turbopack (lightning-fast HMR, optimized builds)
+- **Styling**: Tailwind CSS v4.1.17 (utility-first, dark mode support)
 - **Icons**: Lucide React 0.554.0 (1000+ tree-shakeable icons)
 - **Charts**: Recharts 3.4.1 (declarative, responsive)
 
@@ -165,24 +165,24 @@ Result:  -81% reduction while adding features
    
    Create `.env.local` in the project root:
    ```env
-   VITE_GEMINI_API_KEY=your_api_key_here
+   NEXT_PUBLIC_GEMINI_API_KEY=your_api_key_here
    ```
    
-   > **Important**: Prefix with `VITE_` for client-side access
+   > **Important**: Prefix with `NEXT_PUBLIC_` for client-side access
 
 4. **Start the development server**
    ```bash
    npm run dev
    ```
    
-   Open [http://localhost:5173](http://localhost:5173) in your browser
+   Open [http://localhost:3000](http://localhost:3000) in your browser (or 3001 if 3000 is in use)
 
 ### Available Scripts
 
 ```bash
-npm run dev          # Start development server (port 5173)
-npm run build        # Production build (dist/ directory)
-npm run preview      # Preview production build locally
+npm run dev          # Start development server (port 3000)
+npm run build        # Production build (.next/ directory)
+npm run start        # Start production server
 npm run lint         # Check for linting errors
 npm run lint:fix     # Auto-fix linting errors
 npm run format       # Format code with Prettier
@@ -258,7 +258,7 @@ npm run test:coverage # Generate coverage report
 
 ### Path Aliases
 
-All imports use clean path aliases configured in `tsconfig.json` and `vite.config.ts`:
+All imports use clean path aliases configured in `tsconfig.json` and `next.config.ts`:
 
 ```typescript
 import { Button } from '@/components/ui/Button'
