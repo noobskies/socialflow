@@ -4,6 +4,10 @@ import {
   Product,
   HashtagGroup,
   TeamMember,
+  Folder,
+  MediaAsset,
+  RSSArticle,
+  Bucket,
 } from "@/types";
 
 export const INITIAL_POSTS: Post[] = [
@@ -398,4 +402,144 @@ export const MOCK_LISTENING = [
     sentiment: "negative" as const,
     timestamp: "3h ago",
   },
+];
+
+export const MOCK_FOLDERS: Folder[] = [
+  { id: "all", name: "All Uploads", type: "system", icon: "folder-open" },
+  { id: "campaign-a", name: "Summer Campaign", type: "user" },
+  { id: "evergreen", name: "Evergreen", type: "user" },
+  { id: "videos", name: "Video Assets", type: "user" },
+];
+
+export const MOCK_ASSETS_INIT: MediaAsset[] = [
+  {
+    id: "1",
+    type: "image",
+    url: "https://images.unsplash.com/photo-1557683316-973673baf926?w=800",
+    name: "Gradient Background",
+    createdAt: "2 days ago",
+    tags: ["background", "gradient", "abstract"],
+    folderId: "campaign-a",
+  },
+  {
+    id: "2",
+    type: "video",
+    url: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800",
+    name: "Product Demo",
+    createdAt: "1 week ago",
+    tags: ["product", "demo"],
+    folderId: "videos",
+  },
+  {
+    id: "3",
+    type: "template",
+    content:
+      "🚀 Exciting news! We're launching [PRODUCT] next week. Early bird pricing available for the first 100 customers. Join the waitlist: [LINK]",
+    name: "Product Launch Template",
+    createdAt: "3 days ago",
+    tags: ["launch", "announcement"],
+    folderId: "evergreen",
+  },
+  {
+    id: "4",
+    type: "image",
+    url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800",
+    name: "Beach Sunset",
+    createdAt: "1 day ago",
+    tags: ["summer", "beach", "sunset"],
+    folderId: "campaign-a",
+  },
+  {
+    id: "5",
+    type: "template",
+    content:
+      "💡 Monday Motivation: [QUOTE]\n\nTag someone who needs to see this! 👇",
+    name: "Monday Motivation",
+    createdAt: "5 days ago",
+    tags: ["motivation", "monday"],
+    folderId: "evergreen",
+  },
+];
+
+export const MOCK_RSS: RSSArticle[] = [
+  {
+    id: "1",
+    title: "The Future of AI in Content Creation",
+    snippet:
+      "Artificial intelligence is revolutionizing how we create and distribute content across social media platforms...",
+    source: "TechCrunch",
+    url: "https://techcrunch.com/ai-content",
+    publishedAt: "2 hours ago",
+    imageUrl:
+      "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800",
+  },
+  {
+    id: "2",
+    title: "Social Media Trends for 2024",
+    snippet:
+      "Short-form video continues to dominate, but authentic storytelling is making a comeback...",
+    source: "Social Media Today",
+    url: "https://socialmediatoday.com/trends-2024",
+    publishedAt: "5 hours ago",
+    imageUrl:
+      "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800",
+  },
+  {
+    id: "3",
+    title: "Instagram Algorithm Update Explained",
+    snippet:
+      "Meta announces major changes to how content is ranked and displayed in user feeds...",
+    source: "Buffer Blog",
+    url: "https://buffer.com/instagram-algorithm",
+    publishedAt: "1 day ago",
+    imageUrl:
+      "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=800",
+  },
+];
+
+export const MOCK_BUCKETS: Bucket[] = [
+  {
+    id: "1",
+    name: "Tips & Tricks",
+    description: "Evergreen educational content",
+    postCount: 24,
+    icon: "💡",
+    color: "bg-gradient-to-br from-blue-500 to-blue-600",
+    schedule: "Mon/Wed/Fri at 9:00 AM",
+  },
+  {
+    id: "2",
+    name: "Behind the Scenes",
+    description: "Team culture and office life",
+    postCount: 12,
+    icon: "📸",
+    color: "bg-gradient-to-br from-purple-500 to-purple-600",
+    schedule: "Thursdays at 2:30 PM",
+  },
+  {
+    id: "3",
+    name: "Customer Stories",
+    description: "User testimonials and case studies",
+    postCount: 8,
+    icon: "⭐",
+    color: "bg-gradient-to-br from-emerald-500 to-emerald-600",
+    schedule: "Tuesdays at 11:00 AM",
+  },
+];
+
+export const MOCK_HASHTAGS = MOCK_HASHTAG_GROUPS;
+
+export const MOCK_STOCK_PHOTOS: string[] = [
+  "https://images.unsplash.com/photo-1557683316-973673baf926?w=400",
+  "https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=400",
+  "https://images.unsplash.com/photo-1557682224-5b8590cd9ec5?w=400",
+  "https://images.unsplash.com/photo-1557682268-e3955ed5d83f?w=400",
+  "https://images.unsplash.com/photo-1557682260-96773eb01377?w=400",
+  "https://images.unsplash.com/photo-1557683311-eac922347aa1?w=400",
+  "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=400",
+  "https://images.unsplash.com/photo-1550684376-efcbd6e3f031?w=400",
+  "https://images.unsplash.com/photo-1550684403-7c3e6d3a3e3c?w=400",
+  "https://images.unsplash.com/photo-1550682848-6b4e8b6d8b1b?w=400",
+  "https://images.unsplash.com/photo-1550681560-af9bc1cb339e?w=400",
+  "https://images.unsplash.com/photo-1550677584-5e8f6d5f3e1f?w=400",
 ];

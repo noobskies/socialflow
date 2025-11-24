@@ -6,7 +6,7 @@ import Calendar from "@/features/calendar/Calendar";
 import Analytics from "@/features/analytics/Analytics";
 import Settings from "@/features/settings/Settings";
 import Inbox from "@/features/inbox/Inbox";
-import Library from "./components/Library";
+import Library from "@/features/library/Library";
 import LinkManager from "./components/LinkManager";
 import Automations from "./components/Automations";
 import CommandPalette from "@/components/feedback/CommandPalette";
@@ -151,6 +151,7 @@ const App: React.FC = () => {
             userPlan={userPlan}
             onOpenUpgrade={upgradeModal.openModal}
             onPostCreated={handlePostCreated}
+            showToast={showToast}
           />
         );
       case ViewState.LINKS:

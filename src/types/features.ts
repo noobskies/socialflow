@@ -144,6 +144,7 @@ export interface RSSArticle {
   source: string;
   url: string;
   publishedAt: string;
+  imageUrl: string;
 }
 
 export interface Bucket {
@@ -152,12 +153,15 @@ export interface Bucket {
   description: string;
   postCount: number;
   icon: string;
+  color: string;
+  schedule: string;
 }
 
 export interface Folder {
   id: string;
   name: string;
-  assetCount: number;
+  type: "system" | "user";
+  icon?: string;
 }
 
 export interface ListeningResult {
