@@ -1,17 +1,51 @@
 # System Patterns: SocialFlow AI
 
-## 🚨 CRITICAL CONTEXT: Frontend Refactoring Focus
+## Architecture Overview
 
-**Current State**: AI Studio-generated MVP with flat file structure needs professional refactoring
+This document describes the established patterns and architectural decisions in SocialFlow AI's frontend codebase. All patterns described here are implemented and battle-tested across 9 major features.
 
-**Refactoring Goals**:
+## Guiding Principles
 
-1. **SOLID Principles**: Single Responsibility, Open/Closed, Dependency Inversion
-2. **DRY Implementation**: Extract repeated logic into hooks, utilities, and shared components
-3. **File Organization**: Move from flat structure to feature-based organization
-4. **Future-Ready**: Prepare codebase for backend integration
+### SOLID Principles in Practice
 
-**No Backwards Compatibility**: Freedom to make breaking changes for better architecture
+Every architectural decision follows SOLID principles:
+
+1. **Single Responsibility Principle (SRP)**
+   - Each component has ONE clear job
+   - Orchestrator components coordinate, sub-components handle specifics
+   - Example: `Composer.tsx` coordinates layout, `ContentEditor.tsx` handles editing logic
+
+2. **Open/Closed Principle (OCP)**
+   - Components are open for extension (composition), closed for modification
+   - Add features through new components, not by editing existing ones
+   - Example: Added `FeatureGateOverlay` component, reused across multiple features
+
+3. **Dependency Inversion Principle (DIP)**
+   - Components depend on props (interfaces), not concrete implementations
+   - Makes testing trivial and enables component reuse
+   - Example: `PostCard` accepts any post object, works in Calendar/Kanban/Grid views
+
+### DRY (Don't Repeat Yourself)
+
+**Zero tolerance for duplication:**
+- See duplicate code? Extract to hook, utility, or shared component
+- Proven wins: FeatureGateOverlay (3 reuses), PostCard (3 views), platform icons (2 features)
+- Custom hooks extracted: useToast, useModal, useTheme, useKeyboard, useLocalStorage
+
+### No Backwards Compatibility
+
+**Critical architectural freedom:**
+- NO legacy API contracts
+- NO deprecated features to maintain
+- NO migration paths to support
+
+**This enables:**
+- Aggressive refactoring (6,897 → 1,300 lines achieved)
+- Component API changes for clarity
+- File/function renames without hesitation
+- Immediate deletion of bad patterns
+
+**Philosophy**: When better patterns emerge, implement them immediately. Don't accumulate technical debt.
 
 ---
 
@@ -52,7 +86,7 @@
                     └─────────────────┘
 ```
 
-## Component Architecture
+## Established Patterns
 
 ### 1. Single-Page Application Pattern
 
@@ -624,135 +658,115 @@ AWS / Railway / Render
 
 ## File Organization
 
-### Current Structure (Phase 5 Complete ✅)
+### Current File Structure
 
 ```
 /socialflow
-├── App.tsx              # ⚠️ Still has logic, will simplify in Phase 6
+├── App.tsx              # 228-line root orchestrator
 ├── index.tsx
-├── types.ts             # 🔴 Legacy file (to be removed after verification)
 │
-├── /src                 # ✅ Professional structure implemented
-│   ├── /features        # ✅ Phases 3, 4, 6a, 6b, 6c complete
-│   │   ├── /dashboard   # ✅ COMPLETE (12 files)
+├── /src                 # All source code organized here
+│   ├── /features        # Feature-based organization (9 features complete)
+│   │   ├── /dashboard (12 files)
 │   │   │   ├── Dashboard.tsx (100-line orchestrator)
 │   │   │   ├── useDashboard.ts
 │   │   │   └── ... (10 widget components)
-│   │   ├── /composer    # ✅ COMPLETE (15 files)
+│   │   ├── /composer (15 files)
 │   │   │   ├── Composer.tsx (217-line orchestrator)
 │   │   │   ├── useComposer.ts
 │   │   │   └── ... (13 sub-components + modals)
-│   │   ├── /analytics   # ✅ COMPLETE (15 files)
+│   │   ├── /analytics (15 files)
 │   │   │   ├── Analytics.tsx (60-line orchestrator)
 │   │   │   ├── useAnalytics.ts
 │   │   │   ├── /tabs (3 tab components)
 │   │   │   ├── /charts (4 chart components)
 │   │   │   └── /widgets (6 widgets)
-│   │   ├── /settings    # ✅ COMPLETE (19 files)
+│   │   ├── /settings (19 files)
 │   │   │   ├── Settings.tsx (150-line orchestrator)
 │   │   │   ├── useSettings.ts, SettingsSidebar.tsx
 │   │   │   ├── /tabs (8 tab components)
 │   │   │   └── /widgets (8 widgets)
-│   │   ├── /calendar    # ✅ COMPLETE (16 files)
+│   │   ├── /calendar (16 files)
 │   │   │   ├── Calendar.tsx (130-line orchestrator)
 │   │   │   ├── useCalendar.ts, ViewModeToggle.tsx
-│   │   │   ├── /views (CalendarView, KanbanView, GridView)
+│   │   │   ├── /views (3 view components)
 │   │   │   ├── /components (6 components)
 │   │   │   └── /utils (5 utility modules)
-│   │   ├── /inbox       # ✅ COMPLETE (12 files)
+│   │   ├── /inbox (12 files)
 │   │   │   ├── Inbox.tsx (80-line orchestrator)
 │   │   │   ├── useInbox.ts
-│   │   │   ├── /tabs (MessagesTab, ListeningTab)
+│   │   │   ├── /tabs (2 tab components)
 │   │   │   ├── /components (7 components)
 │   │   │   └── /utils (sentimentUtils.tsx)
-│   │   ├── /library     # ✅ COMPLETE (18 files)
+│   │   ├── /library (18 files)
 │   │   │   ├── Library.tsx (165-line orchestrator)
 │   │   │   ├── useLibrary.ts
 │   │   │   ├── /tabs (5 tab components)
 │   │   │   └── /components (10 components)
-│   │   ├── /linkmanager # ✅ COMPLETE (14 files)
+│   │   ├── /linkmanager (14 files)
 │   │   │   ├── LinkManager.tsx (80-line orchestrator)
 │   │   │   ├── useLinkManager.ts
 │   │   │   ├── /tabs (3 tab components)
 │   │   │   └── /components (9 components)
-│   │   └── /automations # ✅ COMPLETE (10 files)
+│   │   └── /automations (10 files)
 │   │       ├── Automations.tsx (70-line orchestrator)
 │   │       ├── useAutomations.ts
 │   │       ├── /tabs (2 tab components)
 │   │       └── /components (6 components)
 │   │
-│   ├── /components      # ✅ Dirs ready for Phase 5
-│   │   ├── /ui
-│   │   ├── /layout
-│   │   └── /feedback
+│   ├── /components      # Shared/reusable components only
+│   │   ├── /ui          # Base UI primitives
+│   │   │   ├── Button.tsx
+│   │   │   ├── Input.tsx
+│   │   │   ├── Modal.tsx
+│   │   │   ├── Card.tsx
+│   │   │   └── FeatureGateOverlay.tsx
+│   │   ├── /layout      # Layout components
+│   │   │   ├── Sidebar.tsx
+│   │   │   ├── MobileHeader.tsx
+│   │   │   └── MobileNav.tsx
+│   │   └── /feedback    # User feedback components
+│   │       ├── Toast.tsx
+│   │       ├── Notifications.tsx
+│   │       ├── HelpModal.tsx
+│   │       ├── UpgradeModal.tsx
+│   │       ├── ShortcutsModal.tsx
+│   │       └── CommandPalette.tsx
 │   │
-│   ├── /hooks           # ✅ Ready for Phase 2
-│   ├── /lib             # ✅ Ready for future wrappers
+│   ├── /hooks           # Custom hooks (14 total)
+│   │   ├── useToast.ts
+│   │   ├── useModal.ts
+│   │   ├── useTheme.ts
+│   │   ├── useKeyboard.ts
+│   │   └── useLocalStorage.ts
 │   │
-│   ├── /utils           # ✅ Phase 1 complete
-│   │   └── constants.ts # All mock data centralized
+│   ├── /lib             # Third-party wrappers (future)
 │   │
-│   ├── /types           # ✅ Phase 1 complete  
-│   │   ├── index.ts     # Re-export hub
-│   │   ├── domain.ts    # Post, Draft, Account, User, Trend
-│   │   ├── ui.ts        # ViewState, ToastType, Notification
-│   │   └── features.ts  # Workflow, BrandingConfig, Product, etc.
+│   ├── /utils           # Pure utility functions
+│   │   ├── constants.ts # All mock data
+│   │   ├── dates.ts
+│   │   ├── formatting.ts
+│   │   └── validation.ts
 │   │
-│   ├── /services        # ✅ Moved in Phase 1
+│   ├── /types           # Shared TypeScript types
+│   │   ├── index.ts     # Re-exports
+│   │   ├── domain.ts    # Post, Draft, Account, User
+│   │   ├── ui.ts        # ViewState, ToastType
+│   │   └── features.ts  # Feature-specific types
+│   │
+│   ├── /services        # API & external services
 │   │   └── geminiService.ts
 │   │
-│   └── /test            # ✅ From Phase 0a
+│   └── /test            # Test configuration
 │       └── setup.ts
 │
-├── /components          # ⚠️ Legacy (to be migrated in Phase 4+)
-│   ├── Dashboard.tsx    # 🔴 LEGACY - Replaced by /src/features/dashboard/
-│   ├── Composer.tsx     # ⚠️ Phase 4 target - needs breakdown
-│   └── ...              # 14 other components at root level
+├── /docs                # Project documentation
+│   ├── /phases          # Phase documentation
+│   │   ├── /archive     # Completed phase docs
+│   │   └── phase7_testing.md
+│   └── README.md
 │
-├── /docs                # ✅ Project documentation
-└── /memory-bank         # ✅ AI context
-```
-
-**Completed Achievements**:
-
-- ✅ Phase 0a: ESLint, Prettier, Vitest configured
-- ✅ Phase 1: Professional `/src` directory structure
-- ✅ Phase 1: Organized type system (3 modules)
-- ✅ Phase 1: Centralized constants
-- ✅ Phase 1: Path aliases configured and working
-- ✅ Phase 2: 5 custom hooks extracted (useToast, useModal, useTheme, useKeyboard, useLocalStorage)
-- ✅ Phase 2: 3 utility modules (dates, formatting, validation)
-- ✅ Phase 3: Dashboard refactored (550 → 100 lines, 10 widgets created)
-- ✅ Phase 4: Composer refactored (1,850 → 217 lines, 14 sub-components + 1 hook)
-- ✅ Phase 5: UI library created (4 components: Button, Input, Modal, Card)
-- ✅ Phase 5: Shared components organized (11 total in `/src/components/`)
-- ✅ Phase 5: App.tsx simplified (280 → 235 lines, ShortcutsModal extracted)
-- ✅ Phase 6a: Analytics refactored (677 → 60 lines, 15 components created)
-- ✅ Phase 6b: Settings refactored (813 → 150 lines, 19 components created)
-- ✅ Phase 6c: Calendar refactored (697 → 130 lines, 16 components created)
-- ✅ Phase 6d: Inbox refactored (475 → 80 lines, 12 components created)
-- ✅ Phase 6e: Library refactored (713 → 165 lines, 18 components created)
-- ✅ Phase 6f: LinkManager refactored (454 → 80 lines, 14 components created)
-- ✅ Phase 6g: Automations refactored (381 → 70 lines, 10 components created)
-- ✅ FeatureGateOverlay moved to `/src/components/ui/` for app-wide reuse (successfully reused in Settings!)
-- ✅ PostCard component created as reusable across all calendar views
-- ✅ Platform icons utility shared between Calendar and Inbox features
-
-**Remaining Work**:
-
-- Phase 7: Add basic tests
-
-**Current Status**: **Phase 6h complete. ENTIRE FRONTEND REFACTORING PROJECT COMPLETE!** 🎉🎉🎉
-
-- ✅ Phase 6h: App.tsx simplified (287 → 228 lines, -21%)
-- ✅ MobileHeader component created (40 lines)
-- ✅ MobileNav component created (70 lines)
-- ✅ All 10 files refactored (9 features + App.tsx)
-- ✅ 135+ focused components created
-- ✅ Professional architecture established
-- ✅ Ready for Phase 7 (Testing)
-
-### Target Structure (Phase 5+)
+└── /memory-bank         # AI context files
 
 ```
 /socialflow
@@ -850,48 +864,12 @@ AWS / Railway / Render
 "@/services/*": ["./src/services/*"]
 ```
 
-**Benefits**:
-
-- ✅ Professional industry-standard structure
-- ✅ Clear separation: `/src` = code, `/docs` = documentation
-- ✅ Clear feature boundaries within `/src`
-- ✅ Co-located related code
-- ✅ Easy to find files
-- ✅ Scalable as features grow
-- ✅ Easier testing (feature isolation)
-- ✅ Prepared for backend integration
-- ✅ Better IDE navigation and tooling support
-- ✅ Ready for monorepo structure if needed
-
-### Migration Strategy
-
-**Phase 1**: Foundation Setup (using `/src` as base)
-
-1. Create `/src/types` directory with 3 modules (domain, ui, features)
-2. Create `/src/utils/constants.ts` with extracted constants
-3. Move `/services` to `/src/services`
-4. Configure TypeScript and Vite path aliases to point to `/src`
-5. Update all imports to use new path aliases (`@/types`, etc.)
-
-**Phase 2**: Extract hooks and utilities
-
-1. Create `/src/hooks` directory
-2. Extract `useToast`, `useModal`, `useTheme` from App.tsx
-3. Create `/src/utils` with utility functions
-4. Move shared logic to custom hooks
-
-**Phase 3**: Reorganize components into features
-
-1. Create `/src/features` directory
-2. Move Dashboard → `/src/features/dashboard`
-3. Move Composer → `/src/features/composer`
-4. Continue for other features (calendar, settings, etc.)
-
-**Phase 4**: Separate shared components
-
-1. Identify truly reusable components
-2. Move to `/src/components/ui` or `/src/components/layout`
-3. Keep feature-specific components in their feature folders
-4. Organize feedback components in `/src/components/feedback`
-
-**Current Status**: Phase 5 complete. UI library established, shared components organized into proper structure.
+**Architecture Benefits**:
+- Professional industry-standard structure
+- Clear separation: `/src` = code, `/docs` = documentation
+- Feature-based organization for scalability
+- Co-located related code
+- Easy file discovery
+- Isolated features for testing
+- Prepared for backend integration
+- Excellent IDE navigation support
