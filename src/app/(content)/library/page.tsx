@@ -1,7 +1,7 @@
 "use client";
 
 import Library from "@/features/library/Library";
-import { useAppContext } from "../../AppContext";
+import { useAppContext } from "../../_components/AppContext";
 
 export default function LibraryPage() {
   const { onCompose, userPlan, onOpenUpgrade, onPostCreated, showToast } =

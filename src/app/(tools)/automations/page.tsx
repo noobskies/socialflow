@@ -1,7 +1,7 @@
 "use client";
 
 import Automations from "@/features/automations/Automations";
-import { useAppContext } from "../../AppContext";
+import { useAppContext } from "../../_components/AppContext";
 
 export default function AutomationsPage() {
   const { showToast } = useAppContext();

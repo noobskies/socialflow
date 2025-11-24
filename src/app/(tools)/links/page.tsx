@@ -1,7 +1,7 @@
 "use client";
 
 import LinkManager from "@/features/linkmanager/LinkManager";
-import { useAppContext } from "../../AppContext";
+import { useAppContext } from "../../_components/AppContext";
 
 export default function LinksPage() {
   const { showToast } = useAppContext();

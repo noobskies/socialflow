@@ -1,7 +1,7 @@
 "use client";
 
 import Composer from "@/features/composer/Composer";
-import { useAppContext } from "../../AppContext";
+import { useAppContext } from "../../_components/AppContext";
 
 export default function ComposerPage() {
   const { showToast, onPostCreated, userPlan, initialDraft } = useAppContext();

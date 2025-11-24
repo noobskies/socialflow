@@ -1,7 +1,7 @@
 "use client";
 
 import Settings from "@/features/settings/Settings";
-import { useAppContext } from "../AppContext";
+import { useAppContext } from "../_components/AppContext";
 
 export default function SettingsPage() {
   const {

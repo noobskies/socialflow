@@ -1,7 +1,7 @@
 "use client";
 
 import Calendar from "@/features/calendar/Calendar";
-import { useAppContext } from "../../AppContext";
+import { useAppContext } from "../../_components/AppContext";
 
 export default function CalendarPage() {
   const { posts, onCompose, onUpdatePost, onPostCreated, userPlan } =
