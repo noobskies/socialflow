@@ -312,3 +312,90 @@ export const MOCK_AUDIT_LOG = [
     date: "1 week ago",
   },
 ];
+
+export const MOCK_MESSAGES = [
+  {
+    id: "1",
+    platform: "twitter" as const,
+    author: "Sarah Jenkins",
+    authorHandle: "@sarahj_tech",
+    authorAvatar:
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&fit=crop",
+    content:
+      "Just tried the new features in SocialFlow and I am blown away! The AI captions are spot on. 🚀",
+    timestamp: "10m ago",
+    type: "mention" as const,
+    unread: true,
+  },
+  {
+    id: "2",
+    platform: "linkedin" as const,
+    author: "David Miller",
+    authorHandle: "david-miller-pm",
+    authorAvatar:
+      "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&fit=crop",
+    content:
+      "Can we schedule carousel posts for LinkedIn yet? Looking to move our agency over.",
+    timestamp: "45m ago",
+    type: "comment" as const,
+    unread: true,
+  },
+  {
+    id: "3",
+    platform: "instagram" as const,
+    author: "Creative Studio",
+    authorHandle: "@creativestudio.io",
+    authorAvatar:
+      "https://images.unsplash.com/photo-1572044162444-ad6021194360?w=100&fit=crop",
+    content:
+      "Love the aesthetic of your recent posts! What tool are you using for templates?",
+    timestamp: "2h ago",
+    type: "dm" as const,
+    unread: false,
+  },
+  {
+    id: "4",
+    platform: "youtube" as const,
+    author: "Tech Reviews",
+    authorHandle: "TechReviewsChannel",
+    authorAvatar:
+      "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=100&fit=crop",
+    content: "Great video! When is the next tutorial coming out?",
+    timestamp: "5h ago",
+    type: "comment" as const,
+    unread: false,
+  },
+];
+
+export const MOCK_LISTENING = [
+  {
+    id: "l1",
+    keyword: "SocialFlow",
+    platform: "twitter" as const,
+    author: "Mark Growth",
+    content:
+      "Comparing @Buffer vs #SocialFlow for my agency. Any thoughts? The pricing on SF looks way better.",
+    sentiment: "neutral" as const,
+    timestamp: "15m ago",
+  },
+  {
+    id: "l2",
+    keyword: "Social Media Tool",
+    platform: "linkedin" as const,
+    author: "Jessica Lee",
+    content:
+      "Finally found a tool that actually uses AI for content gen, not just a wrapper. #SocialFlow is a game changer.",
+    sentiment: "positive" as const,
+    timestamp: "2h ago",
+  },
+  {
+    id: "l3",
+    keyword: "CompetitorX",
+    platform: "twitter" as const,
+    author: "AngryUser123",
+    content:
+      "CompetitorX is down AGAIN? I need a reliable alternative asap. Recommendations?",
+    sentiment: "negative" as const,
+    timestamp: "3h ago",
+  },
+];

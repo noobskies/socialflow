@@ -98,7 +98,7 @@ Refactoring an AI Studio-generated MVP to establish professional code architectu
 - ✅ Phase 6b: Settings Refactoring (813-line monolith → 150-line orchestrator + 19 components)
 - ✅ Phase 6c: Calendar Refactoring (697-line monolith → 130-line orchestrator + 16 components)
 
-**Latest**: Phase 6c complete - Refactored Calendar following orchestrator pattern. Created 16 focused components organized in `/src/features/calendar/` with views/, components/, and utils/ subdirectories. Main Calendar.tsx reduced from 697 to 130 lines (-81%). Successfully applied orchestrator pattern for all 3 view modes (CalendarView, KanbanView, GridView). Extracted reusable components (PostCard, PostDetailModal, ExportMenu) and utilities (platformIcons, dragDropUtils, exportUtils, importUtils, calendarUtils). TypeScript: 0 errors. Dev server verified working on port 3000.
+**Latest**: Phase 6d complete - Refactored Inbox following orchestrator pattern. Created 12 focused components organized in `/src/features/inbox/` with tabs/, components/, and utils/ subdirectories. Main Inbox.tsx reduced from 475 to 80 lines (-83%). Successfully separated message list (sidebar) from conversation view (right content area). Reused platformIcons utility from Calendar. Fixed layout issues during implementation. TypeScript: 0 errors. Dev server verified working on port 3000.
 
 **Details**: See `progress.md` for complete session history with metrics and verification.
 
@@ -106,27 +106,22 @@ Refactoring an AI Studio-generated MVP to establish professional code architectu
 
 ### Immediate Focus (This Week)
 
-**Phase 6a-c Documentation Complete**: Created comprehensive refactoring plans for Analytics, Settings, and Calendar
+**Phase 6d Complete** ✅ - Inbox refactored successfully
 
-**Three Major Components Documented**:
-1. **Phase 6a: Analytics** (677 → ~120 lines, 15 files) - `docs/phases/phase6a_analytics.md`
-2. **Phase 6b: Settings** (813 → ~150 lines, 19 files) - `docs/phases/phase6b_settings.md`
-3. **Phase 6c: Calendar** (697 → ~140 lines, 16 files) - `docs/phases/phase6c_calendar.md`
+**Remaining Components** (3 components + App.tsx):
+1. **Phase 6e: Library** (713 → ~100 lines, 15-18 files) - LARGEST component, 5 tabs
+2. **Phase 6f: LinkManager** (454 → ~80 lines, 12-14 files) - Bio builder, phone preview
+3. **Phase 6g: Automations** (381 → ~70 lines, 8-10 files) - Workflows, integrations
+4. **Phase 6h: App.tsx** (235 → ~140 lines, 2-3 files) - Final cleanup
 
-**Execution Order Recommended**:
-1. Phase 6a: Analytics (easiest - clear tab structure)
-2. Phase 6b: Settings (medium - reuses FeatureGateOverlay from Analytics)
-3. Phase 6c: Calendar (hardest - complex views, drag-drop)
-4. Phase 6d: App.tsx Simplification (rename phase6_app_simplification.md)
+**Next Target**: Phase 6e (Library) - Most complex with folder management, RSS feeds, stock photos
 
-**Total Impact**: 2,187 lines → ~410 lines (-81%) + ~50 new focused components
+### Upcoming (Next 2 Weeks)
 
-### Upcoming (Next Week)
-
-1. **Phase 6d**: App.tsx Simplification (from 235 lines)
+1. **Complete Phases 6e-6h**: Finish remaining component refactoring
 2. **Phase 7**: Add basic tests (Vitest infrastructure already configured)
 3. **Fix Linting**: Address ESLint issues gradually
-4. **Consider**: Additional component refactoring (Inbox, Library, LinkManager, Automations)
+4. **Code Review**: Ensure consistency across all refactored features
 
 ## Active Design Decisions
 

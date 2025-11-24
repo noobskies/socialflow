@@ -45,6 +45,99 @@
 
 ## Recent Refactoring Sessions
 
+### Phase 6d: Inbox Refactoring ✅ (Nov 23, 2025)
+
+**Duration**: ~2 hours (including bug fixes)
+**Result**: Inbox.tsx reduced from 475 to 80 lines (-83%)
+
+**Created** (12 files in `/src/features/inbox/`):
+
+**Core Structure (2 files)**:
+- **Inbox.tsx** - 80-line orchestrator component
+- **useInbox.ts** - State management hook (activeTab, selectedMessageId, replyText, isGenerating)
+
+**Message Components (2 files)**:
+- **components/MessageCard.tsx** - Individual message with platform badge and unread indicator
+- **components/MessageList.tsx** - Simple message list renderer (no duplicate UI)
+
+**Conversation Components (4 files)**:
+- **components/ConversationHeader.tsx** - Author info, platform badge, actions
+- **components/AIReplyButtons.tsx** - 4 AI tone buttons (gratitude, supportive, witty, professional)
+- **components/ReplyBox.tsx** - Reply textarea with send button
+- **components/ConversationView.tsx** - Full conversation orchestrator with AI integration
+
+**Listening Components (2 files)**:
+- **components/ListeningCard.tsx** - Keyword highlight card with sentiment icon
+- **tabs/ListeningTab.tsx** - Listening items container
+
+**Tab Components (1 file)**:
+- **tabs/MessagesTab.tsx** - Simplified to render only MessageList (sidebar content)
+
+**Utilities (1 file)**:
+- **utils/sentimentUtils.tsx** - getSentimentIcon() helper (returns JSX)
+
+**Impact**:
+- 475-line monolith reduced to 80-line orchestrator (-83%)
+- Created 12 focused, single-responsibility components
+- Applied orchestrator pattern successfully
+- **Reused platformIcons from Calendar** - no code duplication
+- MOCK_MESSAGES and MOCK_LISTENING moved to constants.ts
+- TypeScript: 0 compilation errors ✅
+- Dev server: Verified working on port 3000 ✅
+
+**Challenges & Fixes**:
+
+1. **Double Search Bar Issue**
+   - Problem: Search appeared in both Inbox.tsx header AND MessageList.tsx
+   - Fix: Removed duplicate from MessageList.tsx, keeping only in parent header
+
+2. **Layout Issue - Conversation in Sidebar**
+   - Problem: MessagesTab rendered both MessageList AND ConversationView inside sidebar div, causing conversation to appear in left sidebar instead of right content area
+   - Fix: Restructured so MessagesTab only renders MessageList (for sidebar), and Inbox.tsx renders ConversationView as sibling div outside sidebar
+
+3. **Message Selection Not Working**
+   - Problem: Clicks weren't updating conversation view
+   - Root Cause: Broken layout prevented proper rendering
+   - Fix: Correct two-column layout (sidebar | content area) resolved issue
+
+4. **No Initial Selection**
+   - Problem: No message selected on mount
+   - Fix: Added useEffect in Inbox.tsx to auto-select first message
+
+**File Organization**:
+```
+/src/features/inbox/
+├── Inbox.tsx (80-line orchestrator)
+├── useInbox.ts
+├── /tabs (MessagesTab.tsx)
+├── /components (7 components)
+└── /utils (sentimentUtils.tsx)
+```
+
+**Integration**:
+- Updated App.tsx import from `./components/Inbox` to `@/features/inbox/Inbox`
+- Moved MOCK_MESSAGES and MOCK_LISTENING to `/src/utils/constants.ts`
+- All components use path aliases consistently
+- Zero breaking changes - component API unchanged
+
+**Verification Steps Completed**:
+1. ✅ TypeScript compilation (0 errors)
+2. ✅ Dev server starts successfully  
+3. ✅ Both tabs (messages, listening) functional
+4. ✅ Message selection updates conversation view
+5. ✅ AI reply generation works
+6. ✅ Listening tab displays with keyword highlights
+7. ✅ Correct two-column layout (sidebar + content)
+8. ✅ Dark mode fully supported
+9. ✅ Platform icons reused from Calendar
+10. ✅ First message auto-selected on mount
+
+**Key Achievements**:
+- Successfully applied proven orchestrator pattern for 4th consecutive feature
+- Demonstrated code reuse (platformIcons shared with Calendar)
+- Fixed complex layout issues during implementation
+- Maintained clean separation of concerns (sidebar vs content area)
+
 ### Phase 6d-6h: Final Documentation Planning ✅ (Nov 23, 2025)
 
 **Duration**: ~1 hour  

@@ -5,7 +5,7 @@ import Composer from "@/features/composer/Composer";
 import Calendar from "@/features/calendar/Calendar";
 import Analytics from "@/features/analytics/Analytics";
 import Settings from "@/features/settings/Settings";
-import Inbox from "./components/Inbox";
+import Inbox from "@/features/inbox/Inbox";
 import Library from "./components/Library";
 import LinkManager from "./components/LinkManager";
 import Automations from "./components/Automations";
