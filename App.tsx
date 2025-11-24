@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import Dashboard from "@/features/dashboard/Dashboard";
 import Composer from "@/features/composer/Composer";
-import Calendar from "./components/Calendar";
+import Calendar from "@/features/calendar/Calendar";
 import Analytics from "@/features/analytics/Analytics";
 import Settings from "@/features/settings/Settings";
 import Inbox from "./components/Inbox";

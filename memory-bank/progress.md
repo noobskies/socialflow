@@ -268,6 +268,101 @@
 
 **Key Achievement**: Successfully demonstrated component reusability! FeatureGateOverlay created in Phase 6a was imported and used in 3 different Settings tabs (Team, Branding, Developer), proving the value of the shared component library.
 
+### Phase 6c: Calendar Refactoring ✅ (Nov 23, 2025)
+
+**Duration**: ~2 hours  
+**Result**: Calendar.tsx reduced from 697 to 130 lines (-81%)
+
+**Created** (16 files in `/src/features/calendar/`):
+
+**Core Structure (3 files)**:
+- **Calendar.tsx** - 130-line orchestrator component
+- **useCalendar.ts** - Custom hook for state management (viewMode, selectedPost, draggedPost, etc.)
+- **ViewModeToggle.tsx** - 3-button view switcher (Month/Board/Grid)
+
+**Views (3 files)**:
+- **views/CalendarView.tsx** - Month calendar layout with header + grid
+- **views/KanbanView.tsx** - 4-column board layout with status columns
+- **views/GridView.tsx** - Instagram-style phone mockup with 3-column grid
+
+**Calendar Components (3 files)**:
+- **components/CalendarHeader.tsx** - Month display with navigation arrows
+- **components/CalendarGrid.tsx** - 35-cell grid with drag-drop zones
+- **components/PostCard.tsx** - **Reusable** post card (calendar + kanban + grid)
+
+**Other Components (3 files)**:
+- **components/KanbanColumn.tsx** - Single status column for board view
+- **components/PostDetailModal.tsx** - Full post detail modal with analytics
+- **components/ExportMenu.tsx** - Export/import dropdown menu
+
+**Utilities (5 files)**:
+- **utils/platformIcons.tsx** - getPlatformIcon(), getPlatformColor() helpers
+- **utils/calendarUtils.ts** - Date calculations, grid generation, isToday checker
+- **utils/dragDropUtils.ts** - createDragHandlers() factory for drag-and-drop
+- **utils/exportUtils.ts** - handleExportPDF(), handleExportCSV() placeholders
+- **utils/importUtils.ts** - handleBulkImport() CSV parser
+
+**Impact**:
+- 697-line monolith reduced to 130-line orchestrator (-81%)
+- Created 16 focused, single-responsibility components
+- Applied orchestrator pattern successfully (same as Dashboard, Composer, Analytics, Settings)
+- All 3 view modes functional (Calendar, Kanban, Grid)
+- Drag-and-drop working in calendar and kanban views
+- Post detail modal fully functional with analytics
+- Export/import CSV functionality preserved
+- TypeScript: 0 compilation errors ✅
+- Dev server: Verified working on port 3000 ✅
+
+**File Organization**:
+```
+/src/features/calendar/
+├── Calendar.tsx (130-line orchestrator)
+├── useCalendar.ts (state hook)
+├── ViewModeToggle.tsx
+├── /views
+│   ├── CalendarView.tsx
+│   ├── KanbanView.tsx
+│   └── GridView.tsx
+├── /components
+│   ├── CalendarHeader.tsx
+│   ├── CalendarGrid.tsx
+│   ├── PostCard.tsx (reusable!)
+│   ├── KanbanColumn.tsx
+│   ├── PostDetailModal.tsx
+│   └── ExportMenu.tsx
+└── /utils
+    ├── platformIcons.tsx
+    ├── calendarUtils.ts
+    ├── dragDropUtils.ts
+    ├── exportUtils.ts
+    └── importUtils.ts
+```
+
+**Integration**:
+- Updated App.tsx import from `./components/Calendar` to `@/features/calendar/Calendar`
+- All components use path aliases consistently (`@/features/calendar/*`)
+- Zero breaking changes - component API unchanged
+
+**Verification Steps Completed**:
+1. ✅ TypeScript compilation (0 errors)
+2. ✅ Dev server starts successfully
+3. ✅ All 3 view modes render correctly
+4. ✅ View switching works smoothly
+5. ✅ Drag-and-drop functional in calendar view
+6. ✅ Kanban board displays correctly with 4 columns
+7. ✅ Instagram grid view renders with phone mockup
+8. ✅ Post detail modal opens with full details
+9. ✅ Export/import menu functional
+10. ✅ Dark mode fully supported
+11. ✅ Responsive layouts work on mobile/tablet/desktop
+
+**Key Achievements**:
+- Completed the MOST COMPLEX refactoring (3 views, drag-drop, modal system)
+- PostCard component successfully reused across all 3 views
+- Platform icons extracted into reusable utility
+- Drag-drop logic cleanly separated into factory function
+- All calendar features preserved with improved organization
+
 ### Phase 5: Shared Components Migration ✅ (Nov 23, 2025)
 
 **Duration**: ~1.5 hours  
@@ -466,7 +561,7 @@
 
 ```
 /src
-├── /features ✅ (Phase 3 & 4 complete)
+├── /features ✅ (Phases 3, 4, 6a, 6b, 6c complete)
 │   ├── /dashboard (12 files) ✅
 │   │   ├── Dashboard.tsx (100-line orchestrator)
 │   │   ├── useDashboard.ts, DashboardStats.tsx
@@ -475,16 +570,33 @@
 │   │   ├── CrisisAlert.tsx, OnboardingProgress.tsx
 │   │   ├── EngagementChart.tsx, TopLinks.tsx
 │   │   └── RecentGenerations.tsx
-│   └── /composer (15 files) ✅
-│       ├── Composer.tsx (217-line orchestrator)
-│       ├── useComposer.ts
-│       ├── PlatformSelector.tsx, PlatformOptions.tsx
-│       ├── ContentEditor.tsx, PreviewPanel.tsx
-│       ├── MediaPreview.tsx, PollCreator.tsx
-│       ├── AIPanel.tsx, AIWriter.tsx, AIDesigner.tsx
-│       ├── TeamCollaboration.tsx
-│       ├── SchedulingModal.tsx, ProductPickerModal.tsx
-│       └── AnalysisModal.tsx
+│   ├── /composer (15 files) ✅
+│   │   ├── Composer.tsx (217-line orchestrator)
+│   │   ├── useComposer.ts
+│   │   ├── PlatformSelector.tsx, PlatformOptions.tsx
+│   │   ├── ContentEditor.tsx, PreviewPanel.tsx
+│   │   ├── MediaPreview.tsx, PollCreator.tsx
+│   │   ├── AIPanel.tsx, AIWriter.tsx, AIDesigner.tsx
+│   │   ├── TeamCollaboration.tsx
+│   │   ├── SchedulingModal.tsx, ProductPickerModal.tsx
+│   │   └── AnalysisModal.tsx
+│   ├── /analytics (15 files) ✅
+│   │   ├── Analytics.tsx (60-line orchestrator)
+│   │   ├── useAnalytics.ts
+│   │   ├── /tabs (OverviewTab, CompetitorsTab, ReportsTab)
+│   │   ├── /charts (4 chart components)
+│   │   └── /widgets (6 widget components)
+│   ├── /settings (19 files) ✅
+│   │   ├── Settings.tsx (150-line orchestrator)
+│   │   ├── useSettings.ts, SettingsSidebar.tsx
+│   │   ├── /tabs (8 tab components)
+│   │   └── /widgets (8 widget components)
+│   └── /calendar (16 files) ✅
+│       ├── Calendar.tsx (130-line orchestrator)
+│       ├── useCalendar.ts, ViewModeToggle.tsx
+│       ├── /views (CalendarView, KanbanView, GridView)
+│       ├── /components (6 components including PostCard)
+│       └── /utils (5 utility modules)
 ├── /components ✅ (Phase 5 complete - 11 components)
 │   ├── /ui (4 components) ✅ NEW!
 │   │   ├── Button.tsx, Input.tsx
@@ -519,8 +631,8 @@
 ## Key Metrics
 
 **App.tsx**: 235 lines (down from 390)  
-**Total Components**: 11 in `/src/components/`, 27 in `/src/features/`, 8 legacy at root
-**Custom Hooks**: 5 reusable hooks + 2 feature-specific hooks
+**Total Components**: 11 in `/src/components/`, 77 in `/src/features/`, 5 legacy at root
+**Custom Hooks**: 5 reusable hooks + 4 feature-specific hooks (useDashboard, useComposer, useAnalytics, useSettings, useCalendar)
 **UI Library**: 4 reusable components (Button, Input, Modal, Card)
 **Utility Functions**: 3 modules with date, format, validation helpers  
 **Linting Issues**: 77 errors (non-blocking, fix during refactoring)  

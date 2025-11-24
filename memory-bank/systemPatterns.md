@@ -626,23 +626,32 @@ AWS / Railway / Render
 ├── types.ts             # 🔴 Legacy file (to be removed after verification)
 │
 ├── /src                 # ✅ Professional structure implemented
-│   ├── /features        # ✅ Phase 3: Dashboard complete (12 files)
-│   │   ├── /dashboard   # ✅ COMPLETE
+│   ├── /features        # ✅ Phases 3, 4, 6a, 6b, 6c complete
+│   │   ├── /dashboard   # ✅ COMPLETE (12 files)
 │   │   │   ├── Dashboard.tsx (100-line orchestrator)
 │   │   │   ├── useDashboard.ts
-│   │   │   ├── DashboardStats.tsx
-│   │   │   ├── TrendingWidget.tsx
-│   │   │   ├── QuickDraft.tsx
-│   │   │   ├── UpcomingPosts.tsx
-│   │   │   ├── AccountHealth.tsx
-│   │   │   ├── CrisisAlert.tsx
-│   │   │   ├── OnboardingProgress.tsx
-│   │   │   ├── EngagementChart.tsx
-│   │   │   ├── TopLinks.tsx
-│   │   │   └── RecentGenerations.tsx
-│   │   ├── /composer    # Phase 4 target
-│   │   ├── /calendar
-│   │   └── /settings
+│   │   │   └── ... (10 widget components)
+│   │   ├── /composer    # ✅ COMPLETE (15 files)
+│   │   │   ├── Composer.tsx (217-line orchestrator)
+│   │   │   ├── useComposer.ts
+│   │   │   └── ... (13 sub-components + modals)
+│   │   ├── /analytics   # ✅ COMPLETE (15 files)
+│   │   │   ├── Analytics.tsx (60-line orchestrator)
+│   │   │   ├── useAnalytics.ts
+│   │   │   ├── /tabs (3 tab components)
+│   │   │   ├── /charts (4 chart components)
+│   │   │   └── /widgets (6 widgets)
+│   │   ├── /settings    # ✅ COMPLETE (19 files)
+│   │   │   ├── Settings.tsx (150-line orchestrator)
+│   │   │   ├── useSettings.ts, SettingsSidebar.tsx
+│   │   │   ├── /tabs (8 tab components)
+│   │   │   └── /widgets (8 widgets)
+│   │   └── /calendar    # ✅ COMPLETE (16 files)
+│   │       ├── Calendar.tsx (130-line orchestrator)
+│   │       ├── useCalendar.ts, ViewModeToggle.tsx
+│   │       ├── /views (CalendarView, KanbanView, GridView)
+│   │       ├── /components (6 components)
+│   │       └── /utils (5 utility modules)
 │   │
 │   ├── /components      # ✅ Dirs ready for Phase 5
 │   │   ├── /ui
@@ -692,13 +701,15 @@ AWS / Railway / Render
 - ✅ Phase 5: App.tsx simplified (280 → 235 lines, ShortcutsModal extracted)
 - ✅ Phase 6a: Analytics refactored (677 → 60 lines, 15 components created)
 - ✅ Phase 6b: Settings refactored (813 → 150 lines, 19 components created)
+- ✅ Phase 6c: Calendar refactored (697 → 130 lines, 16 components created)
 - ✅ FeatureGateOverlay moved to `/src/components/ui/` for app-wide reuse (successfully reused in Settings!)
+- ✅ PostCard component created as reusable across all calendar views
 
 **Remaining Work**:
 
-- Phase 6c: Calendar refactoring
 - Phase 6d: App.tsx simplification (from 235 lines)
 - Phase 7: Add basic tests
+- Consider: Additional component refactoring (Inbox, Library, LinkManager, Automations)
 
 **Phase 6a-c Documentation Created** ✅:
 - **Analytics** (677 → ~120 lines, 15 files) - 3 tabs, 4 charts, 6 widgets + FeatureGateOverlay
@@ -708,7 +719,7 @@ AWS / Railway / Render
 All three will follow the same orchestrator pattern established in Dashboard and Composer.
 
 ### Current Structure (Phase 5 Complete ✅)
-**Current Status**: Phase 5 complete and ready to commit. Ready for Phase 6: App.tsx Simplification
+**Current Status**: Phase 6c complete. Calendar refactored successfully. Ready for Phase 6d: App.tsx Simplification
 
 ### Target Structure (Phase 5+)
 
