@@ -45,6 +45,66 @@
 
 ## Recent Refactoring Sessions
 
+### Phase 6d-6h: Final Documentation Planning ✅ (Nov 23, 2025)
+
+**Duration**: ~1 hour  
+**Result**: Completed all remaining refactoring documentation (4 components + App.tsx)
+
+**Created Documentation** (5 comprehensive phase plans):
+
+1. **phase6d_inbox.md** - Inbox refactoring (475 → ~80 lines, -83%)
+   - 10-12 components: MessageList, MessageCard, ConversationView, AIReplyButtons, etc.
+   - 2 tabs: messages + listening
+   - Reuses platform icons from Calendar (code reuse win!)
+   - Sub-phases: A (Foundation), B (Messages), C (Conversation), D (Listening), E (Integration)
+
+2. **phase6e_library.md** - Library refactoring (713 → ~100 lines, -86%, LARGEST!)
+   - 15-18 components across 5 tabs (library, rss, buckets, hashtags, stock)
+   - Most complex: folder management, modal systems, AI RSS integration
+   - Sub-phases: A (Foundation & Library), B (RSS), C (Buckets), D (Hashtags), E (Stock), F (Integration)
+
+3. **phase6f_linkmanager.md** - LinkManager refactoring (454 → ~80 lines, -82%)
+   - 12-14 components: Bio editor, phone preview, links table, leads table
+   - Live phone preview with 3 theme options
+   - AI bio generation integration
+   - Sub-phases: A (Foundation & Shortener), B (Bio Editor), C (Phone Preview), D (Leads), E (Integration)
+
+4. **phase6g_automations.md** - Automations refactoring (381 → ~70 lines, -82%)
+   - 8-10 components: Workflow cards, AI architect sidebar, integration cards
+   - Create workflow modal with form validation
+   - Sub-phases: A (Foundation), B (AI Architect), C (Integrations), D (Tabs), E (Integration)
+
+5. **phase6h_app_simplification.md** - App.tsx cleanup (235 → ~140 lines, -40%)
+   - Final phase after all component migrations
+   - Extract MobileHeader and MobileNav components
+   - Update all imports to @/features paths
+   - Optional ViewRouter extraction
+   - Sub-phases: A (Imports), B (MobileHeader), C (MobileNav), D (ViewRouter-optional), E (Cleanup)
+
+**Documentation Achievements**:
+- **2,023 lines** in 4 components → **~330 lines** (-84%) + ~50 new components
+- **App.tsx**: 235 → ~140 lines (-40%) 
+- **Combined Total**: 2,258 lines → ~470 lines (-79%)
+- **Grand Total (all phases)**: 9,103 → ~1,580 lines (-83%) + 100+ components
+
+**Removed Old File**: 
+- Deleted outdated `phase6d_app_simplification.md`
+- Replaced with correct `phase6h_app_simplification.md`
+
+**Execution Strategy**:
+- Recommended order: 6d (Inbox), 6e (Library), 6f (LinkManager), 6g (Automations), 6h (App.tsx)
+- Estimated time: 6-8 hours total for all phases
+- Each phase fully documented with sub-phases and code examples
+
+**Key Insights**:
+- Library (713 lines) is largest component - needs most work
+- Platform icons can be shared between Calendar and Inbox
+- All 4 components follow consistent tab-based patterns
+- App.tsx imports need cleanup before simplification
+- MobileHeader and MobileNav extraction will improve testability
+
+**Next**: Ready to execute Phases 6d-6h implementation
+
 ### Phase 6a-c: Documentation Planning ✅ (Nov 23, 2025)
 
 **Duration**: ~45 minutes  

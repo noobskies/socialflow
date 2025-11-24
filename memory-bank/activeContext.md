@@ -24,6 +24,69 @@ Refactoring an AI Studio-generated MVP to establish professional code architectu
 
 ## Recent Progress
 
+### Phase 6d-6h: Documentation Planning ✅ (Nov 23, 2025)
+
+**Duration**: ~1 hour  
+**Result**: Created comprehensive refactoring documentation for remaining 4 components + App.tsx
+
+**Created Documentation** (5 phase plans):
+
+1. **phase6d_inbox.md** - Inbox refactoring plan
+   - Current: 475 lines → Target: ~80 lines (-83%)
+   - 10-12 files to create (2 tabs, 8 components, 2 utils)
+   - Key features: Messages + listening tabs, AI replies, sentiment analysis
+   - Reuses platform icons from Calendar
+
+2. **phase6e_library.md** - Library refactoring plan (LARGEST!)
+   - Current: 713 lines (LARGEST!) → Target: ~100 lines (-86%)
+   - 15-18 files to create (5 tabs, 11 components, 1 util)
+   - Key features: Media library, RSS feeds, content buckets, hashtag groups, stock photos
+   - Most complex with folder management and multiple sub-features
+
+3. **phase6f_linkmanager.md** - LinkManager refactoring plan  
+   - Current: 454 lines → Target: ~80 lines (-82%)
+   - 12-14 files to create (3 tabs, 9 components, 1 util)
+   - Key features: Short links, bio page builder with phone preview, lead capture
+
+4. **phase6g_automations.md** - Automations refactoring plan
+   - Current: 381 lines → Target: ~70 lines (-82%)
+   - 8-10 files to create (2 tabs, 6 components, 1 util)
+   - Key features: Workflows, integrations, AI workflow architect
+
+5. **phase6h_app_simplification.md** - App.tsx simplification plan (renamed from old phase6d)
+   - Current: 235 lines → Target: ~120-150 lines (-40%)
+   - 2-3 files to create (MobileHeader, MobileNav, optional ViewRouter)
+   - Final cleanup after all component migrations
+
+**Total Documentation Impact**:
+- **4 Components**: 2,023 lines → ~330 lines (-84%) + ~50 new components
+- **App.tsx**: 235 → ~140 lines (-40%) + 2 layout components
+- **Combined with Phases 6a-6c**: 9,103 lines → ~1,580 lines (-83%) across 10 files
+
+**Execution Order Documented**:
+1. Phase 6d: Inbox (easiest - 2 tabs)
+2. Phase 6e: Library (hardest - 5 complex tabs)
+3. Phase 6f: LinkManager (medium - bio builder)
+4. Phase 6g: Automations (easy - 2 tabs)
+5. Phase 6h: App.tsx (final cleanup)
+
+**Documentation Quality**:
+- Follows proven pattern from Phases 6a-6c
+- Detailed sub-phases with step-by-step code
+- Complete component breakdowns
+- Verification checklists
+- Mock data migration notes
+- Integration guidance
+
+**Key Patterns**:
+- Orchestrator pattern for all components
+- Custom hooks for state management
+- Tab-based organization
+- Component reusability (platform icons, FeatureGateOverlay)
+- Utility extraction where beneficial
+
+**Next Action**: Ready to execute Phases 6d-6h (estimated 6-8 hours total)
+
 **Completed Phases**:
 - ✅ Phase 0a: Development Tools (ESLint, Prettier, Vitest configured)
 - ✅ Phase 1: Foundation Setup (/src structure, types split into 3 modules, constants extracted)
