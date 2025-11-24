@@ -1,12 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Output as static export (SPA mode) for initial migration
-  output: "export",
-
-  // Custom output directory to match Vite's dist folder
-  distDir: "./dist",
-
-  // No image optimization in static export mode
+  // No image optimization for now
   images: {
     unoptimized: true,
   },
