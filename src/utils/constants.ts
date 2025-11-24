@@ -8,6 +8,9 @@ import {
   MediaAsset,
   RSSArticle,
   Bucket,
+  ShortLink,
+  BioPageConfig,
+  Lead,
 } from "@/types";
 
 export const INITIAL_POSTS: Post[] = [
@@ -542,4 +545,113 @@ export const MOCK_STOCK_PHOTOS: string[] = [
   "https://images.unsplash.com/photo-1550682848-6b4e8b6d8b1b?w=400",
   "https://images.unsplash.com/photo-1550681560-af9bc1cb339e?w=400",
   "https://images.unsplash.com/photo-1550677584-5e8f6d5f3e1f?w=400",
+];
+
+export const MOCK_LINKS: ShortLink[] = [
+  {
+    id: "1",
+    title: "Product Launch Page",
+    shortCode: "launch2024",
+    originalUrl: "https://socialflow.ai/products/new-features",
+    clicks: 1247,
+    createdAt: "Oct 15, 2023",
+    tags: ["product", "launch"],
+  },
+  {
+    id: "2",
+    title: "Blog: AI Content Tips",
+    shortCode: "ai-tips",
+    originalUrl: "https://socialflow.ai/blog/ai-content-creation-guide",
+    clicks: 892,
+    createdAt: "Oct 10, 2023",
+    tags: ["blog", "ai"],
+  },
+  {
+    id: "3",
+    title: "Free Trial Signup",
+    shortCode: "freetrial",
+    originalUrl: "https://socialflow.ai/signup?ref=social",
+    clicks: 2156,
+    createdAt: "Oct 5, 2023",
+    tags: ["conversion", "trial"],
+  },
+  {
+    id: "4",
+    title: "Webinar Registration",
+    shortCode: "webinar-nov",
+    originalUrl: "https://socialflow.ai/events/november-webinar",
+    clicks: 543,
+    createdAt: "Oct 1, 2023",
+    tags: ["event", "webinar"],
+  },
+];
+
+export const INITIAL_BIO_CONFIG: BioPageConfig = {
+  username: "@alexcreator",
+  displayName: "Alex Creator",
+  bio: "Digital creator passionate about tech & design. 🎨✨",
+  avatar:
+    "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&fit=crop",
+  theme: "colorful",
+  links: [
+    {
+      id: "1",
+      title: "Latest YouTube Video",
+      url: "https://youtube.com/@alexcreator",
+      active: true,
+    },
+    {
+      id: "2",
+      title: "My Portfolio",
+      url: "https://alexcreator.com",
+      active: true,
+    },
+    {
+      id: "3",
+      title: "Book a Consultation",
+      url: "https://cal.com/alexcreator",
+      active: true,
+    },
+    {
+      id: "4",
+      title: "Shop My Presets",
+      url: "https://gumroad.com/alexcreator",
+      active: true,
+    },
+  ],
+  enableLeadCapture: true,
+  leadCaptureText: "Join my weekly newsletter for tips!",
+};
+
+export const MOCK_LEADS: Lead[] = [
+  {
+    id: "1",
+    email: "sarah.tech@gmail.com",
+    source: "Bio Page - Newsletter",
+    timestamp: "2 hours ago",
+  },
+  {
+    id: "2",
+    email: "mike.designer@yahoo.com",
+    source: "Bio Page - Newsletter",
+    timestamp: "5 hours ago",
+  },
+  {
+    id: "3",
+    email: "emma.marketing@company.com",
+    source: "Bio Page - Newsletter",
+    timestamp: "1 day ago",
+  },
+  {
+    id: "4",
+    email: "john.dev@startup.io",
+    source: "Bio Page - Newsletter",
+    timestamp: "2 days ago",
+  },
+  {
+    id: "5",
+    email: "lisa.content@agency.com",
+    source: "Bio Page - Newsletter",
+    timestamp: "3 days ago",
+  },
 ];

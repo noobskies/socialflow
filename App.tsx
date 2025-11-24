@@ -7,7 +7,7 @@ import Analytics from "@/features/analytics/Analytics";
 import Settings from "@/features/settings/Settings";
 import Inbox from "@/features/inbox/Inbox";
 import Library from "@/features/library/Library";
-import LinkManager from "./components/LinkManager";
+import LinkManager from "@/features/linkmanager/LinkManager";
 import Automations from "./components/Automations";
 import CommandPalette from "@/components/feedback/CommandPalette";
 import Toast from "@/components/feedback/Toast";

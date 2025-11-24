@@ -412,6 +412,7 @@ Self-contained with internal animation/positioning logic.
 - `useCalendar` - Calendar view mode, drag-drop, and post selection
 - `useInbox` - Inbox tab state and message handling
 - `useLibrary` - Library tab state, folder/asset management, and filters
+- `useLinkManager` - LinkManager tab state (shortener, bio, leads)
 
 **Usage**: Import from `@/hooks/*` and use in components. All hooks follow React best practices with proper cleanup.
 
@@ -663,11 +664,16 @@ AWS / Railway / Render
 │   │   │   ├── /tabs (MessagesTab, ListeningTab)
 │   │   │   ├── /components (7 components)
 │   │   │   └── /utils (sentimentUtils.tsx)
-│   │   └── /library     # ✅ COMPLETE (18 files)
-│   │       ├── Library.tsx (165-line orchestrator)
-│   │       ├── useLibrary.ts
-│   │       ├── /tabs (5 tab components)
-│   │       └── /components (10 components)
+│   │   ├── /library     # ✅ COMPLETE (18 files)
+│   │   │   ├── Library.tsx (165-line orchestrator)
+│   │   │   ├── useLibrary.ts
+│   │   │   ├── /tabs (5 tab components)
+│   │   │   └── /components (10 components)
+│   │   └── /linkmanager # ✅ COMPLETE (14 files)
+│   │       ├── LinkManager.tsx (80-line orchestrator)
+│   │       ├── useLinkManager.ts
+│   │       ├── /tabs (3 tab components)
+│   │       └── /components (9 components)
 │   │
 │   ├── /components      # ✅ Dirs ready for Phase 5
 │   │   ├── /ui
@@ -720,26 +726,18 @@ AWS / Railway / Render
 - ✅ Phase 6c: Calendar refactored (697 → 130 lines, 16 components created)
 - ✅ Phase 6d: Inbox refactored (475 → 80 lines, 12 components created)
 - ✅ Phase 6e: Library refactored (713 → 165 lines, 18 components created)
+- ✅ Phase 6f: LinkManager refactored (454 → 80 lines, 14 components created)
 - ✅ FeatureGateOverlay moved to `/src/components/ui/` for app-wide reuse (successfully reused in Settings!)
 - ✅ PostCard component created as reusable across all calendar views
 - ✅ Platform icons utility shared between Calendar and Inbox features
 
 **Remaining Work**:
 
-- Phase 6f: LinkManager refactoring (454 lines)
 - Phase 6g: Automations refactoring (381 lines)
 - Phase 6h: App.tsx simplification (from 235 lines)
 - Phase 7: Add basic tests
 
-**Phase 6a-c Documentation Created** ✅:
-- **Analytics** (677 → ~120 lines, 15 files) - 3 tabs, 4 charts, 6 widgets + FeatureGateOverlay
-- **Settings** (813 → ~150 lines, 19 files) - 8 tabs, 8 widgets, sidebar (reuses FeatureGateOverlay)
-- **Calendar** (697 → ~140 lines, 16 files) - 3 views, 5 components, 5 utilities
-
-All three will follow the same orchestrator pattern established in Dashboard and Composer.
-
-### Current Structure (Phase 5 Complete ✅)
-**Current Status**: Phase 6c complete. Calendar refactored successfully. Ready for Phase 6d: App.tsx Simplification
+**Current Status**: Phase 6f complete. LinkManager refactored successfully. Ready for Phase 6g: Automations Refactoring
 
 ### Target Structure (Phase 5+)
 
