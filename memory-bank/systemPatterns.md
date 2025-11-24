@@ -4,7 +4,7 @@
 
 This document describes the established patterns and architectural decisions in SocialFlow AI's frontend codebase. All patterns described here are implemented and battle-tested across 9 major features.
 
-**Note on Upcoming Migration** (November 23, 2025): A comprehensive plan to migrate from Vite to Next.js 16 has been completed. The migration will preserve all architectural patterns described in this document with zero breaking changes to the 135+ components. See `implementation_plan.md` and `docs/phases/phase8a-8j_*.md` for details.
+**Next.js Migration Complete** (November 24, 2025): Successfully migrated from Vite 6.2 to Next.js 16.0.3. All architectural patterns described in this document have been preserved with zero breaking changes to the 135+ components. The application now runs on Next.js with Turbopack, providing improved performance and developer experience.
 
 ## Guiding Principles
 
