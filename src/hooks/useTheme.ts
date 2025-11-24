@@ -3,15 +3,10 @@ import { useState, useEffect } from "react";
 type Theme = "light" | "dark" | "system";
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>("system");
-
-  // Load theme from localStorage on mount
-  useEffect(() => {
+  const [theme, setTheme] = useState<Theme>(() => {
     const savedTheme = localStorage.getItem("theme") as Theme | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-    }
-  }, []);
+    return savedTheme || "system";
+  });
 
   // Apply theme to document and handle system preference
   useEffect(() => {

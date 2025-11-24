@@ -26,7 +26,18 @@ export const Calendar: React.FC<CalendarProps> = ({
   onPostCreated,
   userPlan = "free",
 }) => {
-  const calendar = useCalendar();
+  const {
+    viewMode,
+    setViewMode,
+    selectedPost,
+    openModal,
+    closeModal,
+    draggedPost,
+    setDraggedPost,
+    isExportMenuOpen,
+    setIsExportMenuOpen,
+    fileInputRef,
+  } = useCalendar();
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleBulkImport(e, onPostCreated);
@@ -36,19 +47,19 @@ export const Calendar: React.FC<CalendarProps> = ({
     <div className="p-6 md:p-8 h-full flex flex-col relative bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
       <input
         type="file"
-        ref={calendar.fileInputRef}
+        ref={fileInputRef}
         onChange={handleImport}
         className="hidden"
         accept=".csv"
       />
 
       {/* Post Detail Modal */}
-      {calendar.selectedPost && (
+      {selectedPost && (
         <PostDetailModal
-          post={calendar.selectedPost}
-          onClose={calendar.closeModal}
+          post={selectedPost}
+          onClose={closeModal}
           onEdit={(draft) => {
-            calendar.closeModal();
+            closeModal();
             onCompose(draft);
           }}
         />
@@ -67,19 +78,14 @@ export const Calendar: React.FC<CalendarProps> = ({
 
         <div className="flex items-center gap-3">
           <ExportMenu
-            isOpen={calendar.isExportMenuOpen}
-            onToggle={() =>
-              calendar.setIsExportMenuOpen(!calendar.isExportMenuOpen)
-            }
+            isOpen={isExportMenuOpen}
+            onToggle={() => setIsExportMenuOpen(!isExportMenuOpen)}
             onExportPDF={handleExportPDF}
             onExportCSV={handleExportCSV}
-            onImport={() => calendar.fileInputRef.current?.click()}
+            onImport={() => fileInputRef.current?.click()}
           />
 
-          <ViewModeToggle
-            viewMode={calendar.viewMode}
-            onViewChange={calendar.setViewMode}
-          />
+          <ViewModeToggle viewMode={viewMode} onViewChange={setViewMode} />
 
           <button
             onClick={() => onCompose()}
@@ -92,32 +98,24 @@ export const Calendar: React.FC<CalendarProps> = ({
       </div>
 
       {/* View Rendering */}
-      {calendar.viewMode === "calendar" && (
+      {viewMode === "calendar" && (
         <CalendarView
           posts={posts}
           onDateClick={(date) => onCompose({ scheduledDate: date })}
-          onPostClick={calendar.openModal}
-          draggedPost={calendar.draggedPost}
-          onDragStart={calendar.setDraggedPost}
-          onDragEnd={() => calendar.setDraggedPost(null)}
+          onPostClick={openModal}
+          draggedPost={draggedPost}
+          onDragStart={setDraggedPost}
+          onDragEnd={() => setDraggedPost(null)}
           onUpdatePost={onUpdatePost}
         />
       )}
 
-      {calendar.viewMode === "kanban" && (
-        <KanbanView
-          posts={posts}
-          onPostClick={calendar.openModal}
-          userPlan={userPlan}
-        />
+      {viewMode === "kanban" && (
+        <KanbanView posts={posts} onPostClick={openModal} userPlan={userPlan} />
       )}
 
-      {calendar.viewMode === "grid" && (
-        <GridView
-          posts={posts}
-          onPostClick={calendar.openModal}
-          onCompose={onCompose}
-        />
+      {viewMode === "grid" && (
+        <GridView posts={posts} onPostClick={openModal} onCompose={onCompose} />
       )}
     </div>
   );

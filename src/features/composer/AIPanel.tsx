@@ -3,7 +3,7 @@ import { Sparkles, Users } from "lucide-react";
 import { AIWriter } from "./AIWriter";
 import { AIDesigner } from "./AIDesigner";
 import { TeamCollaboration } from "./TeamCollaboration";
-import { Platform, ToastType, PlanTier } from "@/types";
+import { Platform, ToastType, PlanTier, Comment } from "@/types";
 
 interface AIPanelProps {
   content: string;
@@ -12,7 +12,7 @@ interface AIPanelProps {
   showToast: (message: string, type: ToastType) => void;
   userPlan: PlanTier;
   isAgency?: boolean;
-  comments?: any[];
+  comments?: Comment[];
   onAddComment?: (comment: string) => void;
   workflowStatus?: string;
   onChangeStatus?: (status: string) => void;
@@ -23,7 +23,6 @@ export const AIPanel: React.FC<AIPanelProps> = ({
   onContentChange,
   selectedPlatforms,
   showToast,
-  userPlan,
   isAgency = false,
   comments = [],
   onAddComment,
@@ -87,7 +86,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({
         )}
         {activeTab === "design" && (
           <AIDesigner
-            onImageGenerated={(url) => {
+            onImageGenerated={() => {
               showToast("Image generated successfully!", "success");
             }}
             showToast={showToast}

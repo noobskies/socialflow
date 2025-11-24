@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Trend } from "@/types";
 import { getTrendingTopics } from "@/services/geminiService";
 
@@ -6,7 +6,7 @@ export function useDashboard(niche: string = "Tech & Marketing") {
   const [trends, setTrends] = useState<Trend[]>([]);
   const [loadingTrends, setLoadingTrends] = useState(false);
 
-  const loadTrends = async () => {
+  const loadTrends = useCallback(async () => {
     setLoadingTrends(true);
     try {
       const newTrends = await getTrendingTopics(niche);
@@ -16,11 +16,11 @@ export function useDashboard(niche: string = "Tech & Marketing") {
     } finally {
       setLoadingTrends(false);
     }
-  };
+  }, [niche]);
 
   useEffect(() => {
     loadTrends();
-  }, []);
+  }, [loadTrends]);
 
   return {
     trends,

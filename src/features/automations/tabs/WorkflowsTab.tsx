@@ -1,6 +1,6 @@
 import React from "react";
 import { Plus } from "lucide-react";
-import { Workflow, ToastType } from "@/types";
+import { Workflow, ToastType, WorkflowSuggestion } from "@/types";
 import { WorkflowCard } from "../components/WorkflowCard";
 import { AIArchitectSidebar } from "../components/AIArchitectSidebar";
 import { PopularTemplates } from "../components/PopularTemplates";
@@ -20,7 +20,7 @@ export const WorkflowsTab: React.FC<WorkflowsTabProps> = ({
   onOpenCreateModal,
   showToast,
 }) => {
-  const handleAddSuggestion = (suggestion: any) => {
+  const handleAddSuggestion = (suggestion: WorkflowSuggestion) => {
     const workflow: Workflow = {
       id: Date.now().toString(),
       name: suggestion.name,

@@ -1,20 +1,19 @@
 import React, { useState } from "react";
 import { Bot, Zap, Loader2 } from "lucide-react";
-import { ToastType } from "@/types";
+import { ToastType, WorkflowSuggestion } from "@/types";
 import { suggestWorkflows } from "@/services/geminiService";
 
 interface AIArchitectSidebarProps {
-  onAddSuggestion: (suggestion: any) => void;
+  onAddSuggestion: (suggestion: WorkflowSuggestion) => void;
   showToast: (message: string, type: ToastType) => void;
 }
 
 export const AIArchitectSidebar: React.FC<AIArchitectSidebarProps> = ({
   onAddSuggestion,
-  showToast,
 }) => {
   const [businessType, setBusinessType] = useState("");
   const [isSuggesting, setIsSuggesting] = useState(false);
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<WorkflowSuggestion[]>([]);
 
   const handleSuggest = async () => {
     if (!businessType) return;
@@ -24,7 +23,7 @@ export const AIArchitectSidebar: React.FC<AIArchitectSidebarProps> = ({
     setIsSuggesting(false);
   };
 
-  const handleAddSuggestion = (suggestion: any) => {
+  const handleAddSuggestion = (suggestion: WorkflowSuggestion) => {
     onAddSuggestion(suggestion);
     setSuggestions(suggestions.filter((s) => s !== suggestion));
   };

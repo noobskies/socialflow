@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-import {
-  CalendarClock,
-  ShoppingBag,
-  FilePlus,
-  Users,
-  CheckCircle2,
-} from "lucide-react";
+import { CalendarClock, ShoppingBag } from "lucide-react";
 import { PlatformSelector } from "./PlatformSelector";
 import { PlatformOptions } from "./PlatformOptions";
 import { ContentEditor } from "./ContentEditor";
@@ -18,7 +12,14 @@ import { AnalysisModal } from "./AnalysisModal";
 import { PreviewPanel } from "./PreviewPanel";
 import { useComposer } from "./useComposer";
 import { useModal } from "@/hooks/useModal";
-import { Draft, Post, ToastType, PlanTier, Product } from "@/types";
+import {
+  Draft,
+  Post,
+  ToastType,
+  PlanTier,
+  Product,
+  DraftAnalysis,
+} from "@/types";
 import {
   refineContent,
   analyzeDraft,
@@ -44,7 +45,9 @@ export const Composer: React.FC<ComposerProps> = ({
   const analysisModal = useModal();
 
   const [isGenerating, setIsGenerating] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [analysisResult, setAnalysisResult] = useState<DraftAnalysis | null>(
+    null
+  );
 
   const isAgency = userPlan === "agency";
 

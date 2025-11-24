@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Search,
   LayoutDashboard,
@@ -29,40 +29,6 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
 }) => {
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
-
-  // Reset query when opened
-  useEffect(() => {
-    if (isOpen) {
-      setQuery("");
-      setSelectedIndex(0);
-    }
-  }, [isOpen]);
-
-  // Keyboard navigation within the palette
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen) return;
-
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setSelectedIndex((prev) => (prev + 1) % filteredItems.length);
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setSelectedIndex(
-          (prev) => (prev - 1 + filteredItems.length) % filteredItems.length
-        );
-      } else if (e.key === "Enter") {
-        e.preventDefault();
-        const item = filteredItems[selectedIndex];
-        if (item) {
-          handleSelect(item);
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, selectedIndex]); // dependency on filteredItems is handled by key/state logic usually, but here simplified
 
   const items = [
     {
@@ -150,10 +116,50 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
       item.category.toLowerCase().includes(query.toLowerCase())
   );
 
-  const handleSelect = (item: (typeof items)[0]) => {
-    item.action();
-    onClose();
-  };
+  const handleSelect = useCallback(
+    (item: (typeof items)[0]) => {
+      item.action();
+      onClose();
+    },
+    [onClose]
+  );
+
+  // Reset when opening (effect only runs when isOpen becomes true)
+  useEffect(() => {
+    if (isOpen) {
+      // Use setTimeout to avoid setState during render
+      setTimeout(() => {
+        setQuery("");
+        setSelectedIndex(0);
+      }, 0);
+    }
+  }, [isOpen]);
+
+  // Keyboard navigation within the palette
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev + 1) % filteredItems.length);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedIndex(
+          (prev) => (prev - 1 + filteredItems.length) % filteredItems.length
+        );
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        const item = filteredItems[selectedIndex];
+        if (item) {
+          handleSelect(item);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, selectedIndex, filteredItems, handleSelect]);
 
   if (!isOpen) return null;
 

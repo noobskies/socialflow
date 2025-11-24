@@ -6,7 +6,14 @@ import {
   Hash,
   Search as SearchIcon,
 } from "lucide-react";
-import { Draft, PlanTier, Post, ToastType } from "@/types";
+import {
+  Draft,
+  PlanTier,
+  Post,
+  ToastType,
+  MediaAsset,
+  LibraryTabType,
+} from "@/types";
 import { useLibrary } from "./useLibrary";
 import { LibraryTab } from "./tabs/LibraryTab";
 import { RSSTab } from "./tabs/RSSTab";
@@ -24,8 +31,6 @@ interface LibraryProps {
 
 export const Library: React.FC<LibraryProps> = ({
   onCompose,
-  userPlan,
-  onOpenUpgrade,
   onPostCreated,
   showToast,
 }) => {
@@ -56,7 +61,7 @@ export const Library: React.FC<LibraryProps> = ({
     }
   };
 
-  const handleUseAsset = (asset: any) => {
+  const handleUseAsset = (asset: MediaAsset) => {
     onCompose({
       mediaUrl: asset.type !== "template" ? asset.url : undefined,
       content: asset.type === "template" ? asset.content : undefined,
@@ -107,7 +112,7 @@ export const Library: React.FC<LibraryProps> = ({
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => library.setActiveTab(tab.id as any)}
+              onClick={() => library.setActiveTab(tab.id as LibraryTabType)}
               className={`flex items-center px-4 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
                 library.activeTab === tab.id
                   ? "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 shadow-sm"

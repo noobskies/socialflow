@@ -19,6 +19,8 @@ export const Inbox: React.FC<InboxProps> = ({ showToast }) => {
     if (!inbox.selectedMessageId && MOCK_MESSAGES.length > 0) {
       inbox.selectMessage(MOCK_MESSAGES[0].id);
     }
+    // Intentionally only run on mount to set initial state
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

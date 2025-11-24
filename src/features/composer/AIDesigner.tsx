@@ -18,13 +18,10 @@ export const AIDesigner: React.FC<AIDesignerProps> = ({
   const handleImageGenerate = async () => {
     if (!imagePrompt) return;
 
-    if (
-      (window as any).aistudio &&
-      !(await (window as any).aistudio.hasSelectedApiKey())
-    ) {
+    if (window.aistudio && !(await window.aistudio.hasSelectedApiKey())) {
       try {
-        await (window as any).aistudio.openSelectKey();
-        if (!(await (window as any).aistudio.hasSelectedApiKey())) {
+        await window.aistudio.openSelectKey();
+        if (!(await window.aistudio.hasSelectedApiKey())) {
           showToast("API Key required for Image Generation.", "error");
           return;
         }

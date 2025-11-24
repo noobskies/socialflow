@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Platform, Draft, PlatformOptions } from "@/types";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 

@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import type { WorkflowSuggestion, TrendingTopic, DraftAnalysis } from "@/types";
 
 const TEXT_MODEL = "gemini-3-pro-preview";
 const IMAGE_MODEL = "gemini-3-pro-image-preview";
@@ -214,7 +215,7 @@ export const generateHashtags = async (content: string): Promise<string[]> => {
 
     const text = response.text || "";
     return text.split(/\s+/).filter((t) => t.startsWith("#"));
-  } catch (error) {
+  } catch {
     return [];
   }
 };
@@ -312,7 +313,7 @@ export const generateBio = async (
 
 export const suggestWorkflows = async (
   businessType: string
-): Promise<any[]> => {
+): Promise<WorkflowSuggestion[]> => {
   try {
     const ai = getAiClient();
     const prompt = `
@@ -373,7 +374,7 @@ export const generateVideoCaptions = async (
 export const analyzeDraft = async (
   content: string,
   platform: string
-): Promise<any> => {
+): Promise<DraftAnalysis> => {
   try {
     const ai = getAiClient();
     const prompt = `
@@ -442,7 +443,9 @@ export const generatePostFromRSS = async (
   }
 };
 
-export const getTrendingTopics = async (niche: string): Promise<any[]> => {
+export const getTrendingTopics = async (
+  niche: string
+): Promise<TrendingTopic[]> => {
   try {
     const ai = getAiClient();
     const prompt = `

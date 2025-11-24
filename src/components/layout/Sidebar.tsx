@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   LayoutDashboard,
   PenSquare,
@@ -56,22 +56,27 @@ const Sidebar: React.FC<SidebarProps> = ({
   onOpenHelp,
   onOpenUpgrade,
 }) => {
-  const [workspaces, setWorkspaces] = useState<Workspace[]>(PERSONAL_WORKSPACE);
-  const [activeWorkspace, setActiveWorkspace] = useState<Workspace>(
-    PERSONAL_WORKSPACE[0]
+  // Derive workspaces and default workspace from userPlan
+  const workspaces =
+    userPlan === "agency" ? AGENCY_WORKSPACES : PERSONAL_WORKSPACE;
+
+  // Track user's workspace selection (null = use default)
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(
+    null
   );
   const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
 
-  // Update workspaces based on plan
-  useEffect(() => {
-    if (userPlan === "agency") {
-      setWorkspaces(AGENCY_WORKSPACES);
-      setActiveWorkspace(AGENCY_WORKSPACES[0]);
-    } else {
-      setWorkspaces(PERSONAL_WORKSPACE);
-      setActiveWorkspace(PERSONAL_WORKSPACE[0]);
+  // Derive active workspace: use selected if exists, otherwise default
+  const activeWorkspace = useMemo(() => {
+    const defaultWorkspace = workspaces[0];
+    if (selectedWorkspaceId) {
+      return (
+        workspaces.find((ws) => ws.id === selectedWorkspaceId) ||
+        defaultWorkspace
+      );
     }
-  }, [userPlan]);
+    return defaultWorkspace;
+  }, [selectedWorkspaceId, workspaces]);
 
   const navItems = [
     { id: ViewState.DASHBOARD, label: "Dashboard", icon: LayoutDashboard },
@@ -153,7 +158,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   key={ws.id}
                   onClick={() => {
-                    setActiveWorkspace(ws);
+                    setSelectedWorkspaceId(ws.id);
                     setIsWorkspaceDropdownOpen(false);
                   }}
                   className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-700/50 transition-colors text-sm"

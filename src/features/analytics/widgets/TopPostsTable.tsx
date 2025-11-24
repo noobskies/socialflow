@@ -1,6 +1,6 @@
 import React from "react";
 import { Eye, ThumbsUp, TrendingUp, RefreshCw } from "lucide-react";
-import { Draft, ToastType } from "@/types";
+import { Draft, ToastType, Platform } from "@/types";
 
 interface TopPost {
   id: number;
@@ -64,7 +64,7 @@ export const TopPostsTable: React.FC<TopPostsTableProps> = ({
     if (onCompose) {
       onCompose({
         content: post.content,
-        platforms: [post.platform as any],
+        platforms: [post.platform as Platform],
         status: "draft",
       });
       showToast("Post content recycled to composer!", "success");

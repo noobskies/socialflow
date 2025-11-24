@@ -1,9 +1,11 @@
 import React from "react";
 import { Search, Upload, Plus } from "lucide-react";
 
+type AssetFilterType = "all" | "image" | "video" | "template";
+
 interface AssetFiltersProps {
-  activeFilter: "all" | "image" | "video" | "template";
-  onFilterChange: (filter: "all" | "image" | "video" | "template") => void;
+  activeFilter: AssetFilterType;
+  onFilterChange: (filter: AssetFilterType) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onUploadClick: () => void;
@@ -22,7 +24,7 @@ export const AssetFilters: React.FC<AssetFiltersProps> = ({
         {["all", "image", "video", "template"].map((type) => (
           <button
             key={type}
-            onClick={() => onFilterChange(type as any)}
+            onClick={() => onFilterChange(type as AssetFilterType)}
             className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${
               activeFilter === type
                 ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800"

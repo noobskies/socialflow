@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { MessageSquare, Send } from "lucide-react";
+import { Comment } from "@/types";
 
 interface TeamCollaborationProps {
-  comments?: any[];
+  comments?: Comment[];
   onAddComment?: (comment: string) => void;
   workflowStatus?: string;
   onChangeStatus?: (status: string) => void;
@@ -11,8 +12,6 @@ interface TeamCollaborationProps {
 export const TeamCollaboration: React.FC<TeamCollaborationProps> = ({
   comments = [],
   onAddComment,
-  workflowStatus = "draft",
-  onChangeStatus,
 }) => {
   const [newComment, setNewComment] = useState("");
 

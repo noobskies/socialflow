@@ -1,15 +1,6 @@
 import React from "react";
 import { Users, Eye, TrendingUp, Sparkles, ArrowUpRight } from "lucide-react";
 
-interface StatCardProps {
-  label: string;
-  value: string;
-  change: string;
-  icon: React.ElementType;
-  color: string;
-  bg: string;
-}
-
 const stats = [
   {
     label: "Total Followers",

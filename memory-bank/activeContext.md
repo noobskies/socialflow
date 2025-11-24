@@ -21,15 +21,42 @@ The frontend refactoring project (Phases 0a-6h) is complete. All 10 major compon
 
 ### Immediate Focus (This Week)
 
-**Phase 7 Priority**: Testing Infrastructure
-- Add unit tests for custom hooks (useToast, useModal, useTheme, useKeyboard, useLocalStorage)
-- Add unit tests for utility functions (dates, formatting, validation)
-- Add component tests for UI library (Button, Input, Modal, Card)
+**Phase 7b - Linting Cleanup (In Progress)**
+
+**Session 1 Completed** (Nov 23, 2025 - Morning):
+- ✅ Fixed critical React hooks issues (21 errors)
+  - Calendar.tsx/useCalendar.ts - Restructured to use destructuring (16 errors)
+  - CommandPalette.tsx - Fixed hoisting, added useCallback (3 errors)
+  - Sidebar.tsx - Derived workspaces from props (1 error)
+  - useTheme.ts - Used lazy initializer (1 error)
+
+**Session 2 Completed** (Nov 23, 2025 - Evening):
+- ✅ Fixed all unused imports/variables (9 errors → 0)
+  - Composer.tsx, useComposer.ts, DashboardStats.tsx, geminiService.ts
+  - AIPanel.tsx, TeamCollaboration.tsx, Library.tsx, AIArchitectSidebar.tsx
+- ✅ Fixed React hooks optimization (3 errors → 0)
+  - Sidebar.tsx - Refactored to useMemo pattern for workspace derivation
+  - useDashboard.ts - Added useCallback with proper dependencies
+  - Inbox.tsx - Added eslint-disable with explanation for mount-only effect
+
+**Current Status**: 53 → 18 ESLint errors remaining (66% reduction)
+
+**Next Priority**: Fix TypeScript `any` types (18 remaining)
+- geminiService.ts: 3 any types
+- AIArchitectSidebar.tsx: 3 any types
+- AIDesigner.tsx: 4 any types
+- Library.tsx: 2 any types
+- 5 other files: 1 any type each
+
+**Phase 7c - Testing (Next)**:
+- Add unit tests for custom hooks
+- Add unit tests for utility functions
+- Add component tests for UI library
 - Add integration tests for key features
 
 ### Upcoming (Next 2 Weeks)
 
-1. **Linting Cleanup**: Address remaining 77 ESLint issues gradually
+1. **Complete Linting**: Finish remaining ~36 ESLint issues
 2. **Code Review**: Ensure consistency across all refactored features
 3. **Documentation**: Update README with new architecture
 4. **Performance**: Add React.memo where needed, implement lazy loading
@@ -160,7 +187,7 @@ export default Component;
 - **API Response Consistency**: Gemini occasionally returns malformed JSON
 - **Timezone Handling**: Currently uses browser local time
 - **File Uploads**: No storage available (using URLs/data URIs)
-- **77 Linting Issues**: Non-blocking, will fix gradually
+- **~36 Linting Issues**: Non-blocking, down from 77 (critical issues fixed)
 
 ### Will Require Backend
 - Data persistence and real-time sync
