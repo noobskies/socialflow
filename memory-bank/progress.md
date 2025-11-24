@@ -180,6 +180,94 @@
 
 **Key Achievement**: FeatureGateOverlay component is now reusable across the app! Settings.tsx can import and use it for premium features.
 
+### Phase 6b: Settings Refactoring ✅ (Nov 23, 2025)
+
+**Duration**: ~1.5 hours  
+**Result**: Settings.tsx reduced from 813 to 150 lines (-82%)
+
+**Created** (19 files in `/src/features/settings/`):
+
+**Core Structure (3 files)**:
+- **Settings.tsx** - 150-line orchestrator component
+- **useSettings.ts** - Custom hook for all settings state management
+- **SettingsSidebar.tsx** - Clean 8-tab navigation with lock icons
+
+**Tabs (8 files)**:
+- **tabs/ProfileTab.tsx** - Profile settings with avatar upload
+- **tabs/AccountsTab.tsx** - Social account connections management
+- **tabs/TeamTab.tsx** - Team member management (agency-gated)
+- **tabs/BillingTab.tsx** - Plan and payment information display
+- **tabs/NotificationsTab.tsx** - Notification preferences with toggles
+- **tabs/SecurityTab.tsx** - 2FA, SSO, and audit log
+- **tabs/BrandingTab.tsx** - White-label settings (agency-gated)
+- **tabs/DeveloperTab.tsx** - API keys management (agency-gated)
+
+**Widgets (8 files)**:
+- **widgets/AccountCard.tsx** - Individual account connection card with platform icons
+- **widgets/TeamMemberRow.tsx** - Team member table row with role dropdown
+- **widgets/NotificationToggle.tsx** - Reusable toggle switch component
+- **widgets/PlanCard.tsx** - Current plan display with gradient header
+- **widgets/PaymentMethodCard.tsx** - Payment method display card
+- **widgets/SecurityToggle.tsx** - 2FA/SSO toggle card with icons
+- **widgets/AuditLogTable.tsx** - Security audit log table
+- (FeatureGateOverlay - **REUSED** from Analytics!)
+
+**Impact**:
+- Largest component (813 lines) reduced to 150-line orchestrator (-82%)
+- Created 19 focused, single-responsibility components
+- Applied orchestrator pattern successfully (same as Dashboard, Composer, Analytics)
+- **Successfully reused FeatureGateOverlay** from Phase 6a for 3 agency features
+- All 8 tabs functional (Profile, Accounts, Team, Billing, Notifications, Security, Branding, Developer)
+- Feature gating works correctly for free/pro/agency users
+- Mock data centralized (MOCK_TEAM, MOCK_AUDIT_LOG moved to constants.ts)
+- TypeScript: 0 compilation errors ✅
+- Dev server: Verified working on port 3000 ✅
+
+**File Organization**:
+```
+/src/features/settings/
+├── Settings.tsx (150-line orchestrator)
+├── useSettings.ts (state hook)
+├── SettingsSidebar.tsx (navigation)
+├── /tabs
+│   ├── ProfileTab.tsx
+│   ├── AccountsTab.tsx
+│   ├── TeamTab.tsx
+│   ├── BillingTab.tsx
+│   ├── NotificationsTab.tsx
+│   ├── SecurityTab.tsx
+│   ├── BrandingTab.tsx
+│   └── DeveloperTab.tsx
+└── /widgets
+    ├── AccountCard.tsx
+    ├── TeamMemberRow.tsx
+    ├── NotificationToggle.tsx
+    ├── PlanCard.tsx
+    ├── PaymentMethodCard.tsx
+    ├── SecurityToggle.tsx
+    └── AuditLogTable.tsx
+```
+
+**Integration**:
+- Updated App.tsx import from `./components/Settings` to `@/features/settings/Settings`
+- Moved MOCK_TEAM and MOCK_AUDIT_LOG to `/src/utils/constants.ts`
+- All components use path aliases consistently
+- Zero breaking changes - component API unchanged
+
+**Verification Steps Completed**:
+1. ✅ TypeScript compilation (0 errors)
+2. ✅ Dev server starts successfully
+3. ✅ All 8 tabs render correctly
+4. ✅ Tab navigation works smoothly
+5. ✅ Feature gating overlays display for free/pro users
+6. ✅ Sidebar navigation with lock icons
+7. ✅ All forms and toggles functional
+8. ✅ Account connection flow works (loading states)
+9. ✅ Team management functional (role changes)
+10. ✅ Dark mode fully supported
+
+**Key Achievement**: Successfully demonstrated component reusability! FeatureGateOverlay created in Phase 6a was imported and used in 3 different Settings tabs (Team, Branding, Developer), proving the value of the shared component library.
+
 ### Phase 5: Shared Components Migration ✅ (Nov 23, 2025)
 
 **Duration**: ~1.5 hours  

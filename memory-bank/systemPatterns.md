@@ -690,12 +690,12 @@ AWS / Railway / Render
 - ✅ Phase 5: UI library created (4 components: Button, Input, Modal, Card)
 - ✅ Phase 5: Shared components organized (11 total in `/src/components/`)
 - ✅ Phase 5: App.tsx simplified (280 → 235 lines, ShortcutsModal extracted)
-- ✅ Phase 6a: Analytics refactored (677 → 60 lines, 14 analytics components + 1 shared UI component created)
-- ✅ FeatureGateOverlay moved to `/src/components/ui/` for app-wide reuse (available to Settings, Library, etc.)
+- ✅ Phase 6a: Analytics refactored (677 → 60 lines, 15 components created)
+- ✅ Phase 6b: Settings refactored (813 → 150 lines, 19 components created)
+- ✅ FeatureGateOverlay moved to `/src/components/ui/` for app-wide reuse (successfully reused in Settings!)
 
 **Remaining Work**:
 
-- Phase 6b: Settings refactoring (can reuse FeatureGateOverlay from Analytics!)
 - Phase 6c: Calendar refactoring
 - Phase 6d: App.tsx simplification (from 235 lines)
 - Phase 7: Add basic tests
