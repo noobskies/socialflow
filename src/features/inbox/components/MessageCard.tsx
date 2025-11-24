@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { SocialMessage } from "@/types";
 import {
   getPlatformIcon,
@@ -29,10 +30,13 @@ export const MessageCard: React.FC<MessageCardProps> = ({
     >
       <div className="flex gap-3">
         <div className="relative shrink-0">
-          <img
+          <Image
             src={message.authorAvatar}
-            className="w-10 h-10 rounded-full object-cover"
             alt={message.author}
+            width={40}
+            height={40}
+            className="rounded-full object-cover"
+            unoptimized
           />
           <div
             className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white dark:border-slate-900 flex items-center justify-center ${platformColor}`}

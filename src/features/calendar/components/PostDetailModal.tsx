@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import {
   X,
   Calendar as CalendarIcon,
@@ -114,11 +115,13 @@ export const PostDetailModal: React.FC<PostDetailModalProps> = ({
           </div>
 
           {post.mediaUrl && (
-            <div className="mb-6 rounded-xl overflow-hidden border border-slate-100 dark:border-slate-800 max-h-64 bg-slate-100 dark:bg-slate-800">
-              <img
+            <div className="mb-6 rounded-xl overflow-hidden border border-slate-100 dark:border-slate-800 max-h-64 bg-slate-100 dark:bg-slate-800 relative">
+              <Image
                 src={post.mediaUrl}
                 alt="Post Media"
-                className="w-full h-full object-contain"
+                fill
+                className="object-contain"
+                unoptimized
               />
             </div>
           )}

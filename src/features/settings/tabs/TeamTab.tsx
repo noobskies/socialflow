@@ -17,7 +17,7 @@ export const TeamTab: React.FC<TeamTabProps> = ({
   team,
   setTeam,
 }) => {
-  const handleUpdateRole = (memberId: string, role: string) => {
+  const handleUpdateRole = (memberId: string, role: TeamMember["role"]) => {
     setTeam(
       team.map((member) =>
         member.id === memberId ? { ...member, role } : member

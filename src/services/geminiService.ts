@@ -7,7 +7,7 @@ const IMAGE_MODEL = "gemini-3-pro-image-preview";
 // Helper to get a fresh client instance.
 // This is crucial for flows where the API key might be selected/updated during the session.
 const getAiClient = () =>
-  new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+  new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
 
 export const generatePostContent = async (
   topic: string,

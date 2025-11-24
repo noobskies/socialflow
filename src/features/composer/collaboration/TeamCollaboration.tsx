@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Image from "next/image";
 import { MessageSquare, Send } from "lucide-react";
 import { Comment } from "@/types";
 
@@ -32,10 +33,13 @@ export const TeamCollaboration: React.FC<TeamCollaborationProps> = ({
         ) : (
           comments.map((comment) => (
             <div key={comment.id} className="flex gap-3">
-              <img
+              <Image
                 src={comment.avatar}
-                className="w-8 h-8 rounded-full shrink-0"
                 alt={comment.author}
+                width={32}
+                height={32}
+                className="rounded-full border border-slate-200 dark:border-slate-700"
+                unoptimized
               />
               <div>
                 <div className="flex items-baseline gap-2">

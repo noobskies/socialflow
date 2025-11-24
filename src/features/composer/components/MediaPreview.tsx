@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { X, PenTool, Type, Play } from "lucide-react";
 
 interface MediaPreviewProps {
@@ -29,10 +30,13 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
             </div>
           </div>
         ) : (
-          <img
+          <Image
             src={url}
             alt={altText || "Generated asset"}
-            className="h-32 w-32 object-cover rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm"
+            width={128}
+            height={128}
+            className="object-cover rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm"
+            unoptimized
           />
         )}
 

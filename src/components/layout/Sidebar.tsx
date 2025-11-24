@@ -1,4 +1,7 @@
 import React, { useState, useMemo } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   PenSquare,
@@ -8,7 +11,7 @@ import {
   Zap,
   MessageSquare,
   FolderOpen,
-  Link,
+  Link as LinkIcon,
   Workflow,
   Sun,
   Moon,
@@ -21,11 +24,9 @@ import {
   Crown,
   Briefcase,
 } from "lucide-react";
-import { ViewState, Workspace, BrandingConfig, PlanTier } from "@/types";
+import { Workspace, BrandingConfig, PlanTier } from "@/types";
 
 interface SidebarProps {
-  currentView: ViewState;
-  setView: (view: ViewState) => void;
   currentTheme: "light" | "dark" | "system";
   setTheme: (theme: "light" | "dark" | "system") => void;
   branding: BrandingConfig;
@@ -46,8 +47,6 @@ const PERSONAL_WORKSPACE: Workspace[] = [
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({
-  currentView,
-  setView,
   currentTheme,
   setTheme,
   branding,
@@ -56,6 +55,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   onOpenHelp,
   onOpenUpgrade,
 }) => {
+  const pathname = usePathname();
+
   // Derive workspaces and default workspace from userPlan
   const workspaces =
     userPlan === "agency" ? AGENCY_WORKSPACES : PERSONAL_WORKSPACE;
@@ -79,14 +80,14 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, [selectedWorkspaceId, workspaces]);
 
   const navItems = [
-    { id: ViewState.DASHBOARD, label: "Dashboard", icon: LayoutDashboard },
-    { id: ViewState.COMPOSER, label: "Create Post", icon: PenSquare },
-    { id: ViewState.INBOX, label: "Inbox", icon: MessageSquare },
-    { id: ViewState.CALENDAR, label: "Calendar", icon: CalendarIcon },
-    { id: ViewState.LIBRARY, label: "Library", icon: FolderOpen },
-    { id: ViewState.LINKS, label: "Link Manager", icon: Link },
-    { id: ViewState.AUTOMATIONS, label: "Automations", icon: Workflow },
-    { id: ViewState.ANALYTICS, label: "Analytics", icon: BarChart3 },
+    { href: "/", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/composer", label: "Create Post", icon: PenSquare },
+    { href: "/inbox", label: "Inbox", icon: MessageSquare },
+    { href: "/calendar", label: "Calendar", icon: CalendarIcon },
+    { href: "/library", label: "Library", icon: FolderOpen },
+    { href: "/links", label: "Link Manager", icon: LinkIcon },
+    { href: "/automations", label: "Automations", icon: Workflow },
+    { href: "/analytics", label: "Analytics", icon: BarChart3 },
   ];
 
   // Use branding logo if available, otherwise default icon
@@ -116,10 +117,13 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="flex items-center space-x-3 overflow-hidden">
             {hasCustomLogo ? (
               <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-white flex items-center justify-center">
-                <img
+                <Image
                   src={branding.logoUrl}
                   alt="Logo"
-                  className="w-full h-full object-contain"
+                  width={32}
+                  height={32}
+                  className="object-contain"
+                  unoptimized
                 />
               </div>
             ) : (
@@ -191,11 +195,14 @@ const Sidebar: React.FC<SidebarProps> = ({
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = currentView === item.id;
+          const isActive =
+            pathname === item.href ||
+            (item.href !== "/" && pathname.startsWith(item.href));
           return (
-            <button
-              key={item.id}
-              onClick={() => setView(item.id)}
+            <Link
+              key={item.href}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              href={item.href as any}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                 isActive
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/20"
@@ -206,7 +213,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 className={`w-5 h-5 ${isActive ? "text-white" : "text-slate-400 group-hover:text-white"}`}
               />
               <span className="font-medium">{item.label}</span>
-            </button>
+            </Link>
           );
         })}
       </nav>
@@ -269,17 +276,17 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <button
-            onClick={() => setView(ViewState.SETTINGS)}
+          <Link
+            href="/settings"
             className={`flex items-center justify-center space-x-2 px-3 py-2 rounded-lg transition-colors border border-slate-700 ${
-              currentView === ViewState.SETTINGS
+              pathname === "/settings"
                 ? "bg-slate-800 text-white"
                 : "bg-transparent text-slate-400 hover:text-white hover:bg-slate-800"
             }`}
           >
             <Settings className="w-4 h-4" />
             <span className="text-xs font-medium">Settings</span>
-          </button>
+          </Link>
           <button
             onClick={onOpenHelp}
             className="flex items-center justify-center space-x-2 px-3 py-2 rounded-lg transition-colors border border-slate-700 bg-transparent text-slate-400 hover:text-white hover:bg-slate-800"
@@ -291,10 +298,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700 flex items-center space-x-3">
           <div className="relative shrink-0">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&fit=crop"
               alt="User"
-              className="w-9 h-9 rounded-full border-2 border-indigo-500"
+              width={36}
+              height={36}
+              className="rounded-full border-2 border-indigo-500"
+              unoptimized
             />
             <div className="absolute -top-1 -right-1 bg-emerald-500 w-2.5 h-2.5 rounded-full border-2 border-slate-800"></div>
           </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import {
   Twitter,
   Facebook,
@@ -189,10 +190,12 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
                       </div>
                     </>
                   ) : (
-                    <img
+                    <Image
                       src={mediaUrl}
                       alt="Post attachment"
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      unoptimized
                     />
                   )}
                 </div>

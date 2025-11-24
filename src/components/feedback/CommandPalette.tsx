@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
   Search,
   LayoutDashboard,
@@ -14,19 +15,14 @@ import {
   CreditCard,
   ArrowRight,
 } from "lucide-react";
-import { ViewState } from "@/types";
 
 interface CommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
-  setView: (view: ViewState) => void;
 }
 
-const CommandPalette: React.FC<CommandPaletteProps> = ({
-  isOpen,
-  onClose,
-  setView,
-}) => {
+const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose }) => {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -35,77 +31,77 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
       id: "nav-dashboard",
       label: "Go to Dashboard",
       icon: LayoutDashboard,
-      action: () => setView(ViewState.DASHBOARD),
+      action: () => router.push("/"),
       category: "Navigation",
     },
     {
       id: "nav-compose",
       label: "Create New Post",
       icon: PenSquare,
-      action: () => setView(ViewState.COMPOSER),
+      action: () => router.push("/composer"),
       category: "Actions",
     },
     {
       id: "nav-inbox",
       label: "Check Inbox",
       icon: MessageSquare,
-      action: () => setView(ViewState.INBOX),
+      action: () => router.push("/inbox"),
       category: "Navigation",
     },
     {
       id: "nav-calendar",
       label: "View Calendar",
       icon: Calendar,
-      action: () => setView(ViewState.CALENDAR),
+      action: () => router.push("/calendar"),
       category: "Navigation",
     },
     {
       id: "nav-library",
       label: "Open Content Library",
       icon: FolderOpen,
-      action: () => setView(ViewState.LIBRARY),
+      action: () => router.push("/library"),
       category: "Navigation",
     },
     {
       id: "nav-links",
       label: "Manage Links",
       icon: Link,
-      action: () => setView(ViewState.LINKS),
+      action: () => router.push("/links"),
       category: "Navigation",
     },
     {
       id: "nav-automations",
       label: "Configure Automations",
       icon: Workflow,
-      action: () => setView(ViewState.AUTOMATIONS),
+      action: () => router.push("/automations"),
       category: "Navigation",
     },
     {
       id: "nav-analytics",
       label: "View Analytics",
       icon: BarChart3,
-      action: () => setView(ViewState.ANALYTICS),
+      action: () => router.push("/analytics"),
       category: "Navigation",
     },
     {
       id: "nav-settings",
       label: "Settings",
       icon: Settings,
-      action: () => setView(ViewState.SETTINGS),
+      action: () => router.push("/settings"),
       category: "Navigation",
     },
     {
       id: "action-profile",
       label: "Edit Profile",
       icon: User,
-      action: () => setView(ViewState.SETTINGS),
+      action: () => router.push("/settings"),
       category: "Settings",
     },
     {
       id: "action-billing",
       label: "Manage Subscription",
       icon: CreditCard,
-      action: () => setView(ViewState.SETTINGS),
+      action: () => router.push("/settings"),
       category: "Settings",
     },
   ];
@@ -195,7 +191,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
         <div className="max-h-[60vh] overflow-y-auto py-2">
           {filteredItems.length === 0 ? (
             <div className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
-              <p>No results found for "{query}"</p>
+              <p>No results found for &quot;{query}&quot;</p>
             </div>
           ) : (
             <>
@@ -232,7 +228,9 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
         </div>
 
         <div className="bg-slate-50 dark:bg-slate-800/50 px-4 py-2 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-400 flex justify-between">
-          <span>Pro Tip: You can type "Create" to jump to composer</span>
+          <span>
+            Pro Tip: You can type &quot;Create&quot; to jump to composer
+          </span>
           <div className="flex gap-3">
             <span>
               Use{" "}

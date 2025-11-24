@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { X, ShoppingBag, Plus } from "lucide-react";
 import { Product } from "@/types";
 import { MOCK_PRODUCTS } from "@/utils/constants";
@@ -42,10 +43,13 @@ export const ProductPickerModal: React.FC<ProductPickerModalProps> = ({
                   onClose();
                 }}
               >
-                <img
+                <Image
                   src={product.image}
                   alt={product.name}
-                  className="w-20 h-20 object-cover rounded-lg bg-slate-100 dark:bg-slate-700"
+                  width={80}
+                  height={80}
+                  className="object-cover rounded-lg bg-slate-100 dark:bg-slate-700"
+                  unoptimized
                 />
                 <div className="flex-1 min-w-0">
                   <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate">

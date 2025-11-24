@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { Post, Draft } from "@/types";
 import { LayoutGrid, Video, Plus } from "lucide-react";
 
@@ -35,10 +36,13 @@ export const GridView: React.FC<GridViewProps> = ({
         <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 p-0.5">
-              <img
+              <Image
                 src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&fit=crop"
                 alt="Profile"
-                className="w-full h-full rounded-full border-2 border-white dark:border-slate-900 object-cover"
+                width={64}
+                height={64}
+                className="rounded-full border-2 border-white dark:border-slate-900 object-cover"
+                unoptimized
               />
             </div>
             <div className="flex-1 flex justify-around text-center">
@@ -113,10 +117,12 @@ export const GridView: React.FC<GridViewProps> = ({
               >
                 {post.mediaUrl ? (
                   <>
-                    <img
+                    <Image
                       src={post.mediaUrl}
                       alt="Post"
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      unoptimized
                     />
                     {post.mediaType === "video" && (
                       <div className="absolute top-1 right-1">

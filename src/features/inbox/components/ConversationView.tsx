@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { ThumbsUp } from "lucide-react";
 import { SocialMessage, ToastType } from "@/types";
 import { ConversationHeader } from "./ConversationHeader";
@@ -65,10 +66,13 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
 
         {/* Incoming Message */}
         <div className="flex gap-4">
-          <img
+          <Image
             src={message.authorAvatar}
-            className="w-10 h-10 rounded-full shrink-0"
             alt="Author"
+            width={40}
+            height={40}
+            className="rounded-full shrink-0"
+            unoptimized
           />
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl rounded-tl-none shadow-sm max-w-lg">
             <p className="text-slate-800 dark:text-slate-200 text-sm leading-relaxed">

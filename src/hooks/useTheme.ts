@@ -4,6 +4,8 @@ type Theme = "light" | "dark" | "system";
 
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() => {
+    // Check if we're in the browser before accessing localStorage
+    if (typeof window === "undefined") return "system";
     const savedTheme = localStorage.getItem("theme") as Theme | null;
     return savedTheme || "system";
   });

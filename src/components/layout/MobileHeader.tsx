@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { Menu } from "lucide-react";
 import { BrandingConfig } from "@/types";
 
@@ -29,10 +30,13 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
       <div className="flex items-center gap-3">
         <button onClick={onNotificationsOpen} className="relative p-1">
           <div className="w-2 h-2 bg-red-500 rounded-full absolute top-0 right-0 border border-white dark:border-slate-900"></div>
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&fit=crop"
             alt="User"
-            className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700"
+            width={32}
+            height={32}
+            className="rounded-full border border-slate-200 dark:border-slate-700"
+            unoptimized
           />
         </button>
       </div>

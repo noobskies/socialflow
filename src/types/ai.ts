@@ -12,7 +12,7 @@ export interface TrendingTopic {
   id: string;
   topic: string;
   volume: string;
-  difficulty: string;
+  difficulty: "Easy" | "Medium" | "Hard";
   context: string;
 }
 

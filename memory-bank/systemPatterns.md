@@ -4,6 +4,8 @@
 
 This document describes the established patterns and architectural decisions in SocialFlow AI's frontend codebase. All patterns described here are implemented and battle-tested across 9 major features.
 
+**Next.js Migration Complete** (November 24, 2025): Successfully migrated from Vite 6.2 to Next.js 16.0.3 with proper App Router implementation. All architectural patterns described in this document have been preserved with zero breaking changes to the 135+ components. The application now runs on Next.js with Turbopack, providing improved performance and developer experience. Phase 8h implemented proper Next.js App Router with route groups, Server/Client Component pattern, and React Context for state management.
+
 ## Guiding Principles
 
 ### SOLID Principles in Practice
@@ -88,63 +90,114 @@ Every architectural decision follows SOLID principles:
 
 ## Established Patterns
 
-### 1. Single-Page Application Pattern
+### 1. Next.js App Router Pattern (Phase 8h) ✅
 
-**Design Decision**: ViewState enum controls which component renders
-**Why**: Simpler than React Router for MVP, instant transitions, less complexity
+**Design Decision**: Proper Next.js 16 App Router with route groups and Server/Client Components
+**Why**: Industry standard, URL routing, automatic code splitting, follows Next.js conventions
+
+**Architecture**:
 
 ```typescript
-enum ViewState {
-  DASHBOARD = "DASHBOARD",
-  COMPOSER = "COMPOSER",
-  CALENDAR = "CALENDAR",
-  ANALYTICS = "ANALYTICS",
-  INBOX = "INBOX",
-  LIBRARY = "LIBRARY",
-  SETTINGS = "SETTINGS",
-  LINKS = "LINKS",
-  AUTOMATIONS = "AUTOMATIONS",
+// src/app/AppShell.tsx - Client Component
+"use client";
+
+export default function AppShell({ children }: { children: ReactNode }) {
+  // All global state: theme, modals, toasts, keyboard shortcuts
+  // Wraps children with AppContextProvider
+  return (
+    <div>
+      <Sidebar />
+      <MobileHeader />
+      <main>
+        <AppContextProvider>{children}</AppContextProvider>
+      </main>
+      <MobileNav />
+    </div>
+  );
 }
+```
+
+**Route Structure**:
+
+```
+src/app/
+├── layout.tsx                    # Server Component - wraps with AppShell
+├── page.tsx                      # Dashboard (/) - uses useAppContext()
+├── (content)/                    # Route group
+│   ├── composer/page.tsx         # /composer
+│   ├── calendar/page.tsx         # /calendar
+│   └── library/page.tsx          # /library
+├── (insights)/                   # Route group
+│   ├── analytics/page.tsx        # /analytics
+│   └── inbox/page.tsx            # /inbox
+├── (tools)/                      # Route group
+│   ├── links/page.tsx            # /links
+│   └── automations/page.tsx      # /automations
+└── settings/page.tsx             # /settings
 ```
 
 **Navigation Flow**:
 
-- Sidebar buttons update `currentView` state
-- App.tsx `renderView()` conditionally renders component
-- Mobile bottom nav updates same state
-- URL does not change (trade-off for simplicity)
+- Each page.tsx is a Client Component (`"use client"`)
+- Uses `useAppContext()` hook to access global state
+- Sidebar/MobileNav will use Next.js `<Link>` components (to be updated)
+- URLs work properly: /, /composer, /calendar, etc.
+- Browser navigation (back/forward) works correctly
+- Route groups organize features without affecting URLs
+
+**ViewState Enum**: Still exists temporarily for Sidebar/MobileNav, will be removed after navigation components updated to use Next.js Link.
 
 ### 2. State Management Pattern
 
-**Current Approach**: React useState at root level (App.tsx)
+**Current Approach**: React Context API via AppContext.tsx
 **No global state library** (Redux, Zustand, etc.) - keeping it simple for MVP
 
 **State Location Strategy**:
 
 ```typescript
-// GLOBAL STATE (App.tsx) - Shared across views
+// GLOBAL STATE (AppContext.tsx) - Shared across views via React Context
 - posts: Post[]                    // All scheduled/published posts
 - accounts: SocialAccount[]        // Connected social accounts
 - userPlan: PlanTier              // User's subscription level
 - branding: BrandingConfig        // Agency white-label settings
-- theme: 'light' | 'dark' | 'system'
+- theme: 'light' | 'dark' | 'system' (managed by useTheme hook)
+
+// CONTEXT HANDLERS (AppContext.tsx) - Actions available to all components
+- showToast: (message, type) => void
+- onPostCreated: (post) => void
+- onUpdatePost: (post) => void
+- onCompose: (draft?) => void
+- onToggleAccount: (id) => void
+- onOpenUpgrade: () => void
 
 // LOCAL STATE (Individual Components) - Scoped to component
 - form inputs, UI toggles, temporary data
 ```
 
-**Prop Drilling Pattern**:
+**Context Pattern** (Phase 8h):
 
-- Props flow down from App.tsx to child components
-- Callbacks flow up to modify parent state
-- Example: `Dashboard` receives `posts` prop, calls `onPostCreated` callback
+```typescript
+// AppContext.tsx - Provider wraps page content
+export function AppContextProvider({ children, showToast, onOpenUpgrade }) {
+  const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
+  const value = { posts, setPosts, showToast, onPostCreated, ... };
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+}
 
-**Why Not Context API?**
+// Page components consume context
+export default function DashboardPage() {
+  const { posts, accounts, showToast, onPostCreated } = useAppContext();
+  return <Dashboard posts={posts} ... />;
+}
+```
 
-- Added complexity for small team
-- Performance not an issue with current data size
-- Easier to debug with explicit props
-- Plan to migrate to backend + API eventually
+**Why React Context Now**:
+
+- Needed for Next.js App Router architecture
+- Cleaner than prop drilling through AppShell
+- Still simple and performant for MVP size
+- Easy to debug with explicit context values
+- Proper separation: AppShell (layout) vs AppContext (state)
 
 ### 3. Data Flow Patterns
 

@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { BioPageConfig } from "@/types";
 
 interface PhonePreviewProps {
@@ -25,10 +26,13 @@ export const PhonePreview: React.FC<PhonePreviewProps> = ({ config }) => {
           className={`w-full h-full overflow-y-auto ${themeClass} pt-12 pb-8 px-6`}
         >
           <div className="flex flex-col items-center text-center mb-8">
-            <img
+            <Image
               src={config.avatar}
-              className="w-24 h-24 rounded-full border-4 border-white/20 mb-4 object-cover"
-              alt="Profile"
+              alt="Avatar"
+              width={64}
+              height={64}
+              className="rounded-full border-2 border-white dark:border-slate-800 mb-2 object-cover"
+              unoptimized
             />
             <h2 className="font-bold text-xl mb-1">{config.displayName}</h2>
             <p className="text-sm opacity-90">{config.username}</p>
