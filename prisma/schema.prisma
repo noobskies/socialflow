@@ -1,0 +1,471 @@
+// Prisma Schema for SocialFlow AI
+// Database: PostgreSQL with Prisma Accelerate
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==========================================
+// USER & AUTHENTICATION
+// ==========================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  passwordHash  String
+  emailVerified DateTime?
+  image         String?
+  planTier      PlanTier  @default(FREE)
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  accounts      SocialAccount[]
+  posts         Post[]
+  mediaAssets   MediaAsset[]
+  workflows     Workflow[]
+  shortLinks    ShortLink[]
+  bioPage       BioPage?
+  apiKeys       ApiKey[]
+  teamMembers   TeamMember[]
+  workspace     Workspace?
+  sessions      Session[]
+  
+  @@index([email])
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  sessionToken String   @unique
+  expires      DateTime
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@map("sessions")
+}
+
+enum PlanTier {
+  FREE
+  PRO
+  AGENCY
+}
+
+// ==========================================
+// SOCIAL ACCOUNTS
+// ==========================================
+
+model SocialAccount {
+  id           String    @id @default(cuid())
+  userId       String
+  platform     Platform
+  username     String
+  displayName  String?
+  avatar       String?
+  
+  // OAuth tokens
+  accessToken  String?   @db.Text
+  refreshToken String?   @db.Text
+  tokenExpiry  DateTime?
+  
+  connected    Boolean   @default(false)
+  
+  // Platform-specific IDs
+  platformUserId String?
+  
+  // Health status
+  lastChecked  DateTime?
+  status       AccountStatus @default(ACTIVE)
+  
+  // Timestamps
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  posts        PostPlatform[]
+  
+  @@unique([userId, platform])
+  @@index([userId])
+  @@index([platform])
+  @@map("social_accounts")
+}
+
+enum Platform {
+  TWITTER
+  LINKEDIN
+  INSTAGRAM
+  FACEBOOK
+  TIKTOK
+  YOUTUBE
+  PINTEREST
+}
+
+enum AccountStatus {
+  ACTIVE
+  DISCONNECTED
+  TOKEN_EXPIRED
+  ERROR
+}
+
+// ==========================================
+// POSTS & SCHEDULING
+// ==========================================
+
+model Post {
+  id            String      @id @default(cuid())
+  userId        String
+  content       String      @db.Text
+  
+  // Scheduling
+  scheduledDate DateTime?
+  scheduledTime String?     // HH:MM format
+  timezone      String      @default("UTC")
+  
+  status        PostStatus  @default(DRAFT)
+  
+  // Media
+  mediaUrl      String?
+  mediaType     MediaType?
+  mediaAssetId  String?
+  
+  // Platform-specific options (JSON)
+  platformOptions Json?
+  
+  // Poll configuration (JSON)
+  pollConfig    Json?
+  
+  // Analytics (after publishing)
+  impressions   Int         @default(0)
+  engagement    Int         @default(0)
+  clicks        Int         @default(0)
+  
+  // Published info
+  publishedAt   DateTime?
+  publishedUrls Json?       // { twitter: "url", linkedin: "url" }
+  
+  // Timestamps
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mediaAsset    MediaAsset? @relation(fields: [mediaAssetId], references: [id])
+  platforms     PostPlatform[]
+  comments      Comment[]
+  
+  @@index([userId])
+  @@index([status])
+  @@index([scheduledDate])
+  @@map("posts")
+}
+
+model PostPlatform {
+  id         String   @id @default(cuid())
+  postId     String
+  accountId  String
+  platform   Platform
+  
+  // Publishing status per platform
+  published  Boolean  @default(false)
+  platformPostId String?
+  publishedUrl   String?
+  error      String?
+  
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  account    SocialAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  
+  @@unique([postId, accountId])
+  @@index([postId])
+  @@map("post_platforms")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  author    String
+  avatar    String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  @@index([postId])
+  @@map("comments")
+}
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  PUBLISHED
+  FAILED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+// ==========================================
+// MEDIA LIBRARY
+// ==========================================
+
+model MediaAsset {
+  id        String     @id @default(cuid())
+  userId    String
+  type      AssetType
+  
+  // Storage
+  url       String?    // For images/videos
+  content   String?    @db.Text // For templates
+  
+  name      String
+  folderId  String?
+  tags      String[]
+  
+  // File metadata
+  fileSize  Int?
+  mimeType  String?
+  
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder    Folder?    @relation(fields: [folderId], references: [id])
+  posts     Post[]
+  
+  @@index([userId])
+  @@index([folderId])
+  @@index([type])
+  @@map("media_assets")
+}
+
+model Folder {
+  id        String       @id @default(cuid())
+  userId    String?
+  name      String
+  type      FolderType
+  icon      String?
+  
+  assets    MediaAsset[]
+  
+  @@map("folders")
+}
+
+enum AssetType {
+  IMAGE
+  VIDEO
+  TEMPLATE
+}
+
+enum FolderType {
+  SYSTEM
+  USER
+}
+
+// ==========================================
+// LINK MANAGEMENT
+// ==========================================
+
+model ShortLink {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  shortCode   String   @unique
+  originalUrl String   @db.Text
+  clicks      Int      @default(0)
+  tags        String[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([shortCode])
+  @@map("short_links")
+}
+
+model BioPage {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  username        String   @unique
+  displayName     String
+  bio             String   @db.Text
+  avatar          String?
+  theme           String   @default("colorful")
+  
+  enableLeadCapture Boolean @default(false)
+  leadCaptureText   String?
+  
+  links           Json     // Array of link objects
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leads           Lead[]
+  
+  @@index([username])
+  @@map("bio_pages")
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  bioPageId String
+  email     String
+  name      String?
+  source    String
+  
+  createdAt DateTime @default(now())
+  
+  bioPage   BioPage  @relation(fields: [bioPageId], references: [id], onDelete: Cascade)
+  
+  @@index([bioPageId])
+  @@index([email])
+  @@map("leads")
+}
+
+// ==========================================
+// AUTOMATIONS & WORKFLOWS
+// ==========================================
+
+model Workflow {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String   @db.Text
+  trigger     String
+  action      String
+  active      Boolean  @default(false)
+  
+  // Statistics
+  runs        Int      @default(0)
+  lastRun     DateTime?
+  
+  icon        String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([active])
+  @@map("workflows")
+}
+
+// ==========================================
+// TEAM & COLLABORATION
+// ==========================================
+
+model Workspace {
+  id          String       @id @default(cuid())
+  userId      String       @unique
+  name        String
+  type        WorkspaceType
+  
+  // Branding
+  companyName String?
+  primaryColor String?
+  logoUrl     String?
+  customDomain String?
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("workspaces")
+}
+
+model TeamMember {
+  id        String     @id @default(cuid())
+  userId    String
+  email     String
+  name      String
+  role      MemberRole
+  avatar    String?
+  status    MemberStatus @default(INVITED)
+  
+  invitedAt DateTime   @default(now())
+  joinedAt  DateTime?
+  
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([email])
+  @@map("team_members")
+}
+
+enum WorkspaceType {
+  PERSONAL
+  TEAM
+  AGENCY
+}
+
+enum MemberRole {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum MemberStatus {
+  INVITED
+  ACTIVE
+  SUSPENDED
+}
+
+// ==========================================
+// API & INTEGRATIONS
+// ==========================================
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  key       String   @unique
+  lastUsed  DateTime?
+  
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([key])
+  @@map("api_keys")
+}
+
+// ==========================================
+// ANALYTICS & REPORTS
+// ==========================================
+
+model AnalyticsSnapshot {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime
+  platform    Platform
+  
+  impressions Int      @default(0)
+  engagement  Int      @default(0)
+  clicks      Int      @default(0)
+  followers   Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  
+  @@unique([userId, date, platform])
+  @@index([userId])
+  @@index([date])
+  @@map("analytics_snapshots")
+}
