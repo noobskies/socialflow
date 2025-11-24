@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Sidebar from "./components/Sidebar";
-import Dashboard from "./components/Dashboard";
+import Dashboard from "@/features/dashboard/Dashboard";
 import Composer from "./components/Composer";
 import Calendar from "./components/Calendar";
 import Analytics from "./components/Analytics";

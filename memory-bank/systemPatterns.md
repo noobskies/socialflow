@@ -220,52 +220,13 @@ try {
 - Prevents type duplication
 - Clear contract between components
 
-### 4. Modal Management Pattern (Implemented in Phase 2 ✅)
+### 4. Modal Management Pattern ✅
 
-**Controlled at Root Level using `useModal` hook**:
+**Pattern**: Controlled at root level using `useModal` custom hook
 
-```typescript
-// App.tsx uses custom hook for each modal
-import { useModal } from "@/hooks/useModal";
+**Implementation**: Each modal uses an instance of `useModal()` hook that provides `isOpen`, `openModal`, `closeModal`, `toggleModal` methods. See `src/hooks/useModal.ts` for implementation details.
 
-const cmdPalette = useModal();
-const notifications = useModal();
-const help = useModal();
-const shortcuts = useModal();
-const upgradeModal = useModal();
-```
-
-**Hook Implementation** (`src/hooks/useModal.ts`):
-
-```typescript
-export function useModal(initialState = false) {
-  const [isOpen, setIsOpen] = useState(initialState);
-  
-  const openModal = () => setIsOpen(true);
-  const closeModal = () => setIsOpen(false);
-  const toggleModal = () => setIsOpen((prev) => !prev);
-  
-  return { isOpen, openModal, closeModal, toggleModal };
-}
-```
-
-**Usage in Components**:
-
-```typescript
-<CommandPalette 
-  isOpen={cmdPalette.isOpen} 
-  onClose={cmdPalette.closeModal}
-/>
-```
-
-**Benefits**:
-
-- Reusable hook pattern (DRY principle)
-- Prevents multiple modals overlapping
-- Centralized z-index management
-- Easy keyboard shortcuts (ESC to close)
-- Consistent backdrop behavior
-- Can be used in any component
+**Benefits**: Reusable pattern, prevents modal overlap, consistent behavior, DRY principle applied.
 
 ## Component Communication Patterns
 
@@ -374,58 +335,19 @@ const handleDraftFromTrend = (trend: Trend) => {
 };
 ```
 
-### 3. Theme Switching (Implemented with useTheme hook ✅)
+### 3. Theme Switching ✅
 
-**Flow**: User Toggle → useTheme Hook → DOM Class → CSS Variables
+**Pattern**: User Toggle → useTheme Hook → DOM Class → CSS Variables
 
-**Implementation**:
+**Implementation**: Uses `useTheme()` custom hook that handles localStorage persistence, system preference detection, and DOM class updates. See `src/hooks/useTheme.ts` for details.
 
-```typescript
-// App.tsx uses custom hook
-import { useTheme } from "@/hooks/useTheme";
+**CSS Pattern**: Tailwind `dark:` variants respond to `.dark` class on `<html>` element.
 
-const { theme, setTheme } = useTheme();
-```
+### 4. Keyboard Shortcuts ✅
 
-**Hook handles all logic internally**:
-- Loads theme from localStorage on mount
-- Applies theme to document root element
-- Handles system preference detection
-- Listens for system theme changes
-- Persists theme selection to localStorage
-- Cleans up event listeners properly
+**Pattern**: Global event listener managed by `useKeyboard()` custom hook
 
-**CSS Pattern**:
-
-```css
-/* Tailwind classes respond to .dark on <html> */
-.bg-white dark:bg-slate-900
-.text-slate-900 dark:text-white
-```
-
-### 4. Keyboard Shortcuts (Implemented with useKeyboard hook ✅)
-
-**Pattern**: Global event listener managed by custom hook
-
-```typescript
-// App.tsx uses custom hook with handler object
-import { useKeyboard } from "@/hooks/useKeyboard";
-
-useKeyboard({
-  "cmd+k": cmdPalette.openModal,
-  "ctrl+k": cmdPalette.openModal,
-  "?": shortcuts.toggleModal,
-  "c": () => setCurrentView(ViewState.COMPOSER),
-});
-```
-
-**Hook handles**:
-- Event listener registration and cleanup
-- Input field detection (skips shortcuts when typing)
-- Modifier key detection (cmd/ctrl)
-- Key string normalization
-- Event prevention
-- Handler lookup and execution
+**Implementation**: Hook accepts an object mapping key combinations to handler functions. Automatically handles input field detection, modifier keys, cleanup, etc. See `src/hooks/useKeyboard.ts` for details.
 
 ## Design Patterns Used
 
@@ -473,31 +395,16 @@ Self-contained with internal animation/positioning logic.
 />
 ```
 
-### 4. Custom Hooks (Implemented in Phase 2 ✅)
-
-**Current implementation**:
-
-```typescript
-// Implemented hooks from Phase 2
-const { toast, showToast, hideToast } = useToast();
-const { theme, setTheme } = useTheme();
-const cmdPalette = useModal();
-useKeyboard({ "cmd+k": cmdPalette.openModal });
-```
+### 4. Custom Hooks ✅
 
 **Available Hooks** (`/src/hooks/`):
-- `useToast` - Toast notification management
-- `useModal` - Modal state controller
-- `useTheme` - Theme switching with persistence
-- `useKeyboard` - Global keyboard shortcuts
-- `useLocalStorage` - LocalStorage with debounce
+- `useToast` - Toast notification state management
+- `useModal` - Modal state controller (reusable for any modal)
+- `useTheme` - Theme switching with localStorage persistence
+- `useKeyboard` - Global keyboard shortcuts handler
+- `useLocalStorage` - Generic localStorage with debounce
 
-**Future hooks to implement**:
-```typescript
-// Phase 3+ planned hooks
-const { posts, addPost, updatePost, deletePost } = usePosts();
-const { accounts, connectAccount, disconnectAccount } = useAccounts();
-```
+**Usage**: Import from `@/hooks/*` and use in components. All hooks follow React best practices with proper cleanup.
 
 ## Component Relationships
 
