@@ -8,7 +8,7 @@ import Settings from "@/features/settings/Settings";
 import Inbox from "@/features/inbox/Inbox";
 import Library from "@/features/library/Library";
 import LinkManager from "@/features/linkmanager/LinkManager";
-import Automations from "./components/Automations";
+import Automations from "@/features/automations/Automations";
 import CommandPalette from "@/components/feedback/CommandPalette";
 import Toast from "@/components/feedback/Toast";
 import Notifications from "@/components/feedback/Notifications";
@@ -157,7 +157,7 @@ const App: React.FC = () => {
       case ViewState.LINKS:
         return <LinkManager showToast={showToast} />;
       case ViewState.AUTOMATIONS:
-        return <Automations />;
+        return <Automations showToast={showToast} />;
       case ViewState.ANALYTICS:
         return (
           <Analytics

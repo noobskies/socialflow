@@ -45,6 +45,96 @@
 
 ## Recent Refactoring Sessions
 
+### Phase 6g: Automations Refactoring ✅ (Nov 23, 2025)
+
+**Duration**: ~1 hour  
+**Result**: Automations.tsx reduced from 381 to 70 lines (-82%)
+
+**Created** (10 files in `/src/features/automations/`):
+
+**Core Structure (2 files)**:
+- **Automations.tsx** - 70-line orchestrator component with 2-tab navigation
+- **useAutomations.ts** - State management hook (activeTab, workflows, integrations, modal state)
+
+**Workflow Components (4 files)**:
+- **components/WorkflowCard.tsx** - Individual workflow display with toggle switch, stats
+- **components/CreateWorkflowModal.tsx** - Workflow creation form with validation
+- **components/AIArchitectSidebar.tsx** - AI-powered workflow suggestions based on business type
+- **components/PopularTemplates.tsx** - Quick template selection
+
+**Integration Components (2 files)**:
+- **components/IntegrationCard.tsx** - Integration connection cards (Shopify, Slack, WordPress, Mailchimp)
+- **components/IntegrationPlaceholder.tsx** - Request integration placeholder card
+
+**Tab Components (2 files)**:
+- **tabs/WorkflowsTab.tsx** - Workflows list with AI sidebar and create button
+- **tabs/IntegrationsTab.tsx** - Integrations grid layout with placeholder
+
+**Mock Data Added to constants.ts**:
+- MOCK_WORKFLOWS (3 workflow examples: product promotion, blog cross-post, sentiment alert)
+- MOCK_INTEGRATIONS (4 integration apps with connection states)
+
+**Impact**:
+- 381-line monolith reduced to 70-line orchestrator (-82%)
+- Created 10 focused, single-responsibility components
+- Applied orchestrator pattern successfully (9th feature completed!)
+- All 2 tabs fully functional (workflows, integrations)
+- Workflow toggle switches (active/inactive) working
+- Integration connection toggles working
+- Create workflow modal with form validation functional
+- AI Architect workflow suggestions based on business type
+- Popular templates quick selection
+- TypeScript: 0 compilation errors ✅
+- Dev server: Verified working on port 3000 ✅
+
+**File Organization**:
+```
+/src/features/automations/
+├── Automations.tsx (70-line orchestrator)
+├── useAutomations.ts (state hook)
+├── /tabs
+│   ├── WorkflowsTab.tsx
+│   └── IntegrationsTab.tsx
+└── /components
+    ├── WorkflowCard.tsx
+    ├── CreateWorkflowModal.tsx
+    ├── AIArchitectSidebar.tsx
+    ├── PopularTemplates.tsx
+    ├── IntegrationCard.tsx
+    └── IntegrationPlaceholder.tsx
+```
+
+**Integration**:
+- Updated App.tsx import from `./components/Automations` to `@/features/automations/Automations`
+- Added showToast prop to Automations component
+- All components use path aliases consistently
+- Zero breaking changes - component API unchanged
+- Added default export to Automations.tsx
+
+**Verification Steps Completed**:
+1. ✅ TypeScript compilation (0 errors)
+2. ✅ Dev server starts successfully
+3. ✅ Both tabs render correctly
+4. ✅ Tab switching works smoothly
+5. ✅ Workflows tab (cards + AI + modal) works
+6. ✅ Workflow toggle switches functional
+7. ✅ Create workflow modal opens/closes
+8. ✅ Workflow creation form validation works
+9. ✅ AI Architect sidebar displays
+10. ✅ Popular templates display
+11. ✅ Integrations tab (cards + placeholder) works
+12. ✅ Integration toggle switches functional
+13. ✅ Dark mode fully supported
+14. ✅ Mobile responsive layouts work
+
+**Key Achievements**:
+- Successfully applied orchestrator pattern for 9th consecutive feature
+- **ALL 9 FEATURES NOW REFACTORED!** 🎉 (Dashboard, Composer, Analytics, Settings, Calendar, Inbox, Library, LinkManager, Automations)
+- AI workflow architect integrated seamlessly
+- Modal system for workflow creation working
+- All automation features preserved with improved organization
+- Frontend refactoring project now 95% complete (only App.tsx simplification remains)
+
 ### Phase 6f: LinkManager Refactoring ✅ (Nov 23, 2025)
 
 **Duration**: ~1.5 hours  
@@ -1006,8 +1096,8 @@
 ## Key Metrics
 
 **App.tsx**: 235 lines (down from 390)  
-**Total Components**: 11 in `/src/components/`, 121 in `/src/features/` (8 features), 2 legacy at root
-**Custom Hooks**: 5 reusable hooks + 8 feature-specific hooks (useDashboard, useComposer, useAnalytics, useSettings, useCalendar, useInbox, useLibrary, useLinkManager)
+**Total Components**: 11 in `/src/components/`, 131 in `/src/features/` (9 features), 2 legacy at root
+**Custom Hooks**: 5 reusable hooks + 9 feature-specific hooks (useDashboard, useComposer, useAnalytics, useSettings, useCalendar, useInbox, useLibrary, useLinkManager, useAutomations)
 **UI Library**: 4 reusable components (Button, Input, Modal, Card)
 **Utility Functions**: 3 modules with date, format, validation helpers  
 **Linting Issues**: 77 errors (non-blocking, fix during refactoring)  
@@ -1016,10 +1106,10 @@
 **Bundle Size**: ~200KB gzipped (acceptable for MVP)
 
 **Refactoring Progress**:
-- **8 Features Complete**: Dashboard, Composer, Analytics, Settings, Calendar, Inbox, Library, LinkManager
-- **Total Lines Reduced**: 6,029 → 1,002 lines (-83%) in orchestrators
-- **Components Created**: 121 focused components across 8 features
-- **1 Feature Remaining**: Automations (381 lines)
+- **9 Features Complete**: Dashboard, Composer, Analytics, Settings, Calendar, Inbox, Library, LinkManager, Automations
+- **Total Lines Reduced**: 6,410 → 1,072 lines (-83%) in orchestrators
+- **Components Created**: 131 focused components across 9 features
+- **ALL FEATURES REFACTORED!** 🎉 Only App.tsx simplification remains
 
 ## Success Indicators
 

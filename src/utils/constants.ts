@@ -655,3 +655,69 @@ export const MOCK_LEADS: Lead[] = [
     timestamp: "3 days ago",
   },
 ];
+
+export const MOCK_WORKFLOWS = [
+  {
+    id: "1",
+    name: "Promote New Products",
+    description:
+      "When a new product is added to Shopify, generate and schedule a post.",
+    trigger: "New Shopify Product",
+    action: "Draft Social Post",
+    active: true,
+    stats: { runs: 12, lastRun: "2 hours ago" },
+    icon: "shopping-bag" as const,
+  },
+  {
+    id: "2",
+    name: "Blog Cross-Post",
+    description: "Auto-share new WordPress posts to LinkedIn and Twitter.",
+    trigger: "New WP Post",
+    action: "Publish to Socials",
+    active: true,
+    stats: { runs: 45, lastRun: "1 day ago" },
+    icon: "globe" as const,
+  },
+  {
+    id: "3",
+    name: "Negative Sentiment Alert",
+    description:
+      "If a comment has negative sentiment, send a Slack notification.",
+    trigger: "Negative Comment",
+    action: "Notify Team",
+    active: false,
+    stats: { runs: 0, lastRun: "Never" },
+    icon: "alert-triangle" as const,
+  },
+];
+
+export const MOCK_INTEGRATIONS = [
+  {
+    id: "1",
+    name: "Shopify",
+    category: "ecommerce" as const,
+    icon: "shopping-bag" as const,
+    connected: true,
+  },
+  {
+    id: "2",
+    name: "Slack",
+    category: "communication" as const,
+    icon: "slack" as const,
+    connected: false,
+  },
+  {
+    id: "3",
+    name: "WordPress",
+    category: "content" as const,
+    icon: "globe" as const,
+    connected: true,
+  },
+  {
+    id: "4",
+    name: "Mailchimp",
+    category: "communication" as const,
+    icon: "mail" as const,
+    connected: false,
+  },
+];

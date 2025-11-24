@@ -413,6 +413,7 @@ Self-contained with internal animation/positioning logic.
 - `useInbox` - Inbox tab state and message handling
 - `useLibrary` - Library tab state, folder/asset management, and filters
 - `useLinkManager` - LinkManager tab state (shortener, bio, leads)
+- `useAutomations` - Automations tab state (workflows, integrations, modal management)
 
 **Usage**: Import from `@/hooks/*` and use in components. All hooks follow React best practices with proper cleanup.
 
@@ -669,11 +670,16 @@ AWS / Railway / Render
 │   │   │   ├── useLibrary.ts
 │   │   │   ├── /tabs (5 tab components)
 │   │   │   └── /components (10 components)
-│   │   └── /linkmanager # ✅ COMPLETE (14 files)
-│   │       ├── LinkManager.tsx (80-line orchestrator)
-│   │       ├── useLinkManager.ts
-│   │       ├── /tabs (3 tab components)
-│   │       └── /components (9 components)
+│   │   ├── /linkmanager # ✅ COMPLETE (14 files)
+│   │   │   ├── LinkManager.tsx (80-line orchestrator)
+│   │   │   ├── useLinkManager.ts
+│   │   │   ├── /tabs (3 tab components)
+│   │   │   └── /components (9 components)
+│   │   └── /automations # ✅ COMPLETE (10 files)
+│   │       ├── Automations.tsx (70-line orchestrator)
+│   │       ├── useAutomations.ts
+│   │       ├── /tabs (2 tab components)
+│   │       └── /components (6 components)
 │   │
 │   ├── /components      # ✅ Dirs ready for Phase 5
 │   │   ├── /ui
@@ -727,17 +733,17 @@ AWS / Railway / Render
 - ✅ Phase 6d: Inbox refactored (475 → 80 lines, 12 components created)
 - ✅ Phase 6e: Library refactored (713 → 165 lines, 18 components created)
 - ✅ Phase 6f: LinkManager refactored (454 → 80 lines, 14 components created)
+- ✅ Phase 6g: Automations refactored (381 → 70 lines, 10 components created)
 - ✅ FeatureGateOverlay moved to `/src/components/ui/` for app-wide reuse (successfully reused in Settings!)
 - ✅ PostCard component created as reusable across all calendar views
 - ✅ Platform icons utility shared between Calendar and Inbox features
 
 **Remaining Work**:
 
-- Phase 6g: Automations refactoring (381 lines)
 - Phase 6h: App.tsx simplification (from 235 lines)
 - Phase 7: Add basic tests
 
-**Current Status**: Phase 6f complete. LinkManager refactored successfully. Ready for Phase 6g: Automations Refactoring
+**Current Status**: Phase 6g complete. **ALL 9 FEATURES NOW REFACTORED!** 🎉 Ready for Phase 6h: App.tsx Simplification
 
 ### Target Structure (Phase 5+)
 
