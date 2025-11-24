@@ -3,6 +3,7 @@ import { BioPageConfig, ToastType } from "@/types";
 import { BioProfileSection } from "./BioProfileSection";
 import { LeadCaptureToggle } from "./LeadCaptureToggle";
 import { BioLinksEditor } from "./BioLinksEditor";
+import { generateBio } from "@/services/geminiService";
 
 interface BioEditorProps {
   config: BioPageConfig;
@@ -25,13 +26,20 @@ export const BioEditor: React.FC<BioEditorProps> = ({
     }
     setIsGenerating(true);
 
-    // Simulate AI generation
-    setTimeout(() => {
-      const newBio = `${config.displayName} | ${bioNiche} 🚀\nSharing insights and tips daily! ✨`;
+    try {
+      const newBio = await generateBio(
+        config.displayName,
+        bioNiche,
+        config.theme
+      );
       onConfigChange({ bio: newBio });
-      setIsGenerating(false);
       showToast("Bio generated successfully!", "success");
-    }, 1500);
+    } catch (error) {
+      console.error("Bio generation error:", error);
+      showToast("Failed to generate bio. Please try again.", "error");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (

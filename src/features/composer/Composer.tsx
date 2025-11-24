@@ -24,6 +24,7 @@ import {
   refineContent,
   analyzeDraft,
   generateProductPost,
+  generateAltText,
 } from "@/services/geminiService";
 
 interface ComposerProps {
@@ -135,6 +136,21 @@ export const Composer: React.FC<ComposerProps> = ({
     showToast("Draft saved locally", "info");
   };
 
+  const handleGenerateAltText = async () => {
+    if (!composer.mediaUrl) return;
+    setIsGenerating(true);
+    try {
+      const altText = await generateAltText(composer.mediaUrl);
+      composer.setAltText(altText);
+      showToast("Alt text generated successfully!", "success");
+    } catch (error) {
+      console.error("Alt text generation error:", error);
+      showToast("Failed to generate alt text. Please try again.", "error");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-6 h-full flex flex-col overflow-hidden relative pb-24 md:pb-6 bg-slate-50 dark:bg-slate-950">
       {/* Header */}
@@ -215,6 +231,7 @@ export const Composer: React.FC<ComposerProps> = ({
               type={composer.mediaType!}
               altText={composer.altText}
               onRemove={composer.removeMedia}
+              onEditAltText={handleGenerateAltText}
             />
           )}
 
