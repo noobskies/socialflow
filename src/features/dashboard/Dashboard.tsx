@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { Post, SocialAccount, Draft, ToastType } from "@/types";
 import { useDashboard } from "./useDashboard";
-import { DashboardStats } from "./DashboardStats";
-import { CrisisAlert } from "./CrisisAlert";
-import { OnboardingProgress } from "./OnboardingProgress";
-import { TrendingWidget } from "./TrendingWidget";
-import { EngagementChart } from "./EngagementChart";
-import { QuickDraft } from "./QuickDraft";
-import { UpcomingPosts } from "./UpcomingPosts";
-import { AccountHealth } from "./AccountHealth";
-import { TopLinks } from "./TopLinks";
-import { RecentGenerations } from "./RecentGenerations";
+import { DashboardStats } from "./widgets/DashboardStats";
+import { CrisisAlert } from "./widgets/CrisisAlert";
+import { OnboardingProgress } from "./widgets/OnboardingProgress";
+import { TrendingWidget } from "./widgets/TrendingWidget";
+import { EngagementChart } from "./widgets/EngagementChart";
+import { QuickDraft } from "./widgets/QuickDraft";
+import { UpcomingPosts } from "./widgets/UpcomingPosts";
+import { AccountHealth } from "./widgets/AccountHealth";
+import { TopLinks } from "./widgets/TopLinks";
+import { RecentGenerations } from "./widgets/RecentGenerations";
 
 interface DashboardProps {
   posts?: Post[];

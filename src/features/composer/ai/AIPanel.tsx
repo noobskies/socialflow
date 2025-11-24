@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Sparkles, Users } from "lucide-react";
 import { AIWriter } from "./AIWriter";
 import { AIDesigner } from "./AIDesigner";
-import { TeamCollaboration } from "./TeamCollaboration";
+import { TeamCollaboration } from "../collaboration/TeamCollaboration";
 import { Platform, ToastType, PlanTier, Comment } from "@/types";
 
 interface AIPanelProps {

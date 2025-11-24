@@ -670,11 +670,37 @@ AWS / Railway / Render
 │   │   ├── /dashboard (12 files)
 │   │   │   ├── Dashboard.tsx (100-line orchestrator)
 │   │   │   ├── useDashboard.ts
-│   │   │   └── ... (10 widget components)
+│   │   │   └── /widgets (10 widget components)
+│   │   │       ├── AccountHealth.tsx
+│   │   │       ├── CrisisAlert.tsx
+│   │   │       ├── DashboardStats.tsx
+│   │   │       ├── EngagementChart.tsx
+│   │   │       ├── OnboardingProgress.tsx
+│   │   │       ├── QuickDraft.tsx
+│   │   │       ├── RecentGenerations.tsx
+│   │   │       ├── TopLinks.tsx
+│   │   │       ├── TrendingWidget.tsx
+│   │   │       └── UpcomingPosts.tsx
 │   │   ├── /composer (15 files)
 │   │   │   ├── Composer.tsx (217-line orchestrator)
 │   │   │   ├── useComposer.ts
-│   │   │   └── ... (13 sub-components + modals)
+│   │   │   ├── /components (6 core UI components)
+│   │   │   │   ├── ContentEditor.tsx
+│   │   │   │   ├── MediaPreview.tsx
+│   │   │   │   ├── PlatformOptions.tsx
+│   │   │   │   ├── PlatformSelector.tsx
+│   │   │   │   ├── PollCreator.tsx
+│   │   │   │   └── PreviewPanel.tsx
+│   │   │   ├── /ai (3 AI components)
+│   │   │   │   ├── AIDesigner.tsx
+│   │   │   │   ├── AIPanel.tsx
+│   │   │   │   └── AIWriter.tsx
+│   │   │   ├── /modals (3 modal components)
+│   │   │   │   ├── AnalysisModal.tsx
+│   │   │   │   ├── ProductPickerModal.tsx
+│   │   │   │   └── SchedulingModal.tsx
+│   │   │   └── /collaboration (1 team component)
+│   │   │       └── TeamCollaboration.tsx
 │   │   ├── /analytics (15 files)
 │   │   │   ├── Analytics.tsx (60-line orchestrator)
 │   │   │   ├── useAnalytics.ts

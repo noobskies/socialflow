@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { CalendarClock, ShoppingBag } from "lucide-react";
-import { PlatformSelector } from "./PlatformSelector";
-import { PlatformOptions } from "./PlatformOptions";
-import { ContentEditor } from "./ContentEditor";
-import { MediaPreview } from "./MediaPreview";
-import { PollCreator } from "./PollCreator";
-import { AIPanel } from "./AIPanel";
-import { SchedulingModal } from "./SchedulingModal";
-import { ProductPickerModal } from "./ProductPickerModal";
-import { AnalysisModal } from "./AnalysisModal";
-import { PreviewPanel } from "./PreviewPanel";
+import { PlatformSelector } from "./components/PlatformSelector";
+import { PlatformOptions } from "./components/PlatformOptions";
+import { ContentEditor } from "./components/ContentEditor";
+import { MediaPreview } from "./components/MediaPreview";
+import { PollCreator } from "./components/PollCreator";
+import { AIPanel } from "./ai/AIPanel";
+import { SchedulingModal } from "./modals/SchedulingModal";
+import { ProductPickerModal } from "./modals/ProductPickerModal";
+import { AnalysisModal } from "./modals/AnalysisModal";
+import { PreviewPanel } from "./components/PreviewPanel";
 import { useComposer } from "./useComposer";
 import { useModal } from "@/hooks/useModal";
 import {
