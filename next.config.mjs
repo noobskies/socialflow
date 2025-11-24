@@ -13,15 +13,6 @@ const nextConfig = {
 
   // Disable trailing slashes for cleaner URLs
   trailingSlash: false,
-
-  // Configure path aliases to match existing tsconfig.json
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "@": "/src",
-    };
-    return config;
-  },
 };
 
 export default nextConfig;
