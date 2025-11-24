@@ -34,8 +34,8 @@ export const TeamCollaboration: React.FC<TeamCollaborationProps> = ({
           comments.map((comment) => (
             <div key={comment.id} className="flex gap-3">
               <Image
-                src={comment.userAvatar}
-                alt={comment.userName}
+                src={comment.avatar}
+                alt={comment.author}
                 width={32}
                 height={32}
                 className="rounded-full border border-slate-200 dark:border-slate-700"

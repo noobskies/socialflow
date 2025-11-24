@@ -201,7 +201,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           return (
             <Link
               key={item.href}
-              href={item.href}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              href={item.href as any}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                 isActive
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/20"

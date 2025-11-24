@@ -23,7 +23,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({ asset, onUse }) => {
         {asset.type === "image" || asset.type === "video" ? (
           <>
             <Image
-              src={asset.url}
+              src={asset.url || "/placeholder-image.png"}
               alt={asset.name}
               fill
               className="object-cover transition-transform group-hover:scale-105 duration-300"
