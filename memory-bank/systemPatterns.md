@@ -404,7 +404,80 @@ Self-contained with internal animation/positioning logic.
 - `useKeyboard` - Global keyboard shortcuts handler
 - `useLocalStorage` - Generic localStorage with debounce
 
+**Feature Hooks** (`/src/features/*/`):
+- `useDashboard` - Dashboard-specific state (trends loading)
+- `useComposer` - Composer state orchestration (content, platforms, media, polls)
+
 **Usage**: Import from `@/hooks/*` and use in components. All hooks follow React best practices with proper cleanup.
+
+### 5. Orchestrator Pattern ✅ (Phase 3 & 4)
+
+**Pattern**: Large feature components broken into orchestrator + specialized sub-components
+
+**Example: Composer Architecture** (Phase 4)
+
+```typescript
+// useComposer.ts - State management hook
+export function useComposer(initialDraft?: Draft) {
+  const [content, setContent] = useLocalStorage("draft_content", "", 1000);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>([]);
+  // ... all composer state
+  
+  return {
+    content, setContent,
+    selectedPlatforms, togglePlatform,
+    mediaUrl, handleMediaUpload,
+    // ... all state and actions
+  };
+}
+
+// Composer.tsx - Orchestrator (217 lines)
+export const Composer: React.FC<ComposerProps> = (props) => {
+  const composer = useComposer(props.initialDraft);
+  const schedulingModal = useModal();
+  
+  return (
+    <div>
+      <PlatformSelector 
+        selectedPlatforms={composer.selectedPlatforms}
+        onToggle={composer.togglePlatform}
+      />
+      <ContentEditor 
+        content={composer.content}
+        onChange={composer.setContent}
+      />
+      <PreviewPanel 
+        content={composer.content}
+        platforms={composer.selectedPlatforms}
+      />
+      {/* ... other specialized components */}
+    </div>
+  );
+};
+```
+
+**Benefits**:
+- Main component stays clean (~200 lines)
+- Sub-components are focused and testable
+- Custom hook manages complex state
+- Easy to understand flow
+- Scalable architecture
+
+**Components Extracted in Composer**:
+1. PlatformSelector - Platform button grid
+2. PlatformOptions - Platform-specific settings
+3. ContentEditor - Textarea with toolbar
+4. PreviewPanel - Multi-platform preview
+5. MediaPreview - Uploaded media display
+6. PollCreator - Poll options interface
+7. AIPanel - Tab container
+8. AIWriter - Content generation
+9. AIDesigner - Image generation
+10. TeamCollaboration - Comments
+11. SchedulingModal - Date/time picker
+12. ProductPickerModal - Product selection
+13. AnalysisModal - AI analysis results
+14. useComposer hook - State orchestration
 
 ## Component Relationships
 
@@ -613,15 +686,18 @@ AWS / Railway / Render
 - ✅ Phase 2: 5 custom hooks extracted (useToast, useModal, useTheme, useKeyboard, useLocalStorage)
 - ✅ Phase 2: 3 utility modules (dates, formatting, validation)
 - ✅ Phase 3: Dashboard refactored (550 → 100 lines, 10 widgets created)
+- ✅ Phase 4: Composer refactored (1,850 → 217 lines, 14 sub-components + 1 hook)
 
 **Remaining Work**:
 
-- Phase 4: Composer refactoring
 - Phase 5: Separate shared components to `/src/components/`
 - Phase 6: Simplify App.tsx further
 - Phase 7: Add basic tests
 
-### Target Structure (Future Phases)
+### Current Structure (Phase 4 Complete ✅)
+**Current Status**: Phase 4 complete and ready to commit. Ready for Phase 5: Shared Components Migration
+
+### Target Structure (Phase 5+)
 
 ```
 /socialflow

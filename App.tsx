@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "@/features/dashboard/Dashboard";
-import Composer from "./components/Composer";
+import Composer from "@/features/composer/Composer";
 import Calendar from "./components/Calendar";
 import Analytics from "./components/Analytics";
 import Settings from "./components/Settings";

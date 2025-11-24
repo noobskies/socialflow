@@ -2,7 +2,7 @@
 
 ## 🚨 CRITICAL CONTEXT: Frontend Refactoring Phase
 
-**Last Updated**: November 23, 2025 (6:09 PM)
+**Last Updated**: November 23, 2025 (6:36 PM)
 
 **What This Project Is**: Frontend MVP exported from Google AI Studio that needs professional refactoring
 
@@ -29,8 +29,9 @@ Refactoring an AI Studio-generated MVP to establish professional code architectu
 - ✅ Phase 1: Foundation Setup (/src structure, types split into 3 modules, constants extracted)
 - ✅ Phase 2: Custom Hooks (5 hooks + 3 utility modules extracted from App.tsx)
 - ✅ Phase 3: Dashboard Refactoring (550-line monolith → 100-line orchestrator + 10 widgets)
+- ✅ Phase 4: Composer Refactoring (1,850-line monolith → 217-line orchestrator + 14 sub-components)
 
-**Result**: Dashboard.tsx reduced from 550 to 100 lines (-82%). Created `/src/features/dashboard/` with 12 files: 10 widget components, 1 custom hook, 1 orchestrator. All widgets independently testable and reusable.
+**Latest**: Composer.tsx reduced from 1,850 to 217 lines (-88%). Created `/src/features/composer/` with 15 files: 14 specialized components, 1 custom hook (useComposer), 1 orchestrator. All components independently testable. Includes bug fix for PreviewPanel scrolling.
 
 **Details**: See `progress.md` for complete session history with metrics and verification.
 
@@ -38,20 +39,19 @@ Refactoring an AI Studio-generated MVP to establish professional code architectu
 
 ### Immediate Focus (This Week)
 
-**Phase 4: Composer Refactoring**
-- Break down large Composer.tsx into focused components
-- Apply SOLID principles (Single Responsibility)
-- Extract custom hooks for composer state
-- Move to `/src/features/composer/`
+**Phase 5: Shared Components Migration**
+- Move truly reusable components to `/src/components/`
+- Organize into ui/, layout/, feedback/ subdirectories
+- Keep feature-specific components in their feature folders
 
-**Documentation**: See `docs/phases/phase4_composer.md` for detailed plan.
+**Documentation**: See `docs/phases/phase5_shared_components.md` for detailed plan.
 
 ### Upcoming (Next 2 Weeks)
 
-1. **Phase 5**: Migrate shared components to `/src/components/`
-2. **Phase 6**: Simplify App.tsx further
-3. **Phase 7**: Add basic tests
-4. **Fix Linting**: Address 77 ESLint issues gradually during refactoring
+1. **Phase 6**: Simplify App.tsx further (reduce from 280 lines)
+2. **Phase 7**: Add basic tests (Vitest infrastructure already configured)
+3. **Fix Linting**: Address 77 ESLint issues gradually during refactoring
+4. **Commit & Document**: Commit Phase 4 completion
 
 ## Active Design Decisions
 
