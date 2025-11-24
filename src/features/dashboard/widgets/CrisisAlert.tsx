@@ -17,8 +17,8 @@ export const CrisisAlert: React.FC<CrisisAlertProps> = ({ onDismiss }) => {
             Negative Sentiment Spike Detected
           </h3>
           <p className="text-rose-600 dark:text-rose-300 text-sm mt-1">
-            Unusually high negative mentions on Twitter regarding "Server
-            Downtime". Recommended action: Check Inbox.
+            Unusually high negative mentions on Twitter regarding &quot;Server
+            Downtime&quot;. Recommended action: Check Inbox.
           </p>
         </div>
       </div>

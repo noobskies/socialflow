@@ -35,7 +35,7 @@ export const AIArchitectSidebar: React.FC<AIArchitectSidebarProps> = ({
         <h3 className="font-bold text-lg">AI Architect</h3>
       </div>
       <p className="text-indigo-100 text-sm mb-4">
-        Tell me about your business, and I'll design the perfect automation
+        Tell me about your business, and I&apos;ll design the perfect automation
         strategy.
       </p>
 

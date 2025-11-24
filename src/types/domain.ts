@@ -44,7 +44,7 @@ export interface Draft {
   mediaType?: "image" | "video";
   scheduledDate?: string;
   platforms?: Platform[];
-  status?: "draft" | "pending_review" | "approved" | "rejected";
+  status?: "scheduled" | "draft" | "pending_review" | "approved" | "rejected";
   comments?: PostComment[];
   platformOptions?: PlatformOptions;
   poll?: PollConfig;

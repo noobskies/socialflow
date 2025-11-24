@@ -22,11 +22,14 @@ This document describes the technical stack, development environment, and toolin
 
 ### Language
 
-**TypeScript 5.8.2** - Strict type checking enabled, full IDE support, 100% type safety
+**TypeScript 5.8.2** - Strict type checking FULLY enabled, full IDE support, 100% type safety
 
 **Why**: Prevents bugs, better refactoring, excellent tooling, industry standard, team collaboration
 
-**Config**: Strict mode enabled - `noImplicitAny`, `strictNullChecks`, `strictFunctionTypes`
+**Config**: `strict: true` enabled in tsconfig.json - all strict options active
+- `jsx: "preserve"` for Next.js (proper JSX handling)
+- `.next/types/**/*.ts` included for typed routes
+- Next.js TypeScript plugin configured
 
 **Type System Organization**: 4 modules for clean type organization
 - `src/types/domain.ts` - Core domain types (Post, Draft, User, Platform, etc.)
@@ -158,17 +161,26 @@ NEXT_PUBLIC_GEMINI_API_KEY=your_api_key_here
 
 ### ESLint
 
-**Status**: Configured with React/TypeScript recommended rules
+**Status**: Configured with Next.js 16 best practices
 
-**Config**: `eslint.config.js` (ESM format)
+**Config**: `eslint.config.mjs` (ESM format, Next.js configuration)
 
-**Rules**: React Hooks enforcement, TypeScript type safety, no explicit `any`, unused variables
+**Rules**: 
+- Next.js core-web-vitals (recommended + performance rules)
+- TypeScript-eslint (type-aware linting)
+- Prettier integration (no conflicts)
+- Custom rules: no-unused-vars, no-explicit-any
+
+**Package**: `eslint-config-next` (includes @next/eslint-plugin-next)
 
 **Scripts**:
 - `npm run lint` - Check for errors
 - `npm run lint:fix` - Auto-fix where possible
+- `npm run typegen` - Generate route types
 
-**Current**: 0 errors, 0 warnings ✅
+**Current Status**: 
+- ✅ 0 errors
+- ⚠️ 20 warnings (img tags - Next.js suggestions, acceptable)
 
 ### Prettier
 
@@ -198,9 +210,16 @@ NEXT_PUBLIC_GEMINI_API_KEY=your_api_key_here
 
 ### TypeScript
 
-**Strict Mode**: Enabled completely
+**Strict Mode**: ✅ Fully enabled (`strict: true` in tsconfig.json)
 
-**Compile Status**: ✅ Zero errors
+**Compile Status**: ✅ Zero errors with strict mode
+
+**Additional Settings**:
+- Typed routes enabled (via `typedRoutes: true` in next.config.ts)
+- Typed environment variables (via `experimental.typedEnv: true`)
+- Next.js TypeScript plugin active
+
+**Verification**: `npm run type-check` passes with 0 errors
 
 ## Development Constraints
 
@@ -387,8 +406,8 @@ test: Add unit tests for geminiService
 
 ### Key Files Created
 
-**Initial Migration (7 files):**
-1. `next.config.mjs` - Next.js configuration
+**Initial Migration (6 files):**
+1. `next.config.ts` - Next.js configuration (TypeScript)
 2. `src/app/layout.tsx` - Root layout with metadata
 3. `src/app/globals.css` - Tailwind v4 + custom styles
 4. `postcss.config.cjs` - PostCSS with Tailwind plugin
@@ -410,23 +429,29 @@ test: Add unit tests for geminiService
 
 ### Key Files Modified
 
-1. `package.json` - Updated scripts and dependencies
-2. `tsconfig.json` - Next.js TypeScript configuration
+1. `package.json` - Updated scripts and dependencies (removed deprecated --ext flag)
+2. `tsconfig.json` - Next.js TypeScript configuration with strict mode
 3. `.gitignore` - Added `.next/` and `next-env.d.ts`
 4. `.env.local` - Renamed environment variable
 5. `src/services/geminiService.ts` - Updated env access
 6. `src/global.d.ts` - Next.js type declarations
+7. `eslint.config.mjs` - Complete rewrite for Next.js
+8. `vitest.config.ts` - Removed Vite-specific plugin
 
 ### Key Files Deleted
 
 **Vite Cleanup (3 files):**
 1. `index.html` - Converted to layout.tsx
 2. `index.tsx` - Logic moved to AppShell.tsx
-3. `vite.config.ts` - Replaced by next.config.mjs
+3. `vite.config.ts` - Replaced by next.config.ts
 
 **App Router Migration (2 files):**
 4. `App.tsx` (root) - Logic moved to src/app/AppShell.tsx
 5. `src/app/[[...slug]]/` folder - Replaced with proper route pages
+
+**Configuration Cleanup (2 files):**
+6. `eslint.config.js` - Replaced by eslint.config.mjs
+7. `next.config.mjs` - Replaced by next.config.ts
 
 ### Critical Fixes During Migration
 

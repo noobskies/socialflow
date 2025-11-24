@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Report } from "@/types";
+import { Report, ToastType } from "@/types";
 
 const MOCK_REPORTS: Report[] = [
   {
@@ -34,7 +34,9 @@ export function useAnalytics() {
   >("overview");
   const [reports, setReports] = useState<Report[]>(MOCK_REPORTS);
 
-  const createReport = (showToast: (message: string, type: string) => void) => {
+  const createReport = (
+    showToast: (message: string, type: ToastType) => void
+  ) => {
     const newReport: Report = {
       id: Date.now().toString(),
       name: "New Custom Report",

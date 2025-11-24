@@ -6,6 +6,7 @@ interface FeatureGateOverlayProps {
   title: string;
   description: string;
   ctaText?: string;
+  upgradeButtonText?: string;
   onUpgrade: () => void;
 }
 
@@ -13,9 +14,11 @@ export const FeatureGateOverlay: React.FC<FeatureGateOverlayProps> = ({
   icon: Icon,
   title,
   description,
-  ctaText = "Upgrade to Pro",
+  ctaText,
+  upgradeButtonText,
   onUpgrade,
 }) => {
+  const buttonText = upgradeButtonText || ctaText || "Upgrade to Pro";
   return (
     <div className="absolute inset-0 z-20 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center text-center p-8 rounded-2xl">
       <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-xl">
@@ -31,7 +34,7 @@ export const FeatureGateOverlay: React.FC<FeatureGateOverlayProps> = ({
         onClick={onUpgrade}
         className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/30"
       >
-        {ctaText}
+        {buttonText}
       </button>
     </div>
   );

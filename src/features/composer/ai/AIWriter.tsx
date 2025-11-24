@@ -136,7 +136,7 @@ export const AIWriter: React.FC<AIWriterProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-              What's this post about?
+              What&apos;s this post about?
             </label>
             <input
               type="text"

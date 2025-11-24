@@ -11,7 +11,7 @@ import HelpModal from "@/components/feedback/HelpModal";
 import UpgradeModal from "@/components/feedback/UpgradeModal";
 import ShortcutsModal from "@/components/feedback/ShortcutsModal";
 import { AppContextProvider } from "./AppContext";
-import { ViewState, BrandingConfig, PlanTier } from "@/types";
+import { BrandingConfig, PlanTier } from "@/types";
 import { useToast } from "@/hooks/useToast";
 import { useModal } from "@/hooks/useModal";
 import { useTheme } from "@/hooks/useTheme";
@@ -31,10 +31,7 @@ export default function AppShell({ children }: AppShellProps) {
   const upgradeModal = useModal();
   const { theme, setTheme } = useTheme();
 
-  // View State (temporary - will be removed when navigation is updated)
-  const [currentView, setCurrentView] = useState<ViewState>(
-    ViewState.DASHBOARD
-  );
+  // Mobile menu state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Branding State (for layout components)
@@ -88,10 +85,6 @@ export default function AppShell({ children }: AppShellProps) {
       <CommandPalette
         isOpen={cmdPalette.isOpen}
         onClose={cmdPalette.closeModal}
-        setView={(view) => {
-          setCurrentView(view);
-          cmdPalette.closeModal();
-        }}
       />
 
       {mobileMenuOpen && (
@@ -105,11 +98,6 @@ export default function AppShell({ children }: AppShellProps) {
         className={`fixed md:relative z-50 h-full transition-transform duration-300 ease-in-out ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
       >
         <Sidebar
-          currentView={currentView}
-          setView={(view) => {
-            setCurrentView(view);
-            setMobileMenuOpen(false);
-          }}
           currentTheme={theme}
           setTheme={setTheme}
           branding={branding}
@@ -137,11 +125,6 @@ export default function AppShell({ children }: AppShellProps) {
         </div>
 
         <MobileNav
-          currentView={currentView}
-          onViewChange={(view) => {
-            setCurrentView(view);
-            setMobileMenuOpen(false);
-          }}
           onCompose={() => {}}
           onMoreClick={() => setMobileMenuOpen(true)}
         />

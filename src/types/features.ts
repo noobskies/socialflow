@@ -100,6 +100,7 @@ export interface Integration {
   id: string;
   name: string;
   description: string;
+  category: string;
   icon: string;
   connected: boolean;
   features: string[];
@@ -166,6 +167,7 @@ export interface Folder {
 
 export interface ListeningResult {
   id: string;
+  keyword: string;
   platform: Platform;
   content: string;
   author: string;

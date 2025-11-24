@@ -9,7 +9,7 @@ export const IntegrationPlaceholder: React.FC = () => {
         Request Integration
       </h3>
       <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">
-        Don't see your tool?
+        Don&apos;t see your tool?
       </p>
     </div>
   );

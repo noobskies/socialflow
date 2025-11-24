@@ -4,7 +4,7 @@ import { TeamMember } from "@/types";
 
 interface TeamMemberRowProps {
   member: TeamMember;
-  onUpdateRole: (memberId: string, role: string) => void;
+  onUpdateRole: (memberId: string, role: TeamMember["role"]) => void;
   onDelete: (memberId: string) => void;
 }
 
@@ -35,7 +35,9 @@ export const TeamMemberRow: React.FC<TeamMemberRowProps> = ({
       <td className="py-4">
         <select
           value={member.role}
-          onChange={(e) => onUpdateRole(member.id, e.target.value)}
+          onChange={(e) =>
+            onUpdateRole(member.id, e.target.value as TeamMember["role"])
+          }
           className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs rounded-lg px-2 py-1 font-medium outline-none focus:ring-2 focus:ring-indigo-500"
         >
           <option value="admin">Admin</option>
