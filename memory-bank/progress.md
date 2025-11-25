@@ -679,6 +679,56 @@ NEXT_PUBLIC_APP_URL=https://socialflow-tau.vercel.app
 - Phase 9D-6: YouTube OAuth (60-90 min)
 - Phase 9D-7: Pinterest OAuth (60-90 min)
 
+### Phase 9D-5: TikTok OAuth Implementation - COMPLETE ✅
+
+**Status**: TikTok OAuth backend fully operational (November 25, 2025, Evening)
+
+**Completed Work**:
+- ✅ TikTokOAuthService implemented (extends BaseOAuthService)
+- ✅ 4 API routes created (authorize, callback, refresh, disconnect)
+- ✅ PKCE required (code verifier/challenge)
+- ✅ 24-hour access tokens with 1-year refresh tokens
+- ✅ Token encryption and state management
+- ✅ Environment variables configured
+- ✅ Zero TypeScript errors, production-ready
+
+**Files Created (5 files)**:
+```
+src/lib/oauth/
+└── tiktok-oauth-service.ts      # TikTok implementation (~140 lines)
+
+src/app/api/oauth/tiktok/
+├── authorize/route.ts            # Initiate OAuth
+├── callback/route.ts             # Handle callback
+├── refresh/route.ts              # Refresh tokens
+└── disconnect/route.ts           # Disconnect account
+
+.env                               # Added TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET
+```
+
+**Key Implementation Details**:
+- **Shortest Token Lifetime**: 24-hour access tokens (most frequent refresh needed)
+- **Longest Refresh Tokens**: 1-year refresh tokens (longest of all 7 platforms)
+- **PKCE Required**: Mandatory code verifier/challenge for authorization
+- **Scopes**: `user.info.basic`, `video.list`, `video.upload`
+- **Content Posting API**: Requires TikTok approval for video.upload scope
+- **Rate Limits**: 100 API calls/min per user, 1000 calls/day per user
+
+**Configuration**:
+```bash
+TIKTOK_CLIENT_KEY=sbawkiy7trh2l9ozzg
+TIKTOK_CLIENT_SECRET=<configured>
+NEXT_PUBLIC_APP_URL=https://socialflow-tau.vercel.app
+```
+
+**Timeline**: ~60-75 minutes
+
+**Progress**: 5 of 7 platforms complete (71%)
+
+**Remaining Platforms** (2 platforms, ~90-180 minutes):
+- Phase 9D-6: YouTube OAuth (60-90 min)
+- Phase 9D-7: Pinterest OAuth (60-90 min)
+
 ### Phase 9D: OAuth Integration Documentation - COMPLETE ✅
 
 **Status**: All 7 platform OAuth documentation completed (November 25, 2025, Afternoon)
