@@ -312,6 +312,85 @@ Initial "Unknown argument 'token'" error was caused by Next.js dev server cachin
 
 **Key Success**: Better Auth + Prisma 7 + custom output path all working correctly together
 
+### Phase 9B-Extended: Route Restructuring & Best Practices - COMPLETE ✅
+
+**Status**: Successfully completed (November 24, 2025 Evening)
+
+**What Was Done**:
+Restructured the entire application routing to follow Next.js 16.0.4 best practices with proper route groups and authentication protection.
+
+**Route Structure Implemented**:
+```
+src/app/
+├── layout.tsx                 # Minimal root layout (no AppShell)
+├── (auth)/                    # Public route group
+│   ├── layout.tsx            # Clean layout (no sidebar)
+│   ├── page.tsx              # Landing/welcome page at /
+│   ├── login/page.tsx        # Login with redirect parameter
+│   └── register/page.tsx     # Registration page
+└── (app)/                     # Protected route group
+    ├── layout.tsx            # Auth check + AppShell
+    ├── dashboard/page.tsx    # /dashboard
+    ├── composer/page.tsx     # /composer
+    ├── calendar/page.tsx     # /calendar
+    ├── library/page.tsx      # /library
+    ├── analytics/page.tsx    # /analytics
+    ├── inbox/page.tsx        # /inbox
+    ├── links/page.tsx        # /links
+    ├── automations/page.tsx  # /automations
+    └── settings/page.tsx     # /settings
+```
+
+**Files Created (4 files)**:
+- `src/app/(auth)/layout.tsx` - Clean public layout
+- `src/app/(auth)/page.tsx` - Landing page with redirect logic
+- `src/app/(app)/layout.tsx` - Protected layout with auth check
+- Updated login/register with redirect parameter support
+
+**Files Moved (9 pages)**:
+- Moved all app pages from `(content)`, `(insights)`, `(tools)` to `(app)/`
+- Moved login/register from `/auth` to `(auth)/`
+
+**Files Removed**:
+- `src/app/(content)`, `(insights)`, `(tools)` - Old route groups
+- `src/app/auth` - Old auth location
+- `src/app/settings` - Moved to (app)
+- `src/app/page.tsx` - Moved to (app)/dashboard
+
+**Authentication Flow Achieved**:
+1. **Landing Page (`/`)** - Redirects authenticated users to `/dashboard`
+2. **Login/Register** - Clean pages without sidebar
+3. **Protected Routes** - All app pages require authentication
+4. **Redirect Flow** - `/login?redirect=/calendar` returns user after login
+5. **Loading States** - Smooth auth checks with loading spinner
+
+**Testing Verified**:
+- ✅ Landing page loads and redirects authenticated users
+- ✅ Login/register pages have clean design (no sidebar)
+- ✅ User registration creates account and redirects to /dashboard
+- ✅ Protected routes redirect unauthenticated users to /login
+- ✅ Redirect parameter preserves intended destination
+- ✅ AppShell with sidebar only shows on protected routes
+
+**Best Practices Compliance**:
+Following Next.js 16.0.4 official documentation:
+- ✅ Route groups for organization without URL impact
+- ✅ Private folders (`_components`) for non-routable files
+- ✅ Single root layout (correct for shared html/body)
+- ✅ Group-specific layouts for different UI sections
+- ✅ Proper file naming conventions
+- ✅ Clean, semantic URL structure
+- ✅ Safe colocation of components
+
+**Timeline**: ~2 hours (planning + implementation + testing)
+
+**Key Learnings**:
+1. **Route Groups**: Perfect for public/protected separation without URL pollution
+2. **Two-Layout Pattern**: Single root + group layouts is the recommended approach
+3. **Authentication at Layout Level**: Enforces protection for entire route group
+4. **Redirect Parameters**: Enable seamless "return to intended page" UX
+5. **Next.js Best Practices**: Following official patterns prevents issues and improves maintainability
+
 ### Remaining Backend Phases
 
 **Phase 9C**: Core API Routes (4-5 hours)

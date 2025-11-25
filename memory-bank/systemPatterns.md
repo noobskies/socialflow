@@ -117,23 +117,27 @@ export default function AppShell({ children }: { children: ReactNode }) {
 }
 ```
 
-**Route Structure**:
+**Route Structure** (Updated Phase 9B - Authentication):
 
 ```
 src/app/
-├── layout.tsx                    # Server Component - wraps with AppShell
-├── page.tsx                      # Dashboard (/) - uses useAppContext()
-├── (content)/                    # Route group
-│   ├── composer/page.tsx         # /composer
-│   ├── calendar/page.tsx         # /calendar
-│   └── library/page.tsx          # /library
-├── (insights)/                   # Route group
-│   ├── analytics/page.tsx        # /analytics
-│   └── inbox/page.tsx            # /inbox
-├── (tools)/                      # Route group
-│   ├── links/page.tsx            # /links
-│   └── automations/page.tsx      # /automations
-└── settings/page.tsx             # /settings
+├── layout.tsx                    # Minimal root layout (html/body only)
+├── (auth)/                       # Public route group
+│   ├── layout.tsx               # Clean layout (no sidebar)
+│   ├── page.tsx                 # Landing page at /
+│   ├── login/page.tsx           # /login
+│   └── register/page.tsx        # /register
+└── (app)/                        # Protected route group
+    ├── layout.tsx               # Auth check + AppShell
+    ├── dashboard/page.tsx       # /dashboard
+    ├── composer/page.tsx        # /composer
+    ├── calendar/page.tsx        # /calendar
+    ├── library/page.tsx         # /library
+    ├── analytics/page.tsx       # /analytics
+    ├── inbox/page.tsx           # /inbox
+    ├── links/page.tsx           # /links
+    ├── automations/page.tsx     # /automations
+    └── settings/page.tsx        # /settings
 ```
 
 **Navigation Flow**:
@@ -141,9 +145,123 @@ src/app/
 - Each page.tsx is a Client Component (`"use client"`)
 - Uses `useAppContext()` hook to access global state
 - Sidebar/MobileNav use Next.js `<Link>` components ✅
-- URLs work properly: /, /composer, /calendar, etc.
+- URLs work properly: /, /login, /dashboard, /composer, etc.
 - Browser navigation (back/forward) works correctly
 - Route groups organize features without affecting URLs
+- Authentication checked at layout level for entire route group
+
+### 1a. Authentication Route Group Pattern (Phase 9B) ✅
+
+**Design Decision**: Two-layout system with route groups for public/protected pages
+**Why**: Clean separation of concerns, follows Next.js 16.0.4 best practices, authentication enforced at layout level
+**Status**: Complete and production-ready
+
+**Architecture Overview**:
+
+This pattern implements a professional authentication system using Next.js route groups to separate public and protected areas of the application.
+
+**Root Layout (Minimal)**:
+```typescript
+// src/app/layout.tsx - Minimal wrapper
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en">
+      <body className={inter.className}>{children}</body>
+    </html>
+  );
+}
+```
+
+**Public Routes** - (auth) Group:
+```typescript
+// src/app/(auth)/layout.tsx - Clean public layout
+export default function AuthLayout({ children }: { children: ReactNode }) {
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      {children}
+    </div>
+  );
+}
+
+// src/app/(auth)/page.tsx - Landing page
+export default function LandingPage() {
+  const { isAuthenticated } = useAuth();
+  
+  if (isAuthenticated) {
+    redirect('/dashboard'); // Authenticated users go to dashboard
+  }
+  
+  return <div>{/* Welcome content with login/register links */}</div>;
+}
+
+// src/app/(auth)/login/page.tsx - Login page
+export default function LoginPage() {
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get('redirect') || '/dashboard';
+  
+  // After successful login:
+  router.push(redirectUrl); // Returns user to intended page
+}
+```
+
+**Protected Routes** - (app) Group:
+```typescript
+// src/app/(app)/layout.tsx - Protected layout with auth check
+"use client";
+
+export default function AppLayout({ children }: { children: ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      const redirectUrl = encodeURIComponent(pathname);
+      router.push(`/login?redirect=${redirectUrl}`);
+    }
+  }, [isAuthenticated, isLoading, pathname, router]);
+  
+  if (isLoading) {
+    return <LoadingSpinner />; // Show loading during auth check
+  }
+  
+  if (!isAuthenticated) {
+    return null; // Will redirect
+  }
+  
+  return <AppShell>{children}</AppShell>; // Render with sidebar
+}
+```
+
+**URL Structure**:
+- Public: `/`, `/login`, `/register`
+- Protected: `/dashboard`, `/composer`, `/calendar`, etc.
+- All URLs clean, no prefixes (route groups omitted from URL)
+
+**Authentication Flow**:
+1. User visits `/composer` without auth
+2. `(app)/layout.tsx` detects no authentication
+3. Redirects to `/login?redirect=%2Fcomposer`
+4. User logs in
+5. Redirected back to `/composer`
+6. Success! User sees composer with sidebar
+
+**Key Benefits**:
+- ✅ Authentication enforced at layout level (can't bypass)
+- ✅ Clean URLs without `/app` or `/auth` prefixes
+- ✅ Redirect parameters preserve intended destination
+- ✅ Loading states for smooth UX
+- ✅ Sidebar only shown on protected routes
+- ✅ Follows Next.js 16.0.4 documented best practices
+- ✅ Single root layout (correct for shared html/body)
+- ✅ Zero code duplication
+
+**Testing Verified**:
+- ✅ Landing page redirects authenticated users to /dashboard
+- ✅ Login/register pages have clean design (no sidebar)
+- ✅ Protected routes redirect unauthenticated users to /login
+- ✅ Redirect parameter works correctly
+- ✅ All navigation flows function properly
 
 ### 2. State Management Pattern
 
