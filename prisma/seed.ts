@@ -18,8 +18,15 @@ async function main() {
     create: {
       email: "test@socialflow.ai",
       name: "Test User",
-      passwordHash: hashedPassword,
+      emailVerified: false,
       planTier: "PRO",
+      authAccounts: {
+        create: {
+          provider: "credential",
+          providerAccountId: "test@socialflow.ai",
+          password: hashedPassword,
+        },
+      },
     },
   });
 

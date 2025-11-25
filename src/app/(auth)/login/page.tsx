@@ -29,6 +29,7 @@ export default function LoginPage() {
       setError(signInError.message || "Invalid credentials");
       setLoading(false);
     } else {
+      // @ts-expect-error - Dynamic redirect URL from query params can't be typed at compile time
       router.push(redirectUrl);
       router.refresh();
     }
