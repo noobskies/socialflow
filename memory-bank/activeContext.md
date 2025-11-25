@@ -373,7 +373,7 @@ Each platform guide includes:
 
 ### Phase 9D Implementation: OAuth Integrations - IN PROGRESS ⏳
 
-**Status**: 2 of 7 platforms complete (November 25, 2025, Afternoon)
+**Status**: 3 of 7 platforms complete (November 25, 2025, Evening)
 
 **Completed Platforms**:
 
@@ -392,16 +392,34 @@ Each platform guide includes:
    - ✅ 60-day token handling (no refresh tokens)
    - **Timeline**: ~60-90 minutes
 
+3. **Instagram OAuth - COMPLETE ✅**
+   - ✅ InstagramOAuthService implemented (extends BaseOAuthService)
+   - ✅ 4 API routes created (authorize, callback, refresh, disconnect)
+   - ✅ Instagram Business Login API integration
+   - ✅ Long-lived token exchange (60 days)
+   - ✅ Production-only testing approach (localhost not supported)
+   - ✅ Environment variables configured
+   - **Timeline**: ~60 minutes
+
+**Key Implementation Notes (Instagram)**:
+- **API Choice**: Using Instagram Business Login (not Facebook Graph API)
+  - Simpler setup, no Facebook Page requirement
+  - Direct Instagram OAuth flow
+  - Scopes: `instagram_business_basic`, `instagram_business_content_publish`, etc.
+- **Localhost Limitation**: Instagram Business Login API doesn't allow localhost URLs
+  - Testing on production deployment (Vercel) only
+  - Alternative: Use ngrok for local testing or Facebook Graph API
+- **Token Lifecycle**: Short-lived (1 hour) → Long-lived (60 days) exchange
+
 **Infrastructure Complete**: All shared OAuth components ready for remaining platforms
 
-**Remaining Platforms** (5 platforms, ~4-5 hours):
-- Phase 9D-3: Instagram OAuth (60-90 min)
+**Remaining Platforms** (4 platforms, ~3-4 hours):
 - Phase 9D-4: Facebook OAuth (60-90 min)
 - Phase 9D-5: TikTok OAuth (60-90 min)
 - Phase 9D-6: YouTube OAuth (60-90 min)
 - Phase 9D-7: Pinterest OAuth (60-90 min)
 
-**Next Steps**: Continue with Instagram OAuth implementation
+**Next Steps**: Continue with Facebook OAuth implementation
 
 ## Next Steps
 
