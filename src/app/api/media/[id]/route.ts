@@ -6,15 +6,17 @@ import { z } from "zod";
 // GET /api/media/[id] - Get single media asset
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { user, error } = await requireAuth();
   if (error) return error;
 
+  const { id } = await params;
+
   try {
     const mediaAsset = await prisma.mediaAsset.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: user!.id,
       },
       include: {
@@ -58,16 +60,18 @@ const updateMediaSchema = z.object({
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { user, error } = await requireAuth();
   if (error) return error;
+
+  const { id } = await params;
 
   try {
     // Verify media asset belongs to user
     const existingMedia = await prisma.mediaAsset.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: user!.id,
       },
     });
@@ -110,7 +114,7 @@ export async function PATCH(
 
     // Update media asset
     const updatedMedia = await prisma.mediaAsset.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(data.name !== undefined && { name: data.name }),
         ...(data.folderId !== undefined && { folderId: data.folderId }),
@@ -136,16 +140,18 @@ export async function PATCH(
 // DELETE /api/media/[id] - Delete media asset
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { user, error } = await requireAuth();
   if (error) return error;
+
+  const { id } = await params;
 
   try {
     // Verify media asset belongs to user
     const mediaAsset = await prisma.mediaAsset.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: user!.id,
       },
       include: {
@@ -173,7 +179,7 @@ export async function DELETE(
 
     // Delete media asset
     await prisma.mediaAsset.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({

@@ -5,15 +5,17 @@ import { prisma } from "@/lib/prisma";
 // GET /api/posts/[id] - Get single post
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { user, error } = await requireAuth();
   if (error) return error;
 
+  const { id } = await params;
+
   try {
     const post = await prisma.post.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: user!.id,
       },
       include: {
@@ -46,10 +48,12 @@ export async function GET(
 // PATCH /api/posts/[id] - Update post
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { user, error } = await requireAuth();
   if (error) return error;
+
+  const { id } = await params;
 
   try {
     const body = await request.json();
@@ -57,7 +61,7 @@ export async function PATCH(
     // Verify ownership
     const existingPost = await prisma.post.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: user!.id,
       },
     });
@@ -67,7 +71,7 @@ export async function PATCH(
     }
 
     const post = await prisma.post.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         content: body.content,
         scheduledDate: body.scheduledDate,
@@ -107,16 +111,18 @@ export async function PATCH(
 // DELETE /api/posts/[id] - Delete post
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { user, error } = await requireAuth();
   if (error) return error;
+
+  const { id } = await params;
 
   try {
     // Verify ownership
     const existingPost = await prisma.post.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: user!.id,
       },
     });
@@ -126,7 +132,7 @@ export async function DELETE(
     }
 
     await prisma.post.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: "Post deleted successfully" });

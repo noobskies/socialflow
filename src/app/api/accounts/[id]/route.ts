@@ -6,15 +6,17 @@ import { z } from "zod";
 // GET /api/accounts/[id] - Get single account details
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { user, error } = await requireAuth();
   if (error) return error;
 
+  const { id } = await params;
+
   try {
     const account = await prisma.socialAccount.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: user!.id,
       },
       include: {
@@ -65,16 +67,18 @@ const updateAccountSchema = z.object({
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { user, error } = await requireAuth();
   if (error) return error;
+
+  const { id } = await params;
 
   try {
     // Verify account belongs to user
     const existingAccount = await prisma.socialAccount.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: user!.id,
       },
     });
@@ -97,7 +101,7 @@ export async function PATCH(
 
     // Update account
     const updatedAccount = await prisma.socialAccount.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(data.displayName !== undefined && {
           displayName: data.displayName,
@@ -138,16 +142,18 @@ export async function PATCH(
 // DELETE /api/accounts/[id] - Disconnect account
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { user, error } = await requireAuth();
   if (error) return error;
+
+  const { id } = await params;
 
   try {
     // Verify account belongs to user
     const account = await prisma.socialAccount.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: user!.id,
       },
       include: {
@@ -181,7 +187,7 @@ export async function DELETE(
 
     // Delete account (cascade will handle related records)
     await prisma.socialAccount.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({
