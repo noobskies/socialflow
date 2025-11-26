@@ -27,18 +27,16 @@ export async function GET(request: Request) {
     const account = await service.handleCallback(code, state);
 
     return NextResponse.redirect(
-      `${baseUrl}/settings/accounts?success=youtube&account=${account.id}`
+      `${baseUrl}/oauth/result?success=true&platform=youtube&account=${account.id}`
     );
   } catch (error) {
     console.error("YouTube OAuth callback failed:", error);
 
     let errorCode = "oauth_failed";
-    let errorMessage = "Failed to connect YouTube account";
 
     if (error instanceof Error) {
       if (error.message.includes("No YouTube channel found")) {
         errorCode = "no_channel";
-        errorMessage = "Please create a YouTube channel first";
       } else if (error.message.includes("Invalid or expired state")) {
         errorCode = "invalid_state";
       } else if (error.message.includes("token")) {
@@ -47,7 +45,7 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.redirect(
-      `${baseUrl}/settings/accounts?error=${errorCode}&message=${encodeURIComponent(errorMessage)}`
+      `${baseUrl}/oauth/result?success=false&platform=youtube&error=${errorCode}`
     );
   }
 }

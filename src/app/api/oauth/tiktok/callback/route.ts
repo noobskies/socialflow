@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     const account = await service.handleCallback(code, state);
 
     return NextResponse.redirect(
-      `${baseUrl}/settings/accounts?success=tiktok&account=${account.id}`
+      `${baseUrl}/oauth/result?success=true&platform=tiktok&account=${account.id}`
     );
   } catch (error) {
     console.error("TikTok OAuth callback failed:", error);
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.redirect(
-      `${baseUrl}/settings/accounts?error=${errorCode}`
+      `${baseUrl}/oauth/result?success=false&platform=tiktok&error=${errorCode}`
     );
   }
 }

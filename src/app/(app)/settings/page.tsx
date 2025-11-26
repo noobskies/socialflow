@@ -12,6 +12,7 @@ export default function SettingsPage() {
     onOpenUpgrade,
     accounts,
     onToggleAccount,
+    refetchAccounts,
   } = useAppContext();
 
   return (
@@ -23,6 +24,7 @@ export default function SettingsPage() {
       onOpenUpgrade={onOpenUpgrade}
       accounts={accounts}
       onToggleConnection={onToggleAccount}
+      refetchAccounts={refetchAccounts}
     />
   );
 }

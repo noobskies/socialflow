@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     const account = await service.handleCallback(code, state);
 
     return NextResponse.redirect(
-      `${baseUrl}/settings/accounts?success=linkedin&account=${account.id}`
+      `${baseUrl}/oauth/result?success=true&platform=linkedin&account=${account.id}`
     );
   } catch (error) {
     console.error("LinkedIn OAuth callback failed:", error);
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.redirect(
-      `${baseUrl}/settings/accounts?error=${errorCode}`
+      `${baseUrl}/oauth/result?success=false&platform=linkedin&error=${errorCode}`
     );
   }
 }

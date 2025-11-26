@@ -20,6 +20,7 @@ interface SettingsProps {
   onOpenUpgrade: () => void;
   accounts: SocialAccount[];
   onToggleConnection: (id: string) => void;
+  refetchAccounts: () => Promise<void>;
 }
 
 export const Settings: React.FC<SettingsProps> = ({
@@ -30,6 +31,7 @@ export const Settings: React.FC<SettingsProps> = ({
   onOpenUpgrade,
   accounts,
   onToggleConnection,
+  refetchAccounts,
 }) => {
   const settings = useSettings(MOCK_TEAM);
 
@@ -63,6 +65,7 @@ export const Settings: React.FC<SettingsProps> = ({
             onToggleConnection={handleConnectionToggle}
             connectingId={settings.connectingId}
             showToast={showToast}
+            refetchAccounts={refetchAccounts}
           />
         );
 

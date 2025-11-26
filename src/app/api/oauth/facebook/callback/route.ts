@@ -28,18 +28,16 @@ export async function GET(request: Request) {
     const account = await service.handleCallback(code, state);
 
     return NextResponse.redirect(
-      `${baseUrl}/settings/accounts?success=facebook&account=${account.id}`
+      `${baseUrl}/oauth/result?success=true&platform=facebook&account=${account.id}`
     );
   } catch (error) {
     console.error("Facebook OAuth callback failed:", error);
 
     let errorCode = "oauth_failed";
-    let errorMessage = "Failed to connect Facebook account";
 
     if (error instanceof Error) {
       if (error.message.includes("No Facebook Pages found")) {
         errorCode = "no_pages";
-        errorMessage = "Please create or get access to a Facebook Page first";
       } else if (error.message.includes("Invalid or expired state")) {
         errorCode = "invalid_state";
       } else if (error.message.includes("token")) {
@@ -48,7 +46,7 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.redirect(
-      `${baseUrl}/settings/accounts?error=${errorCode}&message=${encodeURIComponent(errorMessage)}`
+      `${baseUrl}/oauth/result?success=false&platform=facebook&error=${errorCode}`
     );
   }
 }

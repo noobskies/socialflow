@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { SocialAccount, ToastType, Platform } from "@/types";
-import { Check, ExternalLink } from "lucide-react";
+import { Check, ExternalLink, Loader2 } from "lucide-react";
 
 interface AccountsTabProps {
   accounts: SocialAccount[];
   onToggleConnection: (id: string, isConnected: boolean) => void;
   connectingId: string | null;
   showToast: (message: string, type: ToastType) => void;
+  refetchAccounts: () => Promise<void>;
 }
 
 interface PlatformConfig {
@@ -74,10 +75,69 @@ export const AccountsTab: React.FC<AccountsTabProps> = ({
   onToggleConnection,
   connectingId,
   showToast,
+  refetchAccounts,
 }) => {
+  const [connectingPlatform, setConnectingPlatform] = useState<Platform | null>(
+    null
+  );
+  const [oauthPopup, setOauthPopup] = useState<Window | null>(null);
+
+  // Listen for OAuth result messages from popup
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      // Verify message origin
+      if (event.origin !== window.location.origin) return;
+
+      // Check if it's an OAuth result message
+      if (event.data.type === "oauth-result") {
+        const { success, platform, error } = event.data;
+
+        if (success) {
+          // Refresh accounts list to show the newly connected account
+          await refetchAccounts();
+          showToast(`${platform} account connected successfully!`, "success");
+        } else {
+          showToast(
+            `Failed to connect ${platform} account: ${error || "Unknown error"}`,
+            "error"
+          );
+        }
+
+        // Close popup and reset state
+        if (oauthPopup && !oauthPopup.closed) {
+          oauthPopup.close();
+        }
+        setOauthPopup(null);
+        setConnectingPlatform(null);
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [oauthPopup, refetchAccounts, showToast]);
+
   const handleConnect = (platform: Platform) => {
-    // Redirect to OAuth authorization
-    window.location.href = `/api/oauth/${platform}/authorize`;
+    setConnectingPlatform(platform);
+
+    // Open OAuth in popup window
+    const width = 600;
+    const height = 700;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+
+    const popup = window.open(
+      `/api/oauth/${platform}/authorize`,
+      "oauth-popup",
+      `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,location=no`
+    );
+
+    setOauthPopup(popup);
+
+    // Check if popup was blocked
+    if (!popup) {
+      showToast("Popup blocked! Please allow popups for this site.", "error");
+      setConnectingPlatform(null);
+    }
   };
 
   const handleDisconnect = async (accountId: string) => {
@@ -205,10 +265,20 @@ export const AccountsTab: React.FC<AccountsTabProps> = ({
                   ) : (
                     <button
                       onClick={() => handleConnect(platform.id)}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 shadow-sm transition-colors"
+                      disabled={connectingPlatform === platform.id}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 shadow-sm transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                      <ExternalLink className="w-4 h-4" />
-                      Connect
+                      {connectingPlatform === platform.id ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Connecting...
+                        </>
+                      ) : (
+                        <>
+                          <ExternalLink className="w-4 h-4" />
+                          Connect
+                        </>
+                      )}
                     </button>
                   )}
                 </div>

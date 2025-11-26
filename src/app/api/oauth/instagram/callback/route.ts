@@ -28,26 +28,23 @@ export async function GET(request: Request) {
     const account = await service.handleCallback(code, state);
 
     return NextResponse.redirect(
-      `${baseUrl}/settings/accounts?success=instagram&account=${account.id}`
+      `${baseUrl}/oauth/result?success=true&platform=instagram&account=${account.id}`
     );
   } catch (error) {
     console.error("Instagram OAuth callback failed:", error);
 
     let errorCode = "oauth_failed";
-    let errorMessage = "Failed to connect Instagram account";
 
     if (error instanceof Error) {
       if (error.message.includes("Invalid or expired state")) {
         errorCode = "invalid_state";
-        errorMessage = "OAuth session expired. Please try again.";
       } else if (error.message.includes("token")) {
         errorCode = "token_exchange_failed";
-        errorMessage = "Failed to exchange authorization code for token.";
       }
     }
 
     return NextResponse.redirect(
-      `${baseUrl}/settings/accounts?error=${errorCode}&message=${encodeURIComponent(errorMessage)}`
+      `${baseUrl}/oauth/result?success=false&platform=instagram&error=${errorCode}`
     );
   }
 }
