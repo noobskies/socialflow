@@ -860,6 +860,154 @@ CDN (Static Assets)
 - Built-in environment variables
 - Preview deployments for PRs
 
+## Backend API Patterns (Phase 9)
+
+### Backend API Route Pattern (Established in Phase 9C)
+
+**Standard CRUD API Structure**:
+
+```typescript
+// src/app/api/[resource]/route.ts - List & Create
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-helpers';
+import { prisma } from '@/lib/prisma';
+import { z } from 'zod';
+
+// GET - List resources
+export async function GET(request: NextRequest) {
+  const { user, error } = await requireAuth();
+  if (error) return error;
+
+  const { searchParams } = new URL(request.url);
+  const limit = parseInt(searchParams.get('limit') || '50');
+
+  const items = await prisma.resource.findMany({
+    where: { userId: user!.id }, // Always filter by userId
+    take: limit,
+    orderBy: { createdAt: 'desc' },
+  });
+
+  return NextResponse.json({ items, count: items.length });
+}
+
+// POST - Create resource
+export async function POST(request: NextRequest) {
+  const { user, error } = await requireAuth();
+  if (error) return error;
+
+  const body = await request.json();
+  
+  // Validate with Zod
+  const schema = z.object({
+    name: z.string().min(1),
+    // ... other fields
+  });
+  
+  const validated = schema.parse(body);
+
+  const item = await prisma.resource.create({
+    data: {
+      ...validated,
+      userId: user!.id,
+    },
+  });
+
+  return NextResponse.json({ item }, { status: 201 });
+}
+```
+
+**Key Principles**:
+1. **Authentication First**: Always call `requireAuth()` before any logic
+2. **User Isolation**: Always filter by `userId` in WHERE clauses
+3. **Validation**: Use Zod schemas for input validation
+4. **Error Handling**: Try/catch with user-friendly messages
+5. **Consistent Responses**: Return `{ data, message }` format
+
+### OAuth Service Pattern (Established in Phase 9D)
+
+**BaseOAuthService Abstract Class**:
+
+```typescript
+// All 7 platforms extend this base class
+abstract class BaseOAuthService {
+  protected abstract platform: Platform;
+  protected abstract authUrl: string;
+  protected abstract tokenUrl: string;
+  protected abstract scopes: string[];
+
+  // Common methods all platforms inherit
+  async generateAuthUrl(userId: string): Promise<string>
+  async handleCallback(code: string, state: string): Promise<SocialAccount>
+  async refreshToken(accountId: string): Promise<void>
+  async disconnect(accountId: string): Promise<void>
+}
+
+// Platform implementation
+class TwitterOAuthService extends BaseOAuthService {
+  protected platform = Platform.TWITTER;
+  protected authUrl = 'https://twitter.com/i/oauth2/authorize';
+  protected tokenUrl = 'https://api.twitter.com/2/oauth2/token';
+  protected scopes = ['tweet.read', 'tweet.write', 'users.read'];
+
+  // Can override base methods or add platform-specific ones
+}
+```
+
+**OAuth API Routes Pattern**:
+
+```typescript
+// Four consistent routes for each platform:
+// 1. /api/oauth/[platform]/authorize - Start OAuth flow
+// 2. /api/oauth/[platform]/callback - Handle OAuth callback
+// 3. /api/oauth/[platform]/refresh - Refresh access token
+// 4. /api/oauth/[platform]/disconnect - Disconnect account
+
+// Security patterns:
+// - PKCE for platforms that support it
+// - State parameter with 10-minute expiration
+// - Token encryption (AES-256-GCM) before database storage
+```
+
+### File Upload Pattern (Documented in Phase 9E)
+
+**Server-Side Processing with Sharp**:
+
+```typescript
+// 1. Receive file
+const file = formData.get('file') as File;
+
+// 2. Validate
+if (file.size > MAX_SIZE) return error;
+if (!ALLOWED_TYPES.includes(file.type)) return error;
+
+// 3. Process images (videos pass through)
+if (isImage) {
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const { optimized, thumbnail } = await processImage(buffer);
+  
+  // 4. Upload both to Vercel Blob
+  const mainBlob = await put('optimized.jpg', optimized);
+  const thumbBlob = await put('thumb.jpg', thumbnail);
+  
+  // 5. Store both URLs
+  await prisma.mediaAsset.create({
+    data: {
+      url: mainBlob.url,
+      thumbnailUrl: thumbBlob.url,
+      userId: user!.id,
+    },
+  });
+}
+```
+
+**Key Features**:
+- Server-side processing (not client-side)
+- Parallel image optimization + thumbnail generation
+- Dual file storage for images
+- Progress tracking via XMLHttpRequest
+
+---
+
 ## File Organization
 
 ### Current File Structure

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the technical stack, development environment, and tooling for SocialFlow AI's frontend application. The architecture is production-ready and now running on Next.js 16.
+This document describes the technical stack, development environment, and tooling for SocialFlow AI. The application is production-ready with a complete frontend on Next.js 16 and partially implemented backend.
 
 ---
 
@@ -10,100 +10,83 @@ This document describes the technical stack, development environment, and toolin
 
 ### Frontend Framework
 
-**React 19.2.0** - Latest React with concurrent features, Server Components support (not used yet), improved hydration
+**React 19.2.0** - Latest React with concurrent features, Server Components support
 
-**Why**: Modern, large ecosystem, excellent TypeScript support, performance improvements, team familiarity
+**Next.js 16.0.3** - React framework with Turbopack, App Router, automatic optimizations
 
-### Build Tool
+**TypeScript 5.8.2** - Strict type checking enabled, 100% type safety
 
-**Next.js 16.0.3** - React framework with Turbopack, automatic optimizations, built-in routing
+**Why**: Modern, performant, excellent TypeScript support, industry standard
 
-**Why**: Industry standard, excellent DX, automatic code splitting, built-in optimizations, Vercel deployment
+---
 
-### Language
+## Full Stack Architecture
 
-**TypeScript 5.8.2** - Strict type checking FULLY enabled, full IDE support, 100% type safety
+### Frontend
 
-**Why**: Prevents bugs, better refactoring, excellent tooling, industry standard, team collaboration
+**UI & Styling**:
+- Tailwind CSS v4.1.17 (via npm + PostCSS)
+- Lucide React v0.554.0 (1000+ icons)
+- Recharts 3.4.1 (charts and analytics)
 
-**Config**: `strict: true` enabled in tsconfig.json - all strict options active
-- `jsx: "preserve"` for Next.js (proper JSX handling)
-- `.next/types/**/*.ts` included for typed routes
-- Next.js TypeScript plugin configured
+**State Management**:
+- React Context API (AppContext)
+- Custom hooks for feature logic
 
-**Type System Organization**: 4 modules for clean type organization
-- `src/types/domain.ts` - Core domain types (Post, Draft, User, Platform, etc.)
-- `src/types/ui.ts` - UI-specific types (ViewState, ToastType, etc.)
-- `src/types/features.ts` - Feature-specific types (Workflow, Integration, etc.)
-- `src/types/ai.ts` - AI service response types (WorkflowSuggestion, TrendingTopic, DraftAnalysis, Comment)
-- `src/global.d.ts` - Global type declarations (Window/NodeJS interface extensions)
+### Backend (Phase 9)
 
-**Type Safety Achievement** (Phase 7b):
-- Zero `any` types in codebase (18 eliminated across 10 files)
-- Comprehensive AI service type definitions
-- Proper Window and NodeJS.ProcessEnv extensions
-- 100% type coverage with zero ESLint errors
+**Database**:
+- **PostgreSQL** - Production database (Vercel Postgres)
+- **Prisma 7.0.0** - Type-safe ORM with migrations
+- **Prisma Accelerate** - Connection pooling and caching
 
-### UI & Styling
+**Authentication**:
+- **Better Auth 1.2.7** - Modern auth library
+- **Prisma Adapter** - Database integration
+- **bcryptjs 2.4.3** - Password hashing
 
-**Tailwind CSS v4.1.17** - Utility-first CSS framework via npm + PostCSS
+**File Storage** (Phase 9E - Documented):
+- **@vercel/blob** - Vercel Blob Storage SDK
+- **sharp** - High-performance image processing
 
-**Features**: Responsive design utilities, dark mode via `.dark` class, custom design tokens
+**AI Integration**:
+- **Google Gemini 1.30.0** (`@google/genai`)
+- Free tier with generous limits
 
-**Config**: `tailwind.config.cjs` with `@import "tailwindcss"` in globals.css (v4 syntax)
+**Real-time** (Phase 9G - Planned):
+- **Socket.io** - WebSocket server
+- Alternative: Pusher (managed service)
 
-**Design Tokens**:
-- Primary: Indigo (600/500)
-- Success: Emerald (500)
-- Warning: Amber (500)
-- Error: Rose (500)
-- Neutral: Slate (50-950)
-
-**Icons**: Lucide React (v0.554.0) - 1000+ icons, tree-shakeable, Tailwind-compatible
-
-### Charts
-
-**Recharts 3.4.1** - Declarative React chart library, responsive, clean design
-
-**Usage**: Bar charts for engagement analytics (Dashboard), line charts planned
-
-### AI Integration
-
-**Google Gemini 1.30.0** (`@google/genai`)
-
-**Why**: Free tier with generous limits, fast responses, multimodal support, cost-effective
-
-**Config**: API key in `.env.local` (gitignored), accessed via `process.env.NEXT_PUBLIC_GEMINI_API_KEY`
+---
 
 ## Development Environment
 
 ### Package Manager
 
-**npm** - Lock file: `package-lock.json` (committed)
+**npm** - Lock file: `package-lock.json`
 
 ### Runtime
 
-**Node.js 18+** - LTS version recommended
+**Node.js 18+** - LTS version
 
 ### Workflow
 
 ```bash
 npm install          # First time setup
-npm run dev          # Dev server (localhost:3000, or 3001 if 3000 in use)
+npm run dev          # Dev server (localhost:3000)
 npm run build        # Production build
 npm start            # Preview production build
+npm run lint         # Check code quality
+npm run format       # Format code
 ```
 
-### Environment Variables
+---
 
-**Current** (`.env.local`):
+## Environment Variables
 
-```bash
-# AI Service
-NEXT_PUBLIC_GEMINI_API_KEY=your_api_key_here
-```
+### Current Configuration
 
-**Phase 9 Will Add**:
+**Required in `.env`**:
 
 ```bash
 # Database (Phase 9A)
@@ -112,27 +95,51 @@ POSTGRES_PRISMA_URL=postgres://...
 POSTGRES_URL_NON_POOLING=postgres://...
 
 # Authentication (Phase 9B)
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=generate-with-openssl-rand
+BETTER_AUTH_SECRET=generated-secret-key
+BETTER_AUTH_URL=http://localhost:3000
 
 # OAuth Platforms (Phase 9D)
+ENCRYPTION_KEY=generated-aes-256-key
+
 TWITTER_CLIENT_ID=...
 TWITTER_CLIENT_SECRET=...
-LINKEDIN_CLIENT_ID=...
-# ... (7 platforms total)
 
-# File Storage (Phase 9E)
+LINKEDIN_CLIENT_ID=...
+LINKEDIN_CLIENT_SECRET=...
+
+INSTAGRAM_APP_ID=...
+INSTAGRAM_APP_SECRET=...
+
+FACEBOOK_APP_ID=...
+FACEBOOK_APP_SECRET=...
+
+TIKTOK_CLIENT_KEY=...
+TIKTOK_CLIENT_SECRET=...
+
+YOUTUBE_CLIENT_ID=...
+YOUTUBE_CLIENT_SECRET=...
+
+# Pinterest pending app approval
+# PINTEREST_APP_ID=...
+# PINTEREST_APP_SECRET=...
+
+# App URL (for OAuth redirects)
+NEXT_PUBLIC_APP_URL=https://socialflow-tau.vercel.app
+
+# File Storage (Phase 9E - when implemented)
 BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...
 
-# Real-time (Phase 9G)
-CRON_SECRET=for-vercel-cron-jobs
+# AI Service
+NEXT_PUBLIC_GEMINI_API_KEY=...
 ```
 
-**Security**: Never commit `.env.local` - use Vercel environment variables for production
+**Security**: Never commit `.env` - use Vercel environment variables for production
+
+---
 
 ## Dependencies
 
-### Production (Minimal by Design)
+### Production
 
 ```json
 {
@@ -143,11 +150,11 @@ CRON_SECRET=for-vercel-cron-jobs
   "lucide-react": "^0.554.0",
   "recharts": "^3.4.1",
   "@prisma/client": "^7.0.0",
-  "bcryptjs": "^2.4.3"
+  "bcryptjs": "^2.4.3",
+  "better-auth": "^1.2.7",
+  "zod": "^3.23.8"
 }
 ```
-
-**Bundle Size**: ~200KB gzipped (estimated)
 
 ### Development
 
@@ -155,260 +162,304 @@ CRON_SECRET=for-vercel-cron-jobs
 {
   "typescript": "~5.8.2",
   "@types/node": "^22.14.0",
+  "@types/bcryptjs": "^2.4.6",
   "tailwindcss": "^4.1.17",
   "@tailwindcss/postcss": "latest",
   "postcss": "^8.5.6",
   "autoprefixer": "^10.4.22",
   "eslint": "^9.39.1",
+  "eslint-config-next": "^16.0.3",
   "prettier": "^3.6.2",
   "vitest": "^4.0.13",
   "prisma": "^7.0.0",
-  "tsx": "^4.7.0",
-  "@types/bcryptjs": "^2.4.6"
+  "tsx": "^4.7.0"
+}
+```
+
+### Phase 9E Dependencies (When Implemented)
+
+```json
+{
+  "@vercel/blob": "^1.0.0",
+  "sharp": "^0.33.x"
 }
 ```
 
 ### Deliberately Avoided
 
 - ❌ Redux/MobX (using React Context)
-- ❌ Axios (using native fetch with api-client wrapper)
+- ❌ Axios (using native fetch)
 - ❌ Moment.js (using native Date)
 - ❌ Lodash (using native JS)
 - ❌ Separate backend server (using Next.js API routes)
 
-**Why**: Smaller bundle, fewer vulnerabilities, less maintenance, unified deployment
+**Why**: Smaller bundle, fewer vulnerabilities, unified deployment
 
-## Browser Support
+---
 
-**Target**: Chrome/Edge 100+, Firefox 100+, Safari 15+
-
-**Required**: ES2020, CSS Grid/Flexbox, CSS Variables, localStorage, Fetch API, matchMedia
-
-**Graceful Degradation**: Fallback messages if AI fails, in-memory state if localStorage unavailable, default to light theme
-
-## Code Quality Tools ✅
+## Code Quality Tools
 
 ### ESLint
 
-**Status**: Configured with Next.js 16 best practices
-
-**Config**: `eslint.config.mjs` (ESM format, Next.js configuration)
+**Config**: `eslint.config.mjs` (Next.js 16 best practices)
 
 **Rules**: 
-- Next.js core-web-vitals (recommended + performance rules)
-- TypeScript-eslint (type-aware linting)
-- Prettier integration (no conflicts)
-- Custom rules: no-unused-vars, no-explicit-any
-
-**Package**: `eslint-config-next` (includes @next/eslint-plugin-next)
+- Next.js core-web-vitals
+- TypeScript-eslint
+- Prettier integration
 
 **Scripts**:
 - `npm run lint` - Check for errors
-- `npm run lint:fix` - Auto-fix where possible
-- `npm run typegen` - Generate route types
+- `npm run lint:fix` - Auto-fix
 
-**Current Status**: 
-- ✅ 0 errors
-- ⚠️ 20 warnings (img tags - Next.js suggestions, acceptable)
+**Current Status**: 0 errors, ~20 warnings (acceptable)
 
 ### Prettier
 
-**Status**: Configured for consistent formatting
-
-**Config**: `.prettierrc` (semi: true, singleQuote: false, tabWidth: 2, printWidth: 80)
+**Config**: `.prettierrc`
 
 **Scripts**:
 - `npm run format` - Format all files
-- `npm run format:check` - Check formatting (CI)
+- `npm run format:check` - Check formatting
 
 **Status**: All files formatted ✅
 
-### Vitest
-
-**Status**: Testing infrastructure configured (tests deferred to Phase 10)
-
-**Config**: `vitest.config.ts` (jsdom environment, @testing-library/react, jest-dom matchers)
-
-**Scripts**:
-- `npm run test` - Watch mode (TDD)
-- `npm run test:ui` - Interactive UI
-- `npm run test:run` - Run once (CI)
-- `npm run test:coverage` - Coverage report
-
-**Setup**: `src/test/setup.ts` configures testing-library
-
 ### TypeScript
 
-**Strict Mode**: ✅ Fully enabled (`strict: true` in tsconfig.json)
+**Strict Mode**: ✅ Fully enabled
 
-**Compile Status**: ✅ Zero errors with strict mode
+**Status**: Zero errors with strict mode
 
 **Additional Settings**:
-- Typed routes enabled (via `typedRoutes: true` in next.config.ts)
-- Typed environment variables (via `experimental.typedEnv: true`)
+- Typed routes enabled
+- Typed environment variables
 - Next.js TypeScript plugin active
-- Prisma Client auto-generates types (will be added in Phase 9A)
+- Prisma Client auto-generates types
 
-**Verification**: `npm run type-check` passes with 0 errors
+### Vitest
 
-## Backend Stack (Phase 9 - In Progress)
+**Config**: `vitest.config.ts`
 
-**Architecture**: Next.js API routes (serverless functions on Vercel)
+**Status**: Infrastructure ready, tests deferred to Phase 10
 
-**Database** (Phase 9A - COMPLETE ✅):
-- **PostgreSQL** - Production database with Prisma Accelerate
-- **Prisma ORM v7.0.0** - Type-safe database client with migrations
-- **Prisma Accelerate** - Connection pooling and query caching
-- 18 tables: User, Session, SocialAccount, Post, PostPlatform, Comment, MediaAsset, Folder, ShortLink, BioPage, Lead, Workflow, Workspace, TeamMember, ApiKey, AnalyticsSnapshot
-- Health check API endpoint: `GET /api/health` (verified working)
-- Seed data: 1 test user (test@socialflow.ai), 2 system folders
-- Prisma Client generated to `src/generated/prisma/`
+---
 
-**Authentication**:
-- **NextAuth.js v5** - JWT sessions, credentials provider
-- **bcryptjs** - Password hashing
-- Protected API routes with `requireAuth()` middleware
+## Database Stack
 
-**File Storage**:
-- **Vercel Blob Storage** - 5GB free tier
-- Image/video uploads with progress tracking
-- Automatic URL generation and CDN
+### PostgreSQL + Prisma 7
 
-**OAuth Integrations**:
-- Twitter/X, LinkedIn, Instagram, Facebook, TikTok, YouTube, Pinterest
-- PKCE security flow with token refresh
-- Encrypted token storage
+**Database**: Vercel Postgres (production-ready)
 
-**Real-time**:
-- **Socket.io** - WebSocket server for notifications
-- Alternative: **Pusher** (managed service)
-- Live post status updates, instant notifications
+**ORM**: Prisma 7.0.0
+- Type-safe database client
+- Migrations system
+- Custom output path: `src/generated/prisma/`
 
-**Validation & Security**:
-- **Zod** - Runtime schema validation
-- Input sanitization and error handling
-- Rate limiting and CORS protection
+**Accelerate**: Connection pooling and query caching
 
-**Documentation**: See `docs/phases/phase9a-9g_*.md` for implementation details
+**Schema**: 18 tables with full relationships
+- Authentication: User, Session, Account
+- Social: SocialAccount, Post, PostPlatform
+- Media: MediaAsset, Folder
+- Links: ShortLink, BioPage, Lead
+- Automation: Workflow
+- Team: Workspace, TeamMember
+- Analytics: AnalyticsSnapshot
 
-### API Rate Limits
+**Commands**:
+```bash
+npx prisma migrate dev    # Create and apply migration
+npx prisma generate      # Generate Prisma Client
+npx prisma studio        # Visual database browser
+npm run db:seed          # Seed test data
+```
 
-**Gemini Free Tier**: 60 requests/min, 1,500/day
+---
 
-**Handling**: Try/catch with fallback messages, will add queuing/retry/caching later
+## OAuth Integration
 
-### Local Storage
+### Platforms Integrated (Phase 9D)
 
-**Browser Limit**: ~5-10MB per domain
+All 7 platforms complete with full OAuth flow:
+1. Twitter/X (PKCE, 2-hour tokens)
+2. LinkedIn (OpenID Connect, 60-day tokens)
+3. Instagram (via Business API, long-lived tokens)
+4. Facebook (Page tokens, long-lived)
+5. TikTok (PKCE, 24-hour tokens)
+6. YouTube (Google OAuth, 1-hour tokens)
+7. Pinterest (30-day tokens, pending app approval)
 
-**Current Usage**: Theme preference (~10 bytes), Settings (~1KB)
+**Infrastructure**:
+- BaseOAuthService abstract class
+- AES-256-GCM token encryption
+- PKCE implementation
+- CSRF protection with state parameter
+- Database-stored OAuth state
 
-**Future**: Posts, drafts, media, auth, analytics (requires backend)
+---
 
-### Performance Budgets
+## File Storage (Phase 9E - Documented)
 
-**Targets**: FCP < 1.5s, TTI < 3s, Lighthouse > 90, Bundle < 300KB gzipped
+### Vercel Blob Storage
 
-**Current**: ✅ Instant transitions (SPA), ✅ Fast HMR with Turbopack (~280ms startup), ⚠️ No code splitting/lazy loading yet
+**Free Tier**: 5GB storage, 100GB bandwidth/month
 
-## Recommended Tools
+**Features**:
+- CDN-backed URLs
+- Automatic global delivery
+- Simple API (put, del, list)
 
-### VS Code Extensions
+### Image Processing
 
-1. **ESLint** - Linting
-2. **Prettier** - Formatting
-3. **TypeScript and JavaScript Language Features** - Built-in
-4. **Tailwind CSS IntelliSense** - Class autocomplete
-5. **Error Lens** - Inline errors
+**Sharp v0.33.x**:
+- 16x faster than alternatives
+- Memory-efficient
+- Production-proven
 
-### Browser Extensions
+**Processing Pipeline**:
+- Optimize: Resize to 1920x1080 max, 80% quality
+- Thumbnail: Generate 300x300 square, 70% quality
+- Parallel processing: ~100ms total
 
-**React DevTools** - Component tree, props/state inspection, performance profiling
+---
 
-## Git Workflow
+## Development Workflow
+
+### Git Workflow
 
 **Remote**: git@github.com:noobskies/socialflow.git  
-**Branch**: nextjs-migrate (migration branch), main (stable Vite version backup)
+**Branch**: main
 
-**Gitignore**: node_modules/, .next/, dist/, .env.local, .DS_Store, *.log, next-env.d.ts
+**Gitignore**: node_modules/, .next/, .env, dist/, *.log
 
-**Commit Conventions** (recommended):
+### Local Development
+
+```bash
+# Start development
+npm run dev           # http://localhost:3000
+
+# Code quality
+npm run lint         # Check code
+npm run format       # Format code
+
+# Database
+npx prisma studio    # Visual DB browser
+npx prisma generate  # After schema changes
+
+# Testing (when implemented)
+npm run test         # Vitest
 ```
-feat: Add trending topics widget
-fix: Resolve calendar date parsing bug
-docs: Update README
-style: Format code with Prettier
-refactor: Extract toast logic to custom hook
-test: Add unit tests for geminiService
-```
+
+---
 
 ## Deployment
 
-**Current**: Local development only (localhost:3001)
+### Vercel Platform
 
-**Recommended Platform**: Vercel
+**Frontend + Backend** (unified deployment):
 - Zero-config Next.js deployment
-- Automatic HTTPS
+- Automatic HTTPS and CDN
+- Environment variables per environment
 - Preview deployments for PRs
-- Free tier sufficient for MVP
+- Serverless auto-scaling
 
-**Process**: 
-1. Push to GitHub: `git push origin nextjs-migrate`
-2. Connect repository to Vercel
-3. Add `NEXT_PUBLIC_GEMINI_API_KEY` environment variable
-4. Deploy automatically
+**Database**:
+- Vercel Postgres (managed)
+- Automatic connection pooling
+- Prisma Accelerate integration
+
+**File Storage**:
+- Vercel Blob (when Phase 9E implemented)
+- CDN-backed delivery
+- 5GB free tier
+
+**Process**:
+1. Push to GitHub
+2. Vercel auto-deploys
+3. Add environment variables in dashboard
+4. Run migrations: `npx prisma migrate deploy`
+5. API routes deploy with frontend
+
+---
+
+## Browser Support
+
+**Target**: Chrome 100+, Firefox 100+, Safari 15+, Edge 100+
+
+**Required**: ES2020, CSS Grid, CSS Variables, localStorage, Fetch API
+
+**Graceful Degradation**: Fallbacks for AI failures, localStorage, theme
+
+---
+
+## Performance Budgets
+
+**Targets**:
+- FCP < 1.5s
+- TTI < 3s
+- Lighthouse > 90
+- Bundle < 300KB gzipped
+
+**Current**: ✅ Fast with Turbopack, ⚠️ No lazy loading yet
+
+---
 
 ## Security Considerations
 
-### Current
+### Current Implementation
 
 **Good**:
-- ✅ API key in environment variable (not in code)
+- ✅ Environment variables for secrets
 - ✅ TypeScript prevents type bugs
-- ✅ No user-generated content execution
+- ✅ Authentication on all API routes
+- ✅ User ownership verification
+- ✅ Input validation with Zod
+- ✅ Token encryption for OAuth
 
-**Risks**:
-- ⚠️ API key exposed in client bundle (Next.js limitation for NEXT_PUBLIC_ vars)
-- ⚠️ No input sanitization
-- ⚠️ No rate limiting
-- ⚠️ No authentication
+**Backend Security**:
+- ✅ requireAuth() on all endpoints
+- ✅ User isolation (userId filtering)
+- ✅ File type/size validation
+- ✅ SQL injection prevention (Prisma)
+- ✅ CSRF protection (OAuth state)
 
-### Future (With Backend)
+---
 
-1. Backend API proxy (hide API key - use Next.js API routes)
-2. Input validation and sanitization
-3. Authentication (NextAuth.js recommended)
-4. Rate limiting and DDoS protection
+## Known Limitations
 
-## Known Technical Limitations
+### Current
 
-**Current (Frontend-Only)**:
-1. **No Data Persistence** - Changes lost on refresh (will be fixed in Phase 9F)
-2. **No Authentication** - No user accounts yet (Phase 9B)
-3. **Mock Data** - Using INITIAL_* constants (Phase 9F migration)
-4. **Client-Side AI Key** - Exposed in bundle (Phase 9B will move to backend)
+1. **No Data Persistence** - Frontend uses mock data (Phase 9F will fix)
+2. **No File Upload** - Phase 9E documented, not implemented
+3. **No Real-time** - Phase 9G not started
+4. **Modern Browsers Only** - No IE11 (by design)
 
-**After Backend (Phase 9)**:
-5. **Modern Browsers Only** - No IE11 support (by design)
-6. **Internet Required** - No offline mode (acceptable)
-7. **Gemini Dependency** - Rate limits apply (60 req/min, 1,500/day)
+### After Phase 9 Complete
+
+5. **Internet Required** - No offline mode (acceptable)
+6. **Gemini Dependency** - Rate limits: 60 req/min, 1,500/day
+
+---
 
 ## Path to Production
 
-### Phase 9: Backend Implementation (Current)
+### Current Progress
 
-**Week 1 - Foundation**:
-1. Phase 9A: Prisma + PostgreSQL setup
-2. Phase 9B: NextAuth.js authentication
-3. Phase 9C: Core CRUD API routes
+**Completed** (~65% of backend):
+- ✅ Database schema and Prisma setup
+- ✅ Authentication system
+- ✅ Core CRUD APIs (19 endpoints)
+- ✅ OAuth integrations (7 platforms)
+- ✅ File storage documentation
 
-**Week 2 - Integration**:
-4. Phase 9D: OAuth for 7 platforms
-5. Phase 9E: Vercel Blob file storage
-6. Phase 9F: Replace mock data with APIs
-7. Phase 9G: WebSocket real-time features
+**Remaining** (~35% of backend):
+- ⚠️ File storage implementation (3 hours)
+- ⚠️ Mock data migration (3-4 hours, needs docs)
+- ⚠️ Real-time features (4-5 hours, needs docs)
 
-### Phase 10: Testing & Deployment
+**Total Remaining**: 10-12 hours
+
+### Phase 10: Testing & Production
 
 1. Write comprehensive test suite
 2. Production deployment to Vercel
@@ -417,42 +468,45 @@ test: Add unit tests for geminiService
 
 ---
 
-## Current Development Status
+## Quick Reference
 
-**Frontend**: ✅ Production-ready
-- 135+ components across 9 features
-- Zero TypeScript/ESLint errors
-- Next.js 16.0.3 with Turbopack
-- Bundle: ~200KB gzipped
+### Key Commands
 
-**Backend**: ✅ Documented, ready for implementation
-- 7 implementation phases (24-32 hours)
-- Complete API architecture
-- Database schema designed
-- OAuth flows documented
+```bash
+# Development
+npm run dev              # Start dev server
+npm run build           # Production build
 
-**Current Phase**: Phase 9A execution next (Database setup)
+# Code Quality
+npm run lint            # Check code
+npm run format          # Format code
+npm run type-check      # TypeScript check
 
-## Deployment
+# Database
+npx prisma migrate dev  # Create migration
+npx prisma generate     # Generate client
+npx prisma studio       # Visual browser
+npm run db:seed         # Seed data
 
-**Platform**: Vercel (all-in-one solution)
+# Testing
+npm run test            # Vitest (when implemented)
+```
 
-**Frontend Deployment** (Working Now):
-1. Push code: `git push origin main`
-2. Vercel auto-deploys from GitHub
-3. Add `NEXT_PUBLIC_GEMINI_API_KEY` in Vercel dashboard
-4. Preview at `*.vercel.app`
+### Port Configuration
 
-**Backend Deployment** (Phase 9):
-1. Create Vercel Postgres database
-2. Add all environment variables (DATABASE_URL, NEXTAUTH_SECRET, OAuth keys, etc.)
-3. Run `npx prisma migrate deploy`
-4. API routes deploy automatically with frontend
-5. One unified deployment
+- **Dev Server**: http://localhost:3000
+- **Prisma Studio**: http://localhost:5555
+- **Database**: PostgreSQL (Vercel Postgres)
 
-**Benefits**:
-- Zero-config deployment
-- Automatic HTTPS and CDN
-- Environment variables per environment
-- Preview deployments for PRs
-- Serverless auto-scaling
+### Important Files
+
+- `.env` - Environment variables (not committed)
+- `prisma/schema.prisma` - Database schema
+- `prisma.config.ts` - Prisma CLI configuration
+- `next.config.ts` - Next.js configuration
+- `tsconfig.json` - TypeScript configuration
+- `eslint.config.mjs` - ESLint rules
+
+---
+
+**Last Updated**: November 25, 2025
