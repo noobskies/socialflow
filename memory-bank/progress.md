@@ -382,6 +382,82 @@ docs/phases/
 
 **Total Timeline**: ~8-9 hours (infrastructure + 7 platform implementations)
 
+### Phase 9D Enhancement: OAuth Popup Flow - COMPLETE ✅
+
+**Status**: Popup-based OAuth implementation - November 26, 2025 (9:00-9:36 AM)
+
+**What Was Built** (~1.5 hours):
+
+1. **OAuth Result Page** (15 min)
+   - Created `src/app/oauth/result/page.tsx` - Success/error UI page
+   - Created `src/app/oauth/layout.tsx` - Minimal popup layout
+   - Displays success with green checkmark or error with red X
+   - Shows user-friendly error messages
+   - Auto-closes after 2 seconds
+   - Uses window.postMessage() to notify parent window
+
+2. **Callback Route Updates** (20 min)
+   - Updated all 7 OAuth callback routes to redirect to `/oauth/result`
+   - Changed from: `/settings/accounts?success=twitter`
+   - Changed to: `/oauth/result?success=true&platform=twitter&account=id`
+   - Platforms: Twitter, LinkedIn, Instagram, Facebook, TikTok, YouTube, Pinterest
+
+3. **AccountsTab Popup Logic** (25 min)
+   - Opens OAuth in popup window (600x700, centered)
+   - window.postMessage() communication between popup and parent
+   - Message listener in AccountsTab receives OAuth results
+   - Popup close monitoring (resets "Connecting..." state)
+   - Auto-refresh accounts list on success
+   - "Connecting..." loading state with spinner
+   - Popup blocked detection with error message
+
+4. **Generic Disconnect Endpoint** (10 min)
+   - Created `src/app/api/oauth/disconnect/[accountId]/route.ts`
+   - Platform-agnostic (works for all 7 platforms)
+   - Verifies user ownership before disconnect
+   - Sets `connected: false`, clears tokens
+   - Preserves account record for historical data
+
+5. **PKCE Fixes** (10 min)
+   - Fixed YouTube OAuth: Added missing `code_verifier` parameter
+   - Fixed LinkedIn OAuth: Added missing `code_verifier` parameter
+   - Twitter & TikTok: Already correct
+   - Other platforms: Don't use PKCE (correct as-is)
+
+6. **Platform Matching Fix** (5 min)
+   - Issue: Database stores UPPERCASE (TWITTER), UI uses lowercase ("twitter")
+   - Solution: Case-insensitive comparison in getAccountForPlatform()
+   - Fixes: Settings page now shows connected accounts correctly
+
+7. **YouTube Error Handling** (10 min)
+   - Detect "youtubeSignupRequired" error
+   - Show helpful message: "Please create a YouTube channel at youtube.com/create_channel"
+   - Better error parsing and user guidance
+
+**Files Created (3)**:
+- `src/app/oauth/result/page.tsx` - OAuth result page (100 lines)
+- `src/app/oauth/layout.tsx` - Minimal layout (15 lines)
+- `src/app/api/oauth/disconnect/[accountId]/route.ts` - Generic disconnect (60 lines)
+
+**Files Modified (13)**:
+- 7 OAuth callback routes (redirect to /oauth/result)
+- `src/features/settings/tabs/AccountsTab.tsx` - Popup logic + message listener
+- `src/features/settings/Settings.tsx` - Removed unused props
+- `src/app/(app)/settings/page.tsx` - Cleaned prop chain
+- `src/lib/oauth/youtube-oauth-service.ts` - PKCE + error handling
+- `src/lib/oauth/linkedin-oauth-service.ts` - PKCE fix
+
+**User Experience Improvements**:
+- ✅ OAuth in popup (no full page redirect)
+- ✅ Button auto-updates to "Connected" after OAuth
+- ✅ Popup auto-closes after 2 seconds
+- ✅ "Connecting..." resets if popup closed manually
+- ✅ Clear error messages for all failure scenarios
+- ✅ Disconnect works with server refresh
+- ✅ Dashboard and Settings both update correctly
+
+**Timeline**: ~1.5 hours total
+
 ### Phase 9E: File Storage Documentation - COMPLETE ✅
 
 **Status**: All 9 documentation files completed (November 25, 2025, Evening)
@@ -711,3 +787,15 @@ Each file includes:
 8. **Migration Workflow** - thumbnailUrl as nullable field allows seamless schema evolution
 9. **Error Handling** - Graceful fallback in Blob deletion prevents blocking database cleanup
 10. **Documentation ROI** - 2.5 hours documenting + 3 hours implementing = faster than ad-hoc approach
+
+### OAuth Popup Enhancement Learnings (Phase 9D Enhancement)
+1. **window.postMessage() Pattern** - Secure communication between popup and parent window
+2. **Popup Close Detection** - setInterval every 500ms to check popup.closed prevents stuck loading states
+3. **PKCE Requirements** - YouTube and LinkedIn require code_verifier in token exchange (Google OAuth standard)
+4. **Case-Sensitive Enum Matching** - Database Platform enum is UPPERCASE, UI uses lowercase - always use case-insensitive comparison
+5. **Platform-Specific Errors** - Parse API error responses to provide actionable user guidance ("no YouTube channel" vs generic "unauthorized")
+6. **Generic vs Platform-Specific Routes** - Generic `/api/oauth/disconnect/[accountId]` better than 7 separate platform routes
+7. **Preserve vs Delete** - Update to `connected: false` preserves historical data better than deleting records
+8. **Auto-Refresh Pattern** - Call refetchAccounts() after mutations, don't manually update state
+9. **Popup UX Details** - Center popup on screen, reasonable size (600x700), auto-close after success
+10. **Error State Management** - Always reset loading states on popup close, error, or success

@@ -968,6 +968,186 @@ class TwitterOAuthService extends BaseOAuthService {
 // - Token encryption (AES-256-GCM) before database storage
 ```
 
+### OAuth Popup Pattern (Established in Phase 9D Enhancement - November 26, 2025)
+
+**Design Decision**: Popup-based OAuth flow with window.postMessage() communication
+**Why**: Better UX (no full page redirect), seamless account connection, auto-refresh on success
+**Status**: Complete and production-ready
+
+**Flow Overview**:
+
+```
+User clicks "Connect" 
+    ↓
+Open popup window (600x700, centered)
+    ↓
+Popup redirects to /api/oauth/[platform]/authorize
+    ↓
+User authenticates with OAuth provider
+    ↓
+Provider redirects to /api/oauth/[platform]/callback
+    ↓
+Callback redirects to /oauth/result?success=true&platform=X
+    ↓
+Result page sends window.opener.postMessage()
+    ↓
+Parent window receives message
+    ↓
+Parent calls refetchAccounts() to update UI
+    ↓
+Popup auto-closes after 2 seconds
+    ↓
+Button updates to "Connected" state
+```
+
+**Implementation Pattern**:
+
+```typescript
+// 1. AccountsTab - Open popup and listen for results
+const [connectingPlatform, setConnectingPlatform] = useState<Platform | null>(null);
+const [oauthPopup, setOauthPopup] = useState<Window | null>(null);
+
+// Open OAuth popup
+const handleConnect = (platform: Platform) => {
+  setConnectingPlatform(platform);
+  
+  const width = 600, height = 700;
+  const left = window.screenX + (window.outerWidth - width) / 2;
+  const top = window.screenY + (window.outerHeight - height) / 2;
+  
+  const popup = window.open(
+    `/api/oauth/${platform}/authorize`,
+    'oauth-popup',
+    `width=${width},height=${height},left=${left},top=${top}`
+  );
+  
+  setOauthPopup(popup);
+};
+
+// Listen for OAuth result from popup
+useEffect(() => {
+  const handleMessage = async (event: MessageEvent) => {
+    if (event.origin !== window.location.origin) return;
+    
+    if (event.data.type === 'oauth-result') {
+      const { success, platform } = event.data;
+      
+      if (success) {
+        await refetchAccounts(); // Refresh from server
+        showToast(`${platform} connected!`, 'success');
+      }
+      
+      oauthPopup?.close();
+      setConnectingPlatform(null);
+    }
+  };
+  
+  window.addEventListener('message', handleMessage);
+  return () => window.removeEventListener('message', handleMessage);
+}, [oauthPopup, refetchAccounts]);
+
+// Monitor popup close to reset state
+useEffect(() => {
+  if (!oauthPopup) return;
+  
+  const checkClosed = setInterval(() => {
+    if (oauthPopup.closed) {
+      setConnectingPlatform(null);
+      showToast('OAuth window closed', 'info');
+    }
+  }, 500);
+  
+  return () => clearInterval(checkClosed);
+}, [oauthPopup]);
+
+// 2. OAuth Result Page - Send message to parent
+useEffect(() => {
+  if (window.opener) {
+    window.opener.postMessage({
+      type: 'oauth-result',
+      success: true,
+      platform: 'twitter',
+      accountId: 'abc123'
+    }, window.location.origin);
+    
+    setTimeout(() => window.close(), 2000);
+  }
+}, []);
+```
+
+**Callback Route Pattern**:
+
+```typescript
+// Redirect to result page instead of /settings
+export async function GET(request: Request) {
+  const { code, state } = new URL(request.url).searchParams;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+  
+  try {
+    const account = await service.handleCallback(code, state);
+    return NextResponse.redirect(
+      `${baseUrl}/oauth/result?success=true&platform=twitter&account=${account.id}`
+    );
+  } catch (error) {
+    return NextResponse.redirect(
+      `${baseUrl}/oauth/result?success=false&platform=twitter&error=oauth_failed`
+    );
+  }
+}
+```
+
+**Generic Disconnect Endpoint**:
+
+```typescript
+// Platform-agnostic disconnect (works for all platforms)
+// Route: /api/oauth/disconnect/[accountId]/route.ts
+export async function POST(request: Request, { params }) {
+  const { user, error } = await requireAuth();
+  if (error) return error;
+  
+  const account = await prisma.socialAccount.findFirst({
+    where: { id: params.accountId, userId: user!.id }
+  });
+  
+  if (!account) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  
+  // Update to disconnected (preserves historical data)
+  await prisma.socialAccount.update({
+    where: { id: params.accountId },
+    data: {
+      connected: false,
+      status: 'DISCONNECTED',
+      accessToken: null,
+      refreshToken: null,
+    }
+  });
+  
+  return NextResponse.json({ success: true });
+}
+```
+
+**Key Features**:
+- ✅ Popup window (no full page redirect)
+- ✅ Secure postMessage communication
+- ✅ Origin verification for security
+- ✅ Popup close detection
+- ✅ Auto-refresh accounts list
+- ✅ Loading states ("Connecting...")
+- ✅ Error handling with user-friendly messages
+- ✅ Generic disconnect endpoint (platform-agnostic)
+- ✅ Preserves account records (sets connected: false)
+
+**PKCE Implementation Notes**:
+- YouTube and LinkedIn require `code_verifier` in token exchange
+- Twitter and TikTok already implement PKCE correctly
+- Other platforms don't use PKCE
+- Always include `code_verifier` parameter for Google OAuth
+
+**Platform Matching**:
+- Database stores Platform enum as UPPERCASE (TWITTER, LINKEDIN)
+- UI uses lowercase strings ("twitter", "linkedin")
+- Always use case-insensitive comparison: `acc.platform.toLowerCase() === platform.toLowerCase()`
+
 ### File Upload Pattern (Documented in Phase 9E)
 
 **Server-Side Processing with Sharp**:

@@ -11,7 +11,6 @@ export default function SettingsPage() {
     userPlan,
     onOpenUpgrade,
     accounts,
-    onToggleAccount,
     refetchAccounts,
   } = useAppContext();
 
@@ -23,7 +22,6 @@ export default function SettingsPage() {
       userPlan={userPlan}
       onOpenUpgrade={onOpenUpgrade}
       accounts={accounts}
-      onToggleConnection={onToggleAccount}
       refetchAccounts={refetchAccounts}
     />
   );

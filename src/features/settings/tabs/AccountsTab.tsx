@@ -4,7 +4,6 @@ import { Check, ExternalLink, Loader2 } from "lucide-react";
 
 interface AccountsTabProps {
   accounts: SocialAccount[];
-  onToggleConnection: (id: string, isConnected: boolean) => void;
   connectingId: string | null;
   showToast: (message: string, type: ToastType) => void;
   refetchAccounts: () => Promise<void>;
@@ -72,7 +71,6 @@ const PLATFORMS: PlatformConfig[] = [
 
 export const AccountsTab: React.FC<AccountsTabProps> = ({
   accounts,
-  onToggleConnection,
   connectingId,
   showToast,
   refetchAccounts,
@@ -174,7 +172,8 @@ export const AccountsTab: React.FC<AccountsTabProps> = ({
         throw new Error("Failed to disconnect account");
       }
 
-      onToggleConnection(accountId, false);
+      // Refresh accounts list from server
+      await refetchAccounts();
       showToast("Account disconnected successfully", "success");
     } catch (error) {
       console.error("Error disconnecting account:", error);

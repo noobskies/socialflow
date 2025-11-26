@@ -19,7 +19,6 @@ interface SettingsProps {
   userPlan: PlanTier;
   onOpenUpgrade: () => void;
   accounts: SocialAccount[];
-  onToggleConnection: (id: string) => void;
   refetchAccounts: () => Promise<void>;
 }
 
@@ -30,27 +29,12 @@ export const Settings: React.FC<SettingsProps> = ({
   userPlan,
   onOpenUpgrade,
   accounts,
-  onToggleConnection,
   refetchAccounts,
 }) => {
   const settings = useSettings(MOCK_TEAM);
 
   const handleSave = (section: string) => {
     showToast(`${section} saved successfully!`, "success");
-  };
-
-  const handleConnectionToggle = (id: string, isConnected: boolean) => {
-    if (isConnected) {
-      onToggleConnection(id);
-      showToast("Account disconnected", "info");
-    } else {
-      settings.setConnectingId(id);
-      setTimeout(() => {
-        onToggleConnection(id);
-        settings.setConnectingId(null);
-        showToast("Account connected successfully!", "success");
-      }, 1500);
-    }
   };
 
   const renderContent = () => {
@@ -62,7 +46,6 @@ export const Settings: React.FC<SettingsProps> = ({
         return (
           <AccountsTab
             accounts={accounts}
-            onToggleConnection={handleConnectionToggle}
             connectingId={settings.connectingId}
             showToast={showToast}
             refetchAccounts={refetchAccounts}
