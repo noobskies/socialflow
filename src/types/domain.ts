@@ -13,8 +13,13 @@ export interface SocialAccount {
   id: string;
   platform: Platform;
   username: string;
-  avatar: string;
+  displayName?: string;
+  avatar?: string;
   connected: boolean;
+  lastChecked?: string | Date;
+  status?: "active" | "disconnected" | "token_expired" | "error";
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
 export interface Post {

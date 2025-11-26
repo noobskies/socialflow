@@ -1,6 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from "react";
 import {
   Post,
   SocialAccount,
@@ -9,26 +16,38 @@ import {
   PlanTier,
   BrandingConfig,
 } from "@/types";
-import { INITIAL_POSTS, INITIAL_ACCOUNTS } from "@/utils/constants";
 
 interface AppContextType {
-  // State
+  // Posts
   posts: Post[];
-  accounts: SocialAccount[];
-  userPlan: PlanTier;
-  branding: BrandingConfig;
-  initialDraft?: Draft;
-
-  // Setters
+  postsLoading: boolean;
+  postsError: string | null;
   setPosts: React.Dispatch<React.SetStateAction<Post[]>>;
+  refetchPosts: () => Promise<void>;
+
+  // Accounts
+  accounts: SocialAccount[];
+  accountsLoading: boolean;
+  accountsError: string | null;
   setAccounts: React.Dispatch<React.SetStateAction<SocialAccount[]>>;
+  refetchAccounts: () => Promise<void>;
+
+  // User
+  userPlan: PlanTier;
   setUserPlan: React.Dispatch<React.SetStateAction<PlanTier>>;
+
+  // Branding
+  branding: BrandingConfig;
   setBranding: React.Dispatch<React.SetStateAction<BrandingConfig>>;
+
+  // Composer
+  initialDraft?: Draft;
 
   // Handlers
   showToast: (message: string, type: ToastType) => void;
   onPostCreated: (post: Post) => void;
   onUpdatePost: (post: Post) => void;
+  onDeletePost: (postId: string) => void;
   onCompose: (draft?: Draft) => void;
   onToggleAccount: (id: string) => void;
   onOpenUpgrade: () => void;
@@ -50,17 +69,64 @@ interface AppProviderProps {
   onOpenUpgrade: () => void;
 }
 
+// Helper function for API calls with error handling
+const fetchAPI = async <T,>(
+  url: string,
+  setData: (data: T) => void,
+  setLoading: (loading: boolean) => void,
+  setError: (error: string | null) => void,
+  dataKey: string
+): Promise<void> => {
+  try {
+    setLoading(true);
+    setError(null);
+
+    const response = await fetch(url, {
+      credentials: "include", // Include cookies for auth
+    });
+
+    // Handle authentication errors
+    if (response.status === 401) {
+      window.location.href = "/login";
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    setData(result[dataKey]);
+  } catch (error) {
+    console.error(`Error fetching ${url}:`, error);
+    setError(error instanceof Error ? error.message : "Failed to load data");
+  } finally {
+    setLoading(false);
+  }
+};
+
 export function AppContextProvider({
   children,
   showToast,
   onOpenUpgrade,
 }: AppProviderProps) {
-  // Global State
-  const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
-  const [accounts, setAccounts] = useState<SocialAccount[]>(INITIAL_ACCOUNTS);
+  // Posts state
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [postsLoading, setPostsLoading] = useState(true);
+  const [postsError, setPostsError] = useState<string | null>(null);
+
+  // Accounts state
+  const [accounts, setAccounts] = useState<SocialAccount[]>([]);
+  const [accountsLoading, setAccountsLoading] = useState(true);
+  const [accountsError, setAccountsError] = useState<string | null>(null);
+
+  // User plan (can be fetched from API later)
   const [userPlan, setUserPlan] = useState<PlanTier>("free");
+
+  // Composer draft
   const [initialDraft, setInitialDraft] = useState<Draft | undefined>();
 
+  // Branding (can be fetched from API later)
   const [branding, setBranding] = useState<BrandingConfig>({
     companyName: "SocialFlow Agency",
     primaryColor: "#4f46e5",
@@ -69,44 +135,106 @@ export function AppContextProvider({
     customDomain: "social.myagency.com",
   });
 
-  // Handlers
-  const handlePostCreated = (newPost: Post) => {
-    setPosts((prev) => [...prev, newPost]);
-    showToast("Post created successfully", "success");
-  };
-
-  const handleUpdatePost = (updatedPost: Post) => {
-    setPosts((prev) =>
-      prev.map((p) => (p.id === updatedPost.id ? updatedPost : p))
+  // Fetch functions
+  const fetchPosts = useCallback(async () => {
+    await fetchAPI<Post[]>(
+      "/api/posts?limit=100",
+      setPosts,
+      setPostsLoading,
+      setPostsError,
+      "posts"
     );
-  };
+  }, []);
 
-  const handleCompose = (draft?: Draft) => {
-    setInitialDraft(draft);
-    // Navigation is handled by Next.js Link in calling component
-  };
+  const fetchAccounts = useCallback(async () => {
+    await fetchAPI<SocialAccount[]>(
+      "/api/accounts",
+      setAccounts,
+      setAccountsLoading,
+      setAccountsError,
+      "accounts"
+    );
+  }, []);
 
-  const handleToggleAccount = (id: string) => {
+  // Fetch data on mount
+  useEffect(() => {
+    fetchPosts();
+    fetchAccounts();
+  }, [fetchPosts, fetchAccounts]);
+
+  // Post mutation handlers
+  const handlePostCreated = useCallback(
+    (newPost: Post) => {
+      setPosts((prev) => [newPost, ...prev]);
+      showToast("Post created successfully", "success");
+    },
+    [showToast]
+  );
+
+  const handleUpdatePost = useCallback(
+    (updatedPost: Post) => {
+      setPosts((prev) =>
+        prev.map((p) => (p.id === updatedPost.id ? updatedPost : p))
+      );
+      showToast("Post updated successfully", "success");
+    },
+    [showToast]
+  );
+
+  const handleDeletePost = useCallback(
+    (postId: string) => {
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+      showToast("Post deleted successfully", "success");
+    },
+    [showToast]
+  );
+
+  // Account mutation handler
+  const handleToggleAccount = useCallback((accountId: string) => {
     setAccounts((prev) =>
       prev.map((acc) =>
-        acc.id === id ? { ...acc, connected: !acc.connected } : acc
+        acc.id === accountId ? { ...acc, connected: !acc.connected } : acc
       )
     );
-  };
+  }, []);
+
+  // Composer handler
+  const handleCompose = useCallback((draft?: Draft) => {
+    setInitialDraft(draft);
+    // Navigation is handled by Next.js Link in calling component
+  }, []);
 
   const value: AppContextType = {
+    // Posts
     posts,
-    accounts,
-    userPlan,
-    branding,
-    initialDraft,
+    postsLoading,
+    postsError,
     setPosts,
+    refetchPosts: fetchPosts,
+
+    // Accounts
+    accounts,
+    accountsLoading,
+    accountsError,
     setAccounts,
+    refetchAccounts: fetchAccounts,
+
+    // User
+    userPlan,
     setUserPlan,
+
+    // Branding
+    branding,
     setBranding,
+
+    // Composer
+    initialDraft,
+
+    // Handlers
     showToast,
     onPostCreated: handlePostCreated,
     onUpdatePost: handleUpdatePost,
+    onDeletePost: handleDeletePost,
     onCompose: handleCompose,
     onToggleAccount: handleToggleAccount,
     onOpenUpgrade,

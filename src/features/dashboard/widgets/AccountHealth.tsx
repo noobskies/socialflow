@@ -9,10 +9,33 @@ interface AccountHealthProps {
 export const AccountHealth: React.FC<AccountHealthProps> = ({ accounts }) => {
   const connectedCount = accounts.filter((a) => a.connected).length;
   const totalCount = accounts.length;
-  const healthPercentage = Math.round((connectedCount / totalCount) * 100);
+  const healthPercentage =
+    totalCount > 0 ? Math.round((connectedCount / totalCount) * 100) : 0;
   const instagramConnected = accounts.find(
     (a) => a.platform === "instagram"
   )?.connected;
+
+  // Empty state
+  if (totalCount === 0) {
+    return (
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">
+          Account Health
+        </h3>
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
+            <AlertCircle className="w-6 h-6 text-slate-400" />
+          </div>
+          <p className="text-sm font-medium text-slate-900 dark:text-white mb-1">
+            No Accounts Connected
+          </p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Connect your social media accounts to get started
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
