@@ -18,7 +18,7 @@ export class YouTubeOAuthService extends BaseOAuthService {
 
   async exchangeCodeForTokens(
     code: string,
-    _codeVerifier: string
+    codeVerifier: string
   ): Promise<OAuthTokens> {
     const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/oauth/youtube/callback`;
 
@@ -33,6 +33,7 @@ export class YouTubeOAuthService extends BaseOAuthService {
         client_secret: this.getClientSecret(),
         redirect_uri: redirectUri,
         grant_type: "authorization_code",
+        code_verifier: codeVerifier, // Required for PKCE
       }),
     });
 
