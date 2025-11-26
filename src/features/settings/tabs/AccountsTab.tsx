@@ -116,6 +116,21 @@ export const AccountsTab: React.FC<AccountsTabProps> = ({
     return () => window.removeEventListener("message", handleMessage);
   }, [oauthPopup, refetchAccounts, showToast]);
 
+  // Monitor popup close to reset connecting state
+  useEffect(() => {
+    if (!oauthPopup) return;
+
+    const checkPopupClosed = setInterval(() => {
+      if (oauthPopup.closed) {
+        setOauthPopup(null);
+        setConnectingPlatform(null);
+        showToast("OAuth window closed", "info");
+      }
+    }, 500);
+
+    return () => clearInterval(checkPopupClosed);
+  }, [oauthPopup, showToast]);
+
   const handleConnect = (platform: Platform) => {
     setConnectingPlatform(platform);
 
@@ -170,7 +185,10 @@ export const AccountsTab: React.FC<AccountsTabProps> = ({
   const getAccountForPlatform = (
     platform: Platform
   ): SocialAccount | undefined => {
-    return accounts.find((acc) => acc.platform === platform);
+    // Platform enum values are UPPERCASE in database, but we use lowercase in UI
+    return accounts.find(
+      (acc) => acc.platform.toLowerCase() === platform.toLowerCase()
+    );
   };
 
   const formatLastSync = (date?: Date | string) => {

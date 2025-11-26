@@ -57,8 +57,23 @@ export class YouTubeOAuthService extends BaseOAuthService {
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error("YouTube profile fetch failed:", error);
+      const errorText = await response.text();
+      console.error("YouTube profile fetch failed:", errorText);
+
+      // Parse error response to check for specific errors
+      try {
+        const errorData = JSON.parse(errorText);
+
+        // Check for youtubeSignupRequired error
+        if (errorData.error?.errors?.[0]?.reason === "youtubeSignupRequired") {
+          throw new Error(
+            "This Google account doesn't have a YouTube channel. Please create a channel at youtube.com/create_channel and try connecting again."
+          );
+        }
+      } catch {
+        // If JSON parsing fails, continue with generic error
+      }
+
       throw new Error(
         `Failed to fetch YouTube channel: ${response.statusText}`
       );
@@ -68,7 +83,7 @@ export class YouTubeOAuthService extends BaseOAuthService {
 
     if (!data.items || data.items.length === 0) {
       throw new Error(
-        "No YouTube channel found. Please create a YouTube channel first."
+        "No YouTube channel found. Please create a YouTube channel at youtube.com/create_channel and try connecting again."
       );
     }
 

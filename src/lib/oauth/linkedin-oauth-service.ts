@@ -14,7 +14,7 @@ export class LinkedInOAuthService extends BaseOAuthService {
 
   async exchangeCodeForTokens(
     code: string,
-    _codeVerifier: string
+    codeVerifier: string
   ): Promise<OAuthTokens> {
     const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/oauth/linkedin/callback`;
 
@@ -29,6 +29,7 @@ export class LinkedInOAuthService extends BaseOAuthService {
         redirect_uri: redirectUri,
         client_id: this.getClientId(),
         client_secret: this.getClientSecret(),
+        code_verifier: codeVerifier, // Include for PKCE support
       }),
     });
 
