@@ -271,8 +271,9 @@ model MediaAsset {
   type      AssetType
   
   // Storage
-  url       String?    // For images/videos
-  content   String?    @db.Text // For templates
+  url          String?    // For images/videos
+  thumbnailUrl String?    // Thumbnail URL for images (300x300 preview)
+  content      String?    @db.Text // For templates
   
   name      String
   folderId  String?

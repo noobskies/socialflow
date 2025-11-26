@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { del } from "@vercel/blob";
 import { requireAuth } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
@@ -177,7 +178,26 @@ export async function DELETE(
       );
     }
 
-    // Delete media asset
+    // Delete files from Vercel Blob Storage (for images and videos)
+    if (mediaAsset.url && mediaAsset.type !== "TEMPLATE") {
+      try {
+        // Delete main file
+        await del(mediaAsset.url);
+        console.log(`Deleted main file: ${mediaAsset.url}`);
+
+        // Delete thumbnail if it exists (images only)
+        if (mediaAsset.thumbnailUrl) {
+          await del(mediaAsset.thumbnailUrl);
+          console.log(`Deleted thumbnail: ${mediaAsset.thumbnailUrl}`);
+        }
+      } catch (blobError) {
+        console.error("Error deleting from Blob Storage:", blobError);
+        // Continue with database deletion even if Blob deletion fails
+        // This prevents orphaned database records
+      }
+    }
+
+    // Delete media asset from database
     await prisma.mediaAsset.delete({
       where: { id },
     });
