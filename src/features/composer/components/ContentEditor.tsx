@@ -39,10 +39,12 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isHashtagOpen, setIsHashtagOpen] = useState(false);
   const [isGeneratingHashtags, setIsGeneratingHashtags] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const processFile = useCallback(
-    (file: File) => {
+    async (file: File) => {
       const fileType = file.type.split("/")[0];
 
       if (fileType !== "image" && fileType !== "video") {
@@ -50,13 +52,75 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
         return;
       }
 
-      const objectUrl = URL.createObjectURL(file);
-      onMediaUpload(objectUrl, fileType as "image" | "video");
+      // Start upload
+      setIsUploading(true);
+      setUploadProgress(0);
 
-      showToast(
-        `${fileType === "image" ? "Image" : "Video"} uploaded successfully!`,
-        "success"
-      );
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        // Use XMLHttpRequest for progress tracking
+        const uploadedAsset = await new Promise<{
+          url: string;
+          thumbnailUrl: string | null;
+          type: "IMAGE" | "VIDEO";
+        }>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+
+          // Track upload progress
+          xhr.upload.addEventListener("progress", (e) => {
+            if (e.lengthComputable) {
+              const percentComplete = Math.round((e.loaded / e.total) * 100);
+              setUploadProgress(percentComplete);
+            }
+          });
+
+          // Handle completion
+          xhr.addEventListener("load", () => {
+            if (xhr.status === 201) {
+              const response = JSON.parse(xhr.responseText);
+              resolve(response.asset);
+            } else {
+              const error = JSON.parse(xhr.responseText);
+              reject(new Error(error.error || "Upload failed"));
+            }
+          });
+
+          // Handle errors
+          xhr.addEventListener("error", () => {
+            reject(new Error("Network error during upload"));
+          });
+
+          xhr.addEventListener("abort", () => {
+            reject(new Error("Upload cancelled"));
+          });
+
+          // Send request
+          xhr.open("POST", "/api/upload");
+          xhr.send(formData);
+        });
+
+        // Upload successful!
+        onMediaUpload(
+          uploadedAsset.url,
+          uploadedAsset.type.toLowerCase() as "image" | "video"
+        );
+
+        showToast(
+          `${fileType === "image" ? "Image" : "Video"} uploaded successfully!`,
+          "success"
+        );
+      } catch (error) {
+        console.error("Upload error:", error);
+        showToast(
+          error instanceof Error ? error.message : "Failed to upload file",
+          "error"
+        );
+      } finally {
+        setIsUploading(false);
+        setUploadProgress(0);
+      }
     },
     [onMediaUpload, showToast]
   );
@@ -138,7 +202,7 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
       />
 
       {/* Drag Overlay */}
-      {isDragging && (
+      {isDragging && !isUploading && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-xl animate-in fade-in">
           <UploadCloud className="w-16 h-16 text-indigo-600 dark:text-indigo-400 mb-4" />
           <p className="text-xl font-bold text-slate-800 dark:text-white">
@@ -146,6 +210,25 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
           </p>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
             Images or Videos supported
+          </p>
+        </div>
+      )}
+
+      {/* Upload Progress Overlay */}
+      {isUploading && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-xl">
+          <Loader2 className="w-16 h-16 text-indigo-600 dark:text-indigo-400 mb-4 animate-spin" />
+          <p className="text-xl font-bold text-slate-800 dark:text-white mb-4">
+            Uploading...
+          </p>
+          <div className="w-64 bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+            <div
+              className="h-full bg-indigo-600 dark:bg-indigo-500 transition-all duration-300"
+              style={{ width: `${uploadProgress}%` }}
+            />
+          </div>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-3 font-medium">
+            {uploadProgress}%
           </p>
         </div>
       )}
