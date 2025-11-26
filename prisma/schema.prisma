@@ -38,9 +38,26 @@ model User {
   teamMembers   TeamMember[]
   workspace     Workspace?
   sessions      Session[]
+  oauthStates   OAuthState[]
   
   @@index([email])
   @@map("users")
+}
+
+model OAuthState {
+  id           String   @id @default(cuid())
+  userId       String
+  platform     Platform
+  state        String   @unique
+  codeVerifier String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([state, platform])
+  @@index([expiresAt])
+  @@map("oauth_states")
 }
 
 model Session {
